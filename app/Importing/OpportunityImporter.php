@@ -35,6 +35,7 @@ class OpportunityImporter
         $lock = Cache::lock('opportunity-import:'.$source->id, 350);
         if (! $dryRun && ! $lock->get()) { return ['status' => 'locked', 'pending' => false]; }
         $started = now(); $clock = microtime(true);
+        $limit = max(1, min($limit, (int) config('importer.run_limit')));
         $refreshBefore = $started->copy()->subHours($source->cadence_hours);
         $refreshOperator = '<=';
         if ($source->cadence_hours === 24) {
@@ -74,7 +75,7 @@ class OpportunityImporter
             }
 
             if ($dryRun) {
-                foreach (array_slice($snapshot['items'], 0, max(1, min($limit, 100))) as $discovery) {
+                foreach (array_slice($snapshot['items'], 0, $limit) as $discovery) {
                     $item = new OpportunitySource([...$discovery, 'first_seen_at' => $started]);
                     try {
                         $data = $normalizer->normalize($reader->read($source, $item));
@@ -96,9 +97,9 @@ class OpportunityImporter
                     'state' => 'pending', 'first_seen_at' => $started, 'last_discovered_at' => $started,
                     'missing_runs' => 0, 'missing_since' => null, 'created_at' => $started, 'updated_at' => $started,
                 ], $chunk);
-                // JSON-LD pages save their JobPosting when read, so a new discovery keeps it.
+                // JSON-LD pages save their JobPosting when read, and linked pages their AI check, so a new discovery keeps it.
                 $update = ['source_url', 'url_key', 'payload', 'last_discovered_at', 'missing_runs', 'missing_since', 'updated_at'];
-                OpportunitySource::upsert($rows, ['import_source_id', 'external_id'], $source->provider === 'jsonld' ? array_diff($update, ['payload']) : $update);
+                OpportunitySource::upsert($rows, ['import_source_id', 'external_id'], in_array($source->provider, ['jsonld', 'pages'], true) ? array_diff($update, ['payload']) : $update);
             }
             if ($discover) { $source->update(['last_discovered_at' => $started]); }
             $cycle = $source->last_discovered_at;
@@ -127,8 +128,8 @@ class OpportunityImporter
                         return false;
                     }
                     return ! $focus || preg_match($focus, $this->focusTitle($item));
-                })->take(max(1, min($limit, 100)))->collect()
-                : $items->limit(max(1, min($limit, 100)))->get();
+                })->take($limit)->collect()
+                : $items->limit($limit)->get();
             if ($outOfScope && ! $dryRun) {
                 OpportunitySource::whereIn('id', $outOfScope)->update(['state' => 'rejected', 'error' => 'Outside IT scope.']);
             }
@@ -147,10 +148,12 @@ class OpportunityImporter
                 }
                 if (microtime(true) > $deadline || $http->requests >= $source->max_requests - 2 || ($maxNew && count($newIds) >= $maxNew)) { break; }
                 try {
-                    $data = $normalizer->normalize($reader->read($source, $item));
+                    $input = $reader->read($source, $item);
+                    $data = $normalizer->normalize($input);
+                    if (isset($input['page_check'])) { $data['page_check'] = $input['page_check']; }
                     if ($source->publication_mode === 'leads') { $data = $this->employerAts($source, $item, $data); }
                     $item->update(['normalized_data' => $data, 'last_verified_at' => now(), 'error' => null, 'application_url' => $data['application_url'],
-                        'url_key' => JobKey::url($data['ats_url'] ?? $item->source_url)]);
+                        'url_key' => JobKey::url($data['ats_url'] ?? $data['page_check']['page_url'] ?? $item->source_url)]);
                     $stats['processed']++;
                     if ($source->publication_mode === 'leads' && $item->state === 'pending' && $this->olderThan($data, $item, config('leads.board_max_age_days'))) {
                         $item->update(['state' => 'rejected', 'error' => 'Posted more than '.config('leads.board_max_age_days').' days ago.']);
@@ -180,6 +183,9 @@ class OpportunityImporter
                     }
                 } catch (SourceBudgetException) {
                     break;
+                } catch (ListingRejected $e) {
+                    $item->update(['state' => $e->later ? $item->state : 'rejected', 'error' => Str::limit($e->getMessage(), 1000), 'last_verified_at' => now()]);
+                    if (! $e->later) { $stats['rejected']++; }
                 } catch (SourceRequestException $e) {
                     if (in_array($e->status, [404, 410], true)) {
                         $this->closeSource($item); $stats['closed']++;
@@ -332,6 +338,18 @@ class OpportunityImporter
         if ($source->publication_mode === 'leads') { throw new RuntimeException('Job board listings only show in job leads.'); }
         $data = $item->normalized_data;
         if ($this->expired($data)) { throw new RuntimeException('This opportunity has expired.'); }
+        // Two runs adding the same new job at once would each miss the other's copy, so new listings are added one at a time.
+        $lock = $item->opportunity_id ? null : Cache::lock('opportunity-publish', 30);
+        $lock?->block(20);
+        try {
+            return $this->save($item, $source, $data);
+        } finally {
+            $lock?->release();
+        }
+    }
+
+    private function save(OpportunitySource $item, ImportSource $source, array $data): Opportunity
+    {
         return DB::transaction(function () use ($item, $source, $data) {
             $company = $source->company ?? $this->employer($source, $data);
             if ($company->claimed_by_company_id) { $company = Company::findOrFail($company->claimed_by_company_id); }
@@ -348,6 +366,7 @@ class OpportunityImporter
                         $opportunity = $candidate->opportunity; break;
                     }
                 }
+                $opportunity ??= $this->sameLink($item, $data);
             }
             $opportunity ??= $this->sameRole($company, $item, $data) ?? new Opportunity();
             $hash = hash('sha256', json_encode($data, JSON_THROW_ON_ERROR));
@@ -356,7 +375,7 @@ class OpportunityImporter
             // When a role is listed on several boards, the first live listing owns its content.
             $isPrimary = ! $opportunity->exists || ! $opportunity->sources()->where('id', '<', $item->id)->where('state', 'published')->exists();
             if (! $opportunity->exists || ($opportunity->origin === 'imported' && ((! $hasEmployerSource && $isPrimary) || ($source->settings['authoritative_employer'] ?? false)))) {
-                $fields = collect($data)->except(['employer', 'website', 'requisition_id'])->all();
+                $fields = collect($data)->except(['employer', 'website', 'requisition_id', 'page_check'])->all();
                 // Sources often leave the language out; keep the one found earlier.
                 if (empty($fields['language']) && $opportunity->language) { unset($fields['language']); }
                 $fieldId = $this->classify($data);
@@ -440,7 +459,7 @@ class OpportunityImporter
     private function employer(ImportSource $source, array $data): Company
     {
         $host = $data['website'] ? preg_replace('/^www\./', '', strtolower((string) parse_url($data['website'], PHP_URL_HOST))) : null;
-        if ($source->provider !== 'jsonld') {
+        if (! in_array($source->provider, ['jsonld', 'pages'], true)) {
             $identity = $source->id.':'.hash('sha256', 'employer-board|'.$data['employer']);
         } elseif ($host) {
             $identity = 'domain:'.$host;
@@ -467,15 +486,31 @@ class OpportunityImporter
     private function sameRole(Company $company, OpportunitySource $item, array $data): ?Opportunity
     {
         $title = JobKey::title($data['title'], $data['location']);
+        // Every role in the window is checked, newest first, so big employers' older roles are still found.
         return Opportunity::where('company_id', $company->id)->where('origin', 'imported')->where('kind', $data['kind'])
             ->whereNull('merged_into_id')->where('first_seen_at', '>=', now()->subDays(config('importer.dedupe_days')))
-            ->with('sources:id,opportunity_id,import_source_id')->latest('id')->limit(50)->get()
+            ->select('id', 'title', 'location', 'country_code', 'work_type', 'status')
+            ->with('sources:id,opportunity_id,import_source_id')->lazyByIdDesc(200)
             ->first(function ($role) use ($item, $data, $title) {
                 if ($role->status === 'open' && $role->sources->contains('import_source_id', $item->import_source_id)) { return false; }
                 $place = $role->country_code === $data['country_code'] || ! $role->country_code || ! $data['country_code']
                     || in_array('remote', [$role->work_type, $data['work_type']], true);
                 return $place && JobKey::similar(JobKey::title($role->title, $role->location), $title) >= config('importer.same_title');
-            });
+            })?->fresh();
+    }
+
+    // The same posting link once tracking is taken off (JobKey::url), with the same title and place, so a job a board
+    // links to twice is one listing.
+    private function sameLink(OpportunitySource $item, array $data): ?Opportunity
+    {
+        if (! $item->url_key) { return null; }
+        $title = JobKey::title($data['title'], $data['location']);
+        return OpportunitySource::where('url_key', $item->url_key)->where('id', '!=', $item->id)->whereNotNull('opportunity_id')
+            ->with('opportunity')->limit(20)->get()
+            ->first(fn ($other) => $other->opportunity?->origin === 'imported' && ! $other->opportunity->merged_into_id
+                && ($other->normalized_data['location'] ?? null) === $data['location']
+                && JobKey::similar(JobKey::title((string) ($other->normalized_data['title'] ?? ''), $data['location']), $title) >= config('importer.same_title'))
+            ?->opportunity;
     }
 
     // Keeps the first date the job was posted. An employer ATS date beats a board date, and a later date for a job

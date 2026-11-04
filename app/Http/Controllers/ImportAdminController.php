@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Importing\OpportunityImporter;
 use App\Importing\SourceHttp;
 use App\Importing\SourceReader;
+use App\Jobs\FetchNewOpportunities;
 use App\Jobs\ImportOpportunitySource;
 use App\Models\Company;
 use App\Models\ImportRun;
@@ -29,6 +30,7 @@ class ImportAdminController extends Controller
     {
         return Inertia::render('Imports/Sources', [
             'sources' => ImportSource::withCount(['items', 'items as pending_count' => fn ($query) => $query->whereIn('state', ['pending', 'review'])])->orderBy('name')->get(),
+            'fetch' => $this->fetchState(),
         ]);
     }
 
@@ -53,6 +55,31 @@ class ImportAdminController extends Controller
         ]);
     }
 
+    public function fetch(Request $request)
+    {
+        $data = $request->validate(['count' => 'required|integer|min:1|max:100']);
+        if (FetchNewOpportunities::running()) {
+            throw ValidationException::withMessages(['count' => 'A fetch is already running. Wait for it to finish.']);
+        }
+        if (! FetchNewOpportunities::start($data['count'], $request->user()->name)) {
+            throw ValidationException::withMessages(['count' => 'No approved source is enabled.']);
+        }
+        $this->audit($request, 'fetch.queued', null, null, ['count' => $data['count']]);
+        return back()->with('toast', ['type' => 'update', 'message' => 'Fetching new listings. Progress shows on this page.']);
+    }
+
+    private function fetchState(): ?array
+    {
+        if (! ($state = FetchNewOpportunities::state())) { return null; }
+        return [...collect($state)->only(['count', 'sources', 'read', 'failed', 'by', 'started_at', 'finished_at'])->all(),
+            'days' => (int) config('importer.fetch_max_age_days'),
+            'running' => FetchNewOpportunities::running(),
+            'stopped' => $state['status'] === 'running' && ! FetchNewOpportunities::running(),
+            'added' => Opportunity::with('company.user')->whereIn('id', $state['added'])->latest('id')->get()
+                ->map(fn ($role) => ['id' => $role->id, 'title' => $role->title, 'company' => $role->company?->display_name, 'kind' => $role->kind, 'public_url' => $role->public_url]),
+        ];
+    }
+
     public function review(Request $request)
     {
         $filters = $request->validate([
@@ -69,6 +96,7 @@ class ImportAdminController extends Controller
             'items' => $items->through(fn ($item) => [
                 'id' => $item->id, 'source_name' => $item->importSource->name,
                 'source_url' => $item->source_url, 'state' => $item->state, 'error' => $item->error,
+                'post_url' => $item->payload['post']['url'] ?? null,
                 'last_verified_at' => $item->last_verified_at?->toIso8601String(),
                 'normalized_data' => $item->normalized_data,
                 'opportunity' => $item->opportunity ? [
@@ -166,9 +194,10 @@ class ImportAdminController extends Controller
         $data = $request->validate([
             'key' => ['required', 'string', 'max:120', 'regex:/^[a-z0-9][a-z0-9_-]*$/', Rule::unique('import_sources')->ignore($source?->id)],
             'name' => 'required|string|max:255',
-            'provider' => 'required|in:jsonld,greenhouse,lever,ashby,workable,recruitee,himalayas,remoteok,remotive,wwr,hn',
+            'provider' => 'required|in:jsonld,greenhouse,lever,ashby,workable,recruitee,himalayas,remoteok,remotive,wwr,hn,pages',
             'url' => 'required|url:http,https|max:2048',
-            'allowed_domains' => 'required|array|min:1|max:20',
+            // Linked job pages can be on any site, so they have no allowlist.
+            'allowed_domains' => 'exclude_if:provider,pages|required|array|min:1|max:20',
             'allowed_domains.*' => 'required|string|max:253|regex:/^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,}$/',
             'permission_status' => 'required|in:pending,approved,revoked',
             'permission_notes' => 'nullable|required_if:permission_status,approved|string|min:20|max:10000',
@@ -187,6 +216,7 @@ class ImportAdminController extends Controller
             'settings.curated_snapshot' => 'nullable|boolean',
             'settings.pages' => 'nullable|integer|min:1|max:50',
         ]);
+        $data['allowed_domains'] ??= [];
         $data['settings'] = collect($data['settings'] ?? [])->only(['employer_name', 'job_path_prefix', 'authoritative_employer', 'scope', 'freshness_hours', 'curated_snapshot', 'pages'])->all();
         if (in_array($data['provider'], SourceReader::BOARDS, true) && $data['publication_mode'] !== 'leads') {
             throw ValidationException::withMessages(['publication_mode' => 'Remote job boards only feed job leads; their listings are never published.']);
@@ -222,7 +252,7 @@ class ImportAdminController extends Controller
             throw ValidationException::withMessages(['publication' => $exception->getMessage()]);
         }
         $this->audit($request, 'opportunity.published', $published->id, $item->import_source_id, ['item_id' => $item->id]);
-        return back()->with('toast', ['type' => 'update', 'message' => 'Opportunity reviewed. Suppressed listings stay hidden until explicitly restored.']);
+        return back()->with('toast', ['type' => 'update', 'message' => 'Role reviewed. Suppressed listings stay hidden until explicitly restored.']);
     }
 
     public function reject(Request $request, OpportunitySource $item)
@@ -300,9 +330,9 @@ class ImportAdminController extends Controller
             $roles = Opportunity::whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
             $duplicate = $roles->get($opportunity->id);
             $survivor = $roles->get((int) $data['survivor_id']);
-            abort_if($duplicate->id === $survivor->id || $duplicate->merged_into_id || $survivor->merged_into_id, 422, 'Select two distinct, unmerged opportunities.');
+            abort_if($duplicate->id === $survivor->id || $duplicate->merged_into_id || $survivor->merged_into_id, 422, 'Select two distinct, unmerged roles.');
             abort_unless($duplicate->company_id === $survivor->company_id, 422, 'Verify and consolidate the employer identity before merging different companies.');
-            abort_if($duplicate->origin === 'native' && $survivor->origin !== 'native', 422, 'Keep the employer-managed opportunity as the survivor.');
+            abort_if($duplicate->origin === 'native' && $survivor->origin !== 'native', 422, 'Keep the employer-managed role as the survivor.');
             foreach (DB::table('likes')->where('opportunity_id', $duplicate->id)->get() as $like) {
                 DB::table('likes')->insertOrIgnore(['candidate_id' => $like->candidate_id, 'opportunity_id' => $survivor->id]);
             }

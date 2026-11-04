@@ -32,8 +32,8 @@ class BrandImages extends Command
             'name' => config('app.name'),
             'logo' => $svg,
             'mascot' => $data(public_path('site-assets/mascots/07-search-internships.svg'), 'image/svg+xml'),
-            'display' => $data(resource_path('fonts/space-grotesk-latin.woff2'), 'font/woff2'),
-            'body' => $data(resource_path('fonts/plus-jakarta-sans-latin.woff2'), 'font/woff2'),
+            'display' => $data(resource_path('fonts/poppins-600-latin.woff2'), 'font/woff2'),
+            'body' => $data(resource_path('fonts/poppins-400-latin.woff2'), 'font/woff2'),
         ])->render();
         $this->shoot($html, 1200, 630, $brand['og_image'], false);
 

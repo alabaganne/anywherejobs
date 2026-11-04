@@ -7,6 +7,7 @@ use App\Importing\CandidateProfiles;
 use App\Importing\OpportunityImporter;
 use App\Importing\OpportunityNormalizer;
 use App\Importing\SourceHttp;
+use App\Jobs\FetchNewOpportunities;
 use App\Models\Candidate;
 use App\Models\City;
 use App\Models\Company;
@@ -15,11 +16,14 @@ use App\Models\ImportRun;
 use App\Models\ImportSource;
 use App\Models\Opportunity;
 use App\Models\OpportunitySource;
+use App\Models\User;
 use Database\Seeders\ImportSourceSeeder;
 use Database\Seeders\OpportunitySeeder;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class OpportunityImportTest extends TestCase
@@ -164,6 +168,54 @@ class OpportunityImportTest extends TestCase
         Http::assertNotSent(fn ($request) => str_contains($request->url(), 'boards-api.greenhouse.io/v1/boards/acme/jobs/'));
     }
 
+    public function test_a_run_reads_up_to_200_listings_and_the_next_run_carries_on(): void
+    {
+        Http::fake([
+            '*/robots.txt' => Http::response('', 404),
+            'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => array_map(fn ($id) => $this->greenhouseJob($id, "Backend Engineer Team {$id}", 'Remote', 1), range(1, 205))]),
+        ]);
+        $source = $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse', 'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
+            'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io'], 'publication_mode' => 'review']);
+
+        $first = app(OpportunityImporter::class)->run($source, 500);
+        $this->travel(31)->seconds();
+        $second = app(OpportunityImporter::class)->run($source->fresh(), 500);
+
+        $this->assertSame([200, true], [$first['processed'], $first['pending']]);
+        $this->assertSame([5, false], [$second['processed'], $second['pending']]);
+        $this->artisan('opportunities:import --limit=201 --sync')->expectsOutputToContain('Limit must be between 1 and 200.')->assertFailed();
+        $this->assertTrue(collect(app(Schedule::class)->events())
+            ->contains(fn ($event) => str_contains((string) $event->command, 'opportunities:import --due --limit=200')));
+    }
+
+    public function test_a_listing_keeps_the_date_it_was_posted_and_the_date_it_was_added(): void
+    {
+        Http::fake([
+            '*/robots.txt' => Http::response('', 404),
+            'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [$this->greenhouseJob(1, 'Backend Engineer', 'Remote', 5)]]),
+        ]);
+        $source = $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse', 'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
+            'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io']]);
+        app(OpportunityImporter::class)->run($source);
+        $role = Opportunity::sole();
+        $added = $role->added_at->copy();
+
+        $this->assertTrue($role->posted_at->isSameDay(now()->subDays(5)));
+        $this->assertTrue($added->equalTo(now()));
+        $this->travel(1)->days();
+        app(OpportunityImporter::class)->run($source->fresh());
+        $this->assertTrue($role->fresh()->added_at->equalTo($added));
+        $this->get($role->fresh()->public_url)->assertInertia(fn ($page) => $page
+            ->where('opportunity.posted_at', $role->posted_at->toIso8601String())->where('opportunity.added_at', $added->toIso8601String()));
+
+        // An employer post is added when it is first published, not while it is a draft.
+        $draft = Opportunity::create(['title' => 'Frontend Engineer', 'description' => str_repeat('Build the web app. ', 10), 'company_id' => $role->company_id,
+            'field_id' => Field::first()->id, 'origin' => 'native', 'application_mode' => 'internal', 'publication_status' => 'draft']);
+        $this->assertNull($draft->added_at);
+        $draft->update(['publication_status' => 'published']);
+        $this->assertNotNull($draft->fresh()->added_at);
+    }
+
     public function test_old_imported_roles_are_closed_by_reconcile(): void
     {
         $company = Company::forceCreate(['name' => 'Acme']);
@@ -292,6 +344,59 @@ class OpportunityImportTest extends TestCase
         app(OpportunityImporter::class)->run(ImportSource::sole(), 100);
         $this->assertSame(0, Opportunity::where('title', 'Design Intern')->count());
         $this->assertSame(2, Opportunity::count());
+    }
+
+    public function test_the_fetch_button_adds_new_listings_from_every_source_and_never_repeats_them(): void
+    {
+        Http::fake([
+            '*/robots.txt' => Http::response('', 404),
+            'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [
+                $this->greenhouseJob(1, 'Design Intern', 'Paris, France', 1), $this->greenhouseJob(2, 'Data Intern', 'Berlin, Germany', 2),
+            ]]),
+            'boards-api.greenhouse.io/v1/boards/beta/jobs*' => Http::response(['jobs' => [
+                ['company_name' => 'Beta'] + $this->greenhouseJob(3, 'Backend Engineer', 'Remote', 1),
+                ['company_name' => 'Beta'] + $this->greenhouseJob(4, 'Frontend Engineer', 'Remote', 2),
+            ]]),
+        ]);
+        foreach (['acme', 'beta'] as $board) {
+            $this->source(['key' => "greenhouse-{$board}", 'provider' => 'greenhouse', 'url' => "https://boards-api.greenhouse.io/v1/boards/{$board}/jobs?content=true",
+                'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io'], 'settings' => ['scope' => 'reachable']]);
+        }
+        $this->source(['key' => 'remoteok', 'provider' => 'remoteok', 'url' => 'https://remoteok.com/api', 'allowed_domains' => ['remoteok.com'], 'publication_mode' => 'leads']);
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)->post(route('imports.fetch'), ['count' => 3])->assertSessionHasNoErrors()->assertRedirect();
+
+        $this->assertSame(3, Opportunity::count());
+        $this->actingAs($admin)->get(route('imports.sources.index'))->assertInertia(fn ($page) => $page
+            ->where('fetch.running', false)->where('fetch.count', 3)->has('fetch.added', 3)->where('fetch.by', $admin->name));
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), 'remoteok.com'));
+
+        $this->actingAs($admin)->post(route('imports.fetch'), ['count' => 10])->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post(route('imports.fetch'), ['count' => 10])->assertSessionHasNoErrors();
+
+        $this->assertSame(4, Opportunity::count());
+        $this->assertSame(4, Opportunity::distinct()->count('job_key'));
+        $this->actingAs($admin)->get(route('imports.sources.index'))->assertInertia(fn ($page) => $page->has('fetch.added', 0)->where('fetch.read', 2));
+    }
+
+    public function test_a_second_fetch_waits_for_the_first_and_only_admins_can_start_one(): void
+    {
+        Queue::fake();
+        $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse', 'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
+            'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io']]);
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs(User::factory()->create())->post(route('imports.fetch'), ['count' => 10])->assertForbidden();
+        $this->actingAs($admin)->post(route('imports.fetch'), ['count' => 500])->assertSessionHasErrors('count');
+        $this->actingAs($admin)->post(route('imports.fetch'), ['count' => 10])->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post(route('imports.fetch'), ['count' => 10])->assertSessionHasErrors(['count' => 'A fetch is already running. Wait for it to finish.']);
+        Queue::assertPushed(FetchNewOpportunities::class, 1);
+
+        // A fetch whose worker stopped no longer blocks a new one.
+        $this->travel(20)->minutes();
+        $this->actingAs($admin)->get(route('imports.sources.index'))->assertInertia(fn ($page) => $page->where('fetch.running', false)->where('fetch.stopped', true));
+        $this->actingAs($admin)->post(route('imports.fetch'), ['count' => 10])->assertSessionHasNoErrors();
     }
 
     public function test_fetch_with_a_focus_only_adds_matching_titles_and_leaves_the_rest_for_later(): void

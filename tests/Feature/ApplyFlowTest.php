@@ -127,7 +127,7 @@ class ApplyFlowTest extends TestCase
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'closed']);
     }
 
-    public function test_admins_can_apply_on_sudo_jobs_and_track_outside_applications(): void
+    public function test_admins_can_apply_on_the_site_and_track_outside_applications(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
         $internal = Opportunity::where('application_mode', 'internal')->firstOrFail();

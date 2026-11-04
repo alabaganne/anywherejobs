@@ -153,7 +153,7 @@ class LeadFinderTest extends TestCase
         Lead::create(['candidate_id' => $this->candidate->id, 'company_name' => 'Notion Labs, Inc.', 'title' => 'Software Engineer - Frontend (Remote)', 'origin' => 'manual']);
     }
 
-    public function test_opening_a_lead_never_moves_it_back_and_applying_on_sudo_jobs_marks_it_applied(): void
+    public function test_opening_a_lead_never_moves_it_back_and_applying_on_the_site_marks_it_applied(): void
     {
         $applied = Lead::create(['candidate_id' => $this->candidate->id, 'company_name' => 'Acme', 'title' => 'Frontend Engineer', 'url' => 'https://acme.example/jobs/1',
             'status' => 'applied', 'applied_at' => '2026-10-20']);
