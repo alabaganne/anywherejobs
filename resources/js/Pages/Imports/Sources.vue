@@ -32,7 +32,7 @@ const date = (value) => value ? new Date(value).toLocaleString('en-GB', { day: '
 
 <template>
     <div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
-        <PageHeader title="Sources" description="The job boards and employer pages Nextward reads every day.">
+        <PageHeader title="Sources" :description="`The job boards and employer pages ${appName} reads every day.`">
             <template #actions>
                 <Link class="cbtn cbtn-primary" :href="route('imports.sources.create')">Add a source</Link>
             </template>

@@ -24,8 +24,8 @@ class CompanyResearcher implements Agent, HasProviderOptions, HasStructuredOutpu
 
     public function instructions(): string
     {
-        return <<<'PROMPT'
-You check hiring companies for Nextward, an IT job board. Use web search to find the company's own official website and public facts about it. Make sure it is the same company that posts the jobs you are given: match the name, the job board links and what it does. Answer only from what you find; leave a text empty and a number 0 when you are not sure. Never guess.
+        return str_replace(':site', config('app.name'), <<<'PROMPT'
+You check hiring companies for :site, an IT job board. Use web search to find the company's own official website and public facts about it. Make sure it is the same company that posts the jobs you are given: match the name, the job board links and what it does. Answer only from what you find; leave a text empty and a number 0 when you are not sure. Never guess.
 
 - found: true only when you are sure which website is the company's own.
 - website: the home page of the company's own site, starting with https. Not LinkedIn, a social network, a job board, an ATS page, a directory or a news site. Empty when not found.
@@ -38,7 +38,7 @@ You check hiring companies for Nextward, an IT job board. Use web search to find
 - linkedin_url: its company page on linkedin.com/company/, only when you saw it in the results, or empty.
 - careers_url: the page where it lists its jobs, or empty.
 - sources: the pages you used, at most five.
-PROMPT;
+PROMPT);
     }
 
     public function tools(): iterable

@@ -19,7 +19,7 @@ const props = defineProps({
 
 const page = usePage();
 const isCandidate = computed(() => props.settings.userable_type === 'candidate');
-// Shown before the username field, e.g. nextward.com/candidates/
+// Shown before the username field, e.g. example.com/candidates/
 const profileBase = computed(() => `${route('home').replace(/^https?:\/\//, '').replace(/\/$/, '')}/candidates/`);
 
 const tabs = computed(() => [

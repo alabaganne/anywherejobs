@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 // Usernames are public profile links (/candidates/{username}), so they stay short, lowercase and readable.
@@ -12,9 +13,9 @@ class Username
     // A profile link segment: a username, or {id}-{name} before one is set.
     public const PROFILE_SLUG = '[0-9]+-[a-z0-9-]+|'.self::PATTERN;
 
-    // Words other pages use, or that could pass for Nextward itself.
+    // Words other pages use, or that could pass for the site itself.
     public const RESERVED = ['admin', 'api', 'app', 'candidate', 'candidates', 'companies', 'company', 'create', 'dashboard', 'edit', 'help',
-        'login', 'logout', 'manage', 'messages', 'new', 'nextward', 'opportunities', 'profile', 'register', 'resume', 'settings', 'support', 'talent'];
+        'login', 'logout', 'manage', 'messages', 'new', 'opportunities', 'profile', 'register', 'resume', 'settings', 'support', 'talent'];
 
     public static function clean(mixed $value): ?string
     {
@@ -24,7 +25,7 @@ class Username
     public static function rules(?int $userId = null): array
     {
         return ['nullable', 'string', 'min:3', 'max:30', 'regex:/^'.self::PATTERN.'$/', 'not_regex:/--/',
-            Rule::notIn(self::RESERVED), Rule::unique('users', 'username')->ignore($userId)];
+            Rule::notIn([...self::RESERVED, Str::slug(config('app.name'), '')]), Rule::unique('users', 'username')->ignore($userId)];
     }
 
     public static function messages(): array

@@ -101,7 +101,7 @@ const submitMerge = () => merge.post(route('imports.opportunities.merge', props.
                             <div class="flex items-center justify-between gap-2"><span class="font-semibold truncate">{{ item.source_name }}</span><StatusPill set="import" :status="item.state" /></div>
                             <a class="text-blue-700 break-all text-[12.5px]" :href="item.source_url" target="_blank" rel="noopener noreferrer">{{ item.source_url }}</a>
                         </li>
-                        <li v-if="!sources.length" class="text-muted">Posted on Nextward, no outside source.</li>
+                        <li v-if="!sources.length" class="text-muted">Posted on {{ appName }}, no outside source.</li>
                     </ul>
                 </section>
                 <section v-if="reports.length" class="bg-white border border-line rounded-[18px] p-5">

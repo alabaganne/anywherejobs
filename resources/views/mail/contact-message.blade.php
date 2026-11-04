@@ -25,6 +25,6 @@ Screenshot attached.<br>
 Reply to this email to answer {!! $name !!} directly.
 
 <x-slot:subcopy>
-Sent from the Nextward contact form on {{ $sentAt }}.
+Sent from the {{ config('app.name') }} contact form on {{ $sentAt }}.
 </x-slot:subcopy>
 </x-mail::message>

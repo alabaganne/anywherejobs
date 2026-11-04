@@ -1,4 +1,4 @@
-Nextward — 20 cartoon assets
+20 cartoon assets
 
 Open START-HERE.html for the offline visual catalog.
 

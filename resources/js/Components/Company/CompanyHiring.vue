@@ -26,7 +26,7 @@ const skills = computed(() => props.hiring.skills || []);
 
 <template>
 	<section class="bg-white border border-line rounded-2xl p-6" aria-labelledby="company-hiring-title">
-		<h2 id="company-hiring-title" class="font-display text-lg font-semibold">{{ text('Hiring on Nextward', 'Recrute sur Nextward') }}</h2>
+		<h2 id="company-hiring-title" class="font-display text-lg font-semibold">{{ text(`Hiring on ${appName}`, `Recrute sur ${appName}`) }}</h2>
 		<dl class="mt-4 grid grid-cols-3 gap-2">
 			<div v-for="stat in stats" :key="stat.label" class="rounded-xl px-2 py-3 text-center" :class="stat.value ? 'bg-[#EEF4FF]' : 'bg-paper-2'">
 				<dd class="font-display text-2xl font-semibold leading-none" :class="stat.value ? 'text-navy-900' : 'text-slate-400'">{{ stat.value }}</dd>

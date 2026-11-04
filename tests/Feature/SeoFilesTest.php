@@ -10,6 +10,20 @@ class SeoFilesTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_the_site_name_and_logo_come_from_config()
+    {
+        // config/site.php reads the name when config loads, so load it again after the change.
+        config(['app.name' => 'Renamed Site']);
+        config(['site' => require config_path('site.php')]);
+        config(['site.brand.logo' => '/brand/other.svg']);
+
+        $this->get('/site.webmanifest')->assertOk()->assertJsonPath('name', 'Renamed Site')->assertJsonPath('icons.0.src', config('site.brand.icon_small'));
+        $this->get('/about')->assertOk()
+            ->assertInertia(fn ($page) => $page->where('brand.name', 'Renamed Site')->where('brand.logo', '/brand/other.svg'))
+            ->assertSee('Renamed Site', false)
+            ->assertDontSee('Sudo Jobs', false);
+    }
+
     public function test_robots_allows_public_pages_and_blocks_private_areas()
     {
         $robots = $this->get('/robots.txt')->assertOk()->assertHeader('Content-Type', 'text/plain; charset=UTF-8')->getContent();
@@ -23,7 +37,7 @@ class SeoFilesTest extends TestCase
     {
         $this->get('/llms.txt')->assertOk()
             ->assertHeader('Content-Type', 'text/markdown; charset=UTF-8')
-            ->assertSee('# Nextward', false)
+            ->assertSee('# '.config('app.name'), false)
             ->assertSee(url('/opportunities?worldwide=1'), false)
             ->assertDontSee('remote-from-tunisia', false)
             ->assertSee(url('/blog/how-to-find-an-internship-as-a-student.md'), false)

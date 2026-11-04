@@ -32,6 +32,27 @@ class ImportAdminController extends Controller
         ]);
     }
 
+    public function companies()
+    {
+        $companies = Company::where(fn ($query) => $query->whereNotNull('tracked_at')->orWhereNotNull('tracking'))
+            ->with(['importSources' => fn ($query) => $query->withCount(['items', 'items as published_count' => fn ($query) => $query->where('state', 'published')])])
+            ->withCount(['opportunities as open_count' => fn ($query) => $query->available()])
+            ->orderByRaw('tracked_at IS NULL')->orderByDesc('tracked_at')->orderByDesc('id')->limit(500)->get();
+        return Inertia::render('Imports/Companies', [
+            'companies' => $companies->map(fn (Company $company) => [
+                'id' => $company->id, 'name' => $company->display_name, 'website' => $company->website, 'careers_url' => $company->careers_url,
+                'public_url' => $company->publicUrl(), 'verified' => (bool) $company->verified_at, 'open_count' => $company->open_count,
+                'tracked_at' => $company->tracked_at?->toIso8601String(), 'reason' => $company->tracked_reason, 'tracking' => $company->tracking,
+                'sources' => $company->importSources->map(fn ($source) => [
+                    'id' => $source->id, 'name' => $source->name, 'provider' => $source->provider, 'enabled' => $source->enabled,
+                    'last_complete_at' => $source->last_complete_at?->toIso8601String(), 'last_error' => $source->last_error,
+                    'items_count' => $source->items_count, 'published_count' => $source->published_count,
+                ]),
+            ]),
+            'perDay' => config('importer.registry.per_day'),
+        ]);
+    }
+
     public function review(Request $request)
     {
         $filters = $request->validate([

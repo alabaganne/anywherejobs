@@ -2,7 +2,9 @@ import { reactive, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 
-const KEY = 'nextward.activity';
+const KEY = 'site.activity';
+// Key used before the site was renamed, read once so guests keep their history.
+const OLD_KEY = 'nextward.activity';
 const LIMIT = 500;
 // owner is the user id the data belongs to, null for guest data
 const state = reactive({ ready: false, owner: null, views: {}, saves: [] });
@@ -13,6 +15,11 @@ const asObject = (value) => (value && typeof value === 'object' && !Array.isArra
 
 function load() {
     try {
+        const old = window.localStorage.getItem(OLD_KEY);
+        if (old !== null) {
+            if (window.localStorage.getItem(KEY) === null) window.localStorage.setItem(KEY, old);
+            window.localStorage.removeItem(OLD_KEY);
+        }
         const data = JSON.parse(window.localStorage.getItem(KEY) || '{}');
         state.owner = data.owner ?? null;
         state.views = asObject(data.views);

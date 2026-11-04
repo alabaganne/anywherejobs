@@ -28,16 +28,16 @@ const tools = computed(() => [
 			<section aria-labelledby="about-title" class="hero-dark">
 				<div class="public-container hero-grid hero-pad">
 					<div>
-						<p class="landing-label">{{ text('About Nextward', 'À propos de Nextward') }}</p>
+						<p class="landing-label">{{ text(`About ${appName}`, `À propos de ${appName}`) }}</p>
 						<h1 id="about-title" class="hero-title">{{ text('IT careers,', 'Les carrières IT,') }} <span class="accent">{{ text('made clearer.', 'en plus clair.') }}</span></h1>
-						<p class="hero-lead">{{ text('Nextward brings IT internships and jobs from around the world into one place, says plainly what each role asks for, and helps you apply well.', 'Nextward réunit les stages et emplois IT du monde entier, dit clairement ce que chaque offre demande et vous aide à bien candidater.') }}</p>
+						<p class="hero-lead">{{ text(`${appName} brings IT internships and jobs from around the world into one place, says plainly what each role asks for, and helps you apply well.`, `${appName} réunit les stages et emplois IT du monde entier, dit clairement ce que chaque offre demande et vous aide à bien candidater.`) }}</p>
 						<div class="hero-buttons">
 							<Link :href="`${prefix}/opportunities`" class="cta cta-primary focus-ring">{{ text('Browse opportunities', 'Voir les offres') }}<ArrowRight class="action-icon" aria-hidden="true" /></Link>
 							<Link :href="`${prefix}/companies`" class="cta cta-ghost focus-ring">{{ text('See companies', 'Voir les entreprises') }}</Link>
 						</div>
 					</div>
 					<figure class="hero-stage w-[min(100%,520px)] before:hidden">
-						<img src="/nextward-assets/mascots/15-student-company-conversation.svg" alt="" width="1100" height="760" fetchpriority="high" />
+						<img src="/site-assets/mascots/15-student-company-conversation.svg" alt="" width="1100" height="760" fetchpriority="high" />
 					</figure>
 				</div>
 			</section>
@@ -46,20 +46,20 @@ const tools = computed(() => [
 				<div class="max-w-3xl">
 					<p class="landing-label">{{ text('Our mission', 'Notre mission') }}</p>
 					<h2 id="mission-title" class="section-title">{{ text('Finding work should not depend on who you know.', 'Trouver un poste ne devrait pas dépendre de qui vous connaissez.') }}</h2>
-					<p class="section-description">{{ text('Good IT roles are spread across company sites and job boards, in several languages, often without the details that matter. Nextward brings them together so every candidate gets the same fair start.', 'Les bonnes offres IT sont dispersées entre sites d’entreprises et job boards, en plusieurs langues, souvent sans les détails importants. Nextward les réunit pour que chaque candidat parte avec les mêmes chances.') }}</p>
+					<p class="section-description">{{ text(`Good IT roles are spread across company sites and job boards, in several languages, often without the details that matter. ${appName} brings them together so every candidate gets the same fair start.`, `Les bonnes offres IT sont dispersées entre sites d’entreprises et job boards, en plusieurs langues, souvent sans les détails importants. ${appName} les réunit pour que chaque candidat parte avec les mêmes chances.`) }}</p>
 				</div>
 				<ul class="mt-11 grid grid-cols-3 gap-5 max-[768px]:grid-cols-1">
 					<li v-for="item in mission" :key="item.title" class="rounded-[18px] bg-pale p-7 max-[768px]:p-[22px]">
-						<img :src="`/nextward-assets/mascots/${item.art}.svg`" alt="" width="768" height="768" loading="lazy" class="size-22" />
+						<img :src="`/site-assets/mascots/${item.art}.svg`" alt="" width="768" height="768" loading="lazy" class="size-22" />
 						<h3 class="mt-4 text-[19px] font-semibold tracking-[-.025em]">{{ item.title }}</h3>
 						<p class="mt-2 text-[15px] leading-[1.7] text-subtle">{{ item.text }}</p>
 					</li>
 				</ul>
-				<p class="mt-7 max-w-[720px] text-[15px] leading-[1.7] text-subtle">{{ text('Employers post on Nextward, and the rest come from approved public sources. Each listing links to the original and shows when it was last checked.', 'Les employeurs publient sur Nextward, les autres offres viennent de sources publiques autorisées. Chaque offre renvoie vers l’original et indique son dernier contrôle.') }}</p>
+				<p class="mt-7 max-w-[720px] text-[15px] leading-[1.7] text-subtle">{{ text(`Employers post on ${appName}, and the rest come from approved public sources. Each listing links to the original and shows when it was last checked.`, `Les employeurs publient sur ${appName}, les autres offres viennent de sources publiques autorisées. Chaque offre renvoie vers l’original et indique son dernier contrôle.`) }}</p>
 			</section>
 
 			<section id="ai-tools" class="public-container section grid scroll-mt-[100px] grid-cols-[260px_minmax(0,1fr)] items-center gap-14 pt-10 max-[1024px]:grid-cols-1 max-[1024px]:gap-6" aria-labelledby="tools-title">
-				<img src="/nextward-assets/mascots/14-prepare-application.svg" alt="" width="768" height="768" loading="lazy" class="size-65 max-[1024px]:size-40" />
+				<img src="/site-assets/mascots/14-prepare-application.svg" alt="" width="768" height="768" loading="lazy" class="size-65 max-[1024px]:size-40" />
 				<div>
 					<p class="landing-label inline-flex items-center gap-2"><Sparkles class="size-4" aria-hidden="true" />{{ text('Free to use', 'Gratuit') }}</p>
 					<h2 id="tools-title" class="section-title">{{ text('Free to use, with AI help when you apply.', 'Gratuit, avec l’aide de l’IA pour candidater.') }}</h2>
@@ -76,7 +76,7 @@ const tools = computed(() => [
 					<div>
 						<p class="landing-label text-blue-200">{{ text('Built by', 'Créé par') }}</p>
 						<h2 id="builder-title" class="section-title text-white">Ala Baganne</h2>
-						<p class="mt-4 max-w-[560px] text-[17px] leading-[1.75] text-mist">{{ text('I’m a software engineer who builds full-stack products end to end, from the first idea to a working product online. I built Nextward and run it day to day.', 'Je suis ingénieur logiciel et je crée des produits complets, de l’idée au produit en ligne. J’ai créé Nextward et je le fais vivre au quotidien.') }}</p>
+						<p class="mt-4 max-w-[560px] text-[17px] leading-[1.75] text-mist">{{ text(`I’m a software engineer who builds full-stack products end to end, from the first idea to a working product online. I built ${appName} and run it day to day.`, `Je suis ingénieur logiciel et je crée des produits complets, de l’idée au produit en ligne. J’ai créé ${appName} et je le fais vivre au quotidien.`) }}</p>
 						<p class="mt-4 max-w-[560px] text-[17px] leading-[1.75] text-mist">{{ text('I’m open to engineering roles and to building products for others. Feel free to get in touch.', 'Je suis ouvert aux postes en ingénierie et à la création de produits pour d’autres. N’hésitez pas à me contacter.') }}</p>
 					</div>
 					<ul class="grid gap-2.5">

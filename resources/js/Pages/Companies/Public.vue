@@ -48,7 +48,7 @@ const button = 'inline-flex items-center justify-center gap-1.5 font-semibold te
 					<h2 id="about-title" class="font-display text-xl font-semibold">{{ text(`About ${company.name}`, `À propos de ${company.name}`) }}</h2>
 					<p v-if="company.about" class="mt-4 whitespace-pre-line text-slate-700 leading-8" dir="auto">{{ company.about }}</p>
 					<p v-else class="mt-4 text-slate-400">{{ text('No description yet.', 'Pas encore de description.') }}</p>
-					<p v-if="!company.managed" class="mt-6 pt-5 border-t border-line text-xs text-slate-500 leading-6">{{ text('This employer does not have a managed account on Nextward. Roles come from approved public sources and link to the original listing.', 'Cet employeur n’a pas de compte géré sur Nextward. Les offres viennent de sources publiques approuvées et renvoient vers l’annonce d’origine.') }}</p>
+					<p v-if="!company.managed" class="mt-6 pt-5 border-t border-line text-xs text-slate-500 leading-6">{{ text(`This employer does not have a managed account on ${appName}. Roles come from approved public sources and link to the original listing.`, `Cet employeur n’a pas de compte géré sur ${appName}. Les offres viennent de sources publiques approuvées et renvoient vers l’annonce d’origine.`) }}</p>
 				</section>
 
 				<section class="bg-white border border-line rounded-2xl p-6 sm:p-8" aria-labelledby="roles-title">

@@ -102,7 +102,7 @@ class LeadFinder
         return [null, null];
     }
 
-    // Listings first seen lately, then job board finds that are not on Nextward yet.
+    // Listings first seen lately, then job board finds that are not on the site yet.
     private function jobs(Carbon $since): \Generator
     {
         $roles = Opportunity::available()->where('kind', 'job')->whereRaw('COALESCE(first_seen_at, created_at) >= ?', [$since])
@@ -142,7 +142,7 @@ class LeadFinder
         ];
     }
 
-    // Where the owner applied (leads marked applied and applications on Nextward), and the listings applied to.
+    // Where the owner applied (leads marked applied and applications on the site), and the listings applied to.
     private function history(Candidate $candidate): array
     {
         $history = Lead::where('candidate_id', $candidate->id)->whereNotNull('applied_at')->whereIn('status', ['applied', 'interviewing', 'offer', 'rejected'])

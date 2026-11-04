@@ -37,10 +37,10 @@ const chip = (on) => on ? 'bg-blue-600 text-white border-blue-600' : 'bg-white b
 					<div>
 						<p class="landing-label">{{ text('Candidate profiles', 'Profils de candidats') }}</p>
 						<h1 id="candidates-title" class="hero-title">{{ text('Candidates', 'Des candidats') }} <span class="accent">{{ text('ready for their next role.', 'prêts pour leur prochain poste.') }}</span></h1>
-						<p class="hero-lead">{{ text('Each candidate chose to share this profile, and the Nextward team checked it before it went live. Some also share their resume and contact details, so you can reach out directly.', 'Chaque candidat a choisi de partager ce profil, et l’équipe Nextward l’a vérifié avant sa mise en ligne. Certains partagent aussi leur CV et leurs coordonnées pour que vous puissiez les contacter directement.') }}</p>
+						<p class="hero-lead">{{ text(`Each candidate chose to share this profile, and the ${appName} team checked it before it went live. Some also share their resume and contact details, so you can reach out directly.`, `Chaque candidat a choisi de partager ce profil, et l’équipe ${appName} l’a vérifié avant sa mise en ligne. Certains partagent aussi leur CV et leurs coordonnées pour que vous puissiez les contacter directement.`) }}</p>
 					</div>
 					<figure class="hero-stage w-[min(100%,320px)]">
-						<img src="/nextward-assets/mascots/10-portfolio-laptop.svg" alt="" width="768" height="768" fetchpriority="high" />
+						<img src="/site-assets/mascots/10-portfolio-laptop.svg" alt="" width="768" height="768" fetchpriority="high" />
 						<Sparkle style="top: 16%; left: 14%; --i: 0" />
 						<Sparkle class="is-sky" style="top: 10%; right: 12%; width: 16px; height: 16px; --i: 1" />
 					</figure>
@@ -80,7 +80,7 @@ const chip = (on) => on ? 'bg-blue-600 text-white border-blue-600' : 'bg-white b
 				</nav>
 			</section>
 
-			<ClosingBanner :title="text('Want your profile here?', 'Vous voulez apparaître ici ?')" :body="text('Fill in your candidate profile, then ask to show it on Nextward from your profile page. We check every profile before it goes live.', 'Complétez votre profil de candidat, puis demandez à l’afficher sur Nextward depuis votre page de profil. Nous vérifions chaque profil avant sa mise en ligne.')">
+			<ClosingBanner :title="text('Want your profile here?', 'Vous voulez apparaître ici ?')" :body="text(`Fill in your candidate profile, then ask to show it on ${appName} from your profile page. We check every profile before it goes live.`, `Complétez votre profil de candidat, puis demandez à l’afficher sur ${appName} depuis votre page de profil. Nous vérifions chaque profil avant sa mise en ligne.`)">
 				<Link v-if="user" :href="route('profile.show')" class="cta cta-light focus-ring">{{ text('Open your profile', 'Ouvrir votre profil') }}<ArrowRight class="action-icon" aria-hidden="true" /></Link>
 				<Link v-else :href="`${prefix}/register`" class="cta cta-light focus-ring">{{ text('Create a free account', 'Créer un compte gratuit') }}<ArrowRight class="action-icon" aria-hidden="true" /></Link>
 			</ClosingBanner>

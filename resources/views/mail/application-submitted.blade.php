@@ -3,7 +3,7 @@
 
 Hi {!! $company !!},
 
-**{!! $candidate !!}** applied to **{!! $role !!}** on Nextward.
+**{!! $candidate !!}** applied to **{!! $role !!}** on {{ config('app.name') }}.
 
 @if ($excerpt)
 <x-mail::panel>
@@ -19,11 +19,11 @@ Hi {!! $company !!},
 Review the application
 </x-mail::button>
 
-Reply from Nextward so the candidate always knows where they stand.
+Reply from {{ config('app.name') }} so the candidate always knows where they stand.
 
 The {{ config('app.name') }} team
 
 <x-slot:subcopy>
-You get this email because {!! $company !!} posts roles on Nextward. If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
+You get this email because {!! $company !!} posts roles on {{ config('app.name') }}. If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
 </x-slot:subcopy>
 </x-mail::message>

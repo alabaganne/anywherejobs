@@ -26,8 +26,8 @@ class SearchProfileReader implements Agent, HasProviderOptions, HasStructuredOut
     {
         $fields = implode(', ', $this->fields);
         $skills = implode(', ', $this->skills);
-        return <<<PROMPT
-You read a person's resume (attached PDF) for Nextward, an IT job board, and say which listings it should find for them.
+        return str_replace(':site', config('app.name'), <<<PROMPT
+You read a person's resume (attached PDF) for :site, an IT job board, and say which listings it should find for them.
 
 - fields: the fields of the roles this person fits or asks for, only from this list: {$fields}.
 - skills: up to 30 skills the person has, only names from this list, written exactly as listed: {$skills}.
@@ -36,7 +36,7 @@ You read a person's resume (attached PDF) for Nextward, an IT job board, and say
 - country_code: the two-letter ISO code of the country they live in, or "".
 - summary: one short line on what they look for.
 Add what the person says they also want, when given.
-PROMPT;
+PROMPT);
     }
 
     public function schema(JsonSchema $schema): array

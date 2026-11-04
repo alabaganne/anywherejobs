@@ -3,7 +3,7 @@
 
 Hi {!! $name !!},
 
-Someone asked to change the email of your Nextward account.
+Someone asked to change the email of your {{ config('app.name') }} account.
 
 <x-mail::panel>
 From: {!! $old !!}<br>

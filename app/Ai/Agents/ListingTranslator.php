@@ -22,8 +22,8 @@ class ListingTranslator implements Agent, HasProviderOptions, HasStructuredOutpu
 
     public function instructions(): string
     {
-        return <<<'PROMPT'
-You translate job listings for Nextward, a job board. You get several listings, each starting with "Listing <id>" and the languages to translate it into ("en" is English, "fr" is French). Answer once for every listing, with the same id, and give one translation for each language asked.
+        return str_replace(':site', config('app.name'), <<<'PROMPT'
+You translate job listings for :site, a job board. You get several listings, each starting with "Listing <id>" and the languages to translate it into ("en" is English, "fr" is French). Answer once for every listing, with the same id, and give one translation for each language asked.
 
 - Translate everything and keep the exact meaning. Do not add, drop, shorten or sum up anything.
 - Keep the plain-text layout: the same paragraphs, blank lines and "• " bullets. No markdown, no HTML.
@@ -31,7 +31,7 @@ You translate job listings for Nextward, a job board. You get several listings, 
 - Use the wording people expect in job ads in that language. Keep the title short, the way job boards in that language write it.
 - source_language: the two-letter ISO 639-1 code of the original listing, like "en", "fr", "ar" or "de".
 - If the listing is already in a language asked for, copy it as it is.
-PROMPT;
+PROMPT);
     }
 
     public function schema(JsonSchema $schema): array

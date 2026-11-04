@@ -58,7 +58,7 @@ class ApplicationReviewed extends Notification implements ShouldQueue
         $role = $application->opportunity->title;
 
         [$subject, $headline, $body, $tip] = match ($application->status) {
-            'interview' => ["{$company} would like to interview you", 'You have an interview request', "{$company} wants to talk with you about {$role}.", 'Watch your inbox and your Nextward messages for the next steps.'],
+            'interview' => ["{$company} would like to interview you", 'You have an interview request', "{$company} wants to talk with you about {$role}.", 'Watch your inbox and your '.config('app.name').' messages for the next steps.'],
             'offer' => ["Good news from {$company}", 'You received an offer', "{$company} made you an offer for {$role}. Congratulations!", 'Reply to the employer soon so they know your answer.'],
             'closed' => ["Update on your application to {$company}", 'Your application was closed', "{$company} decided not to move forward with your application for {$role}.", 'It happens to everyone. New roles come in every day, so keep going.'],
             'review' => ["{$company} is reviewing your application", 'Your application is under review', "{$company} is now reviewing your application for {$role}.", null],

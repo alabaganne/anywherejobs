@@ -16,7 +16,8 @@ Schedule::command('opportunities:indexing --limit=100')->hourly()->withoutOverla
 Schedule::command('companies:logos')->hourly()->withoutOverlapping();
 Schedule::command('companies:research')->hourly()->withoutOverlapping();
 Schedule::command('leads:daily')->dailyAt('07:00')->timezone('Africa/Tunis')->withoutOverlapping();
-Schedule::command('opportunities:discover')->weeklyOn(1, '06:00')->timezone('Africa/Tunis')->withoutOverlapping();
+Schedule::command('companies:link-sources')->dailyAt('05:30')->timezone('Africa/Tunis')->withoutOverlapping();
+Schedule::command('companies:discover')->dailyAt('06:00')->timezone('Africa/Tunis')->withoutOverlapping();
 Schedule::command('seo:indexnow')->hourly()->withoutOverlapping();
 Schedule::command('opportunities:translate --limit=200')->everyTenMinutes()->withoutOverlapping();
 Schedule::command('credits:monthly')->monthlyOn(1, '06:00')->timezone('Africa/Tunis')->withoutOverlapping();

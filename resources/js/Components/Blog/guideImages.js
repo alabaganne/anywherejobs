@@ -12,5 +12,5 @@ export function guideImage(post) {
 	if (post?.cover) return { src: post.cover, alt: post.cover_alt || '', width: 1200, height: 630 };
 	const image = images.find((item) => item.slugs.includes(post?.slug));
 	if (!image) return null;
-	return { src: `/nextward-assets/landing-light-v1/${image.file}.webp`, alt: image.alt[post.locale === 'fr' ? 1 : 0], width: image.width, height: image.height };
+	return { src: `/site-assets/landing-light-v1/${image.file}.webp`, alt: image.alt[post.locale === 'fr' ? 1 : 0], width: image.width, height: image.height };
 }

@@ -40,11 +40,11 @@ Cela ne veut pas dire que vous attendrez des années. Cela veut dire qu'une mét
 2. **Mettez à jour votre CV et votre profil LinkedIn.** Placez votre PFE, vos stages et vos meilleurs projets en premier, avec des résultats. Reprenez les intitulés des postes que vous visez.
 3. **Rassemblez vos documents.** Diplôme ou attestation de réussite, relevés de notes, attestations de stage, et une ou deux personnes prêtes à vous recommander.
 4. **Inscrivez-vous à l'ANETI.** L'ANETI est l'agence nationale pour l'emploi. L'inscription vous donne accès à ses services et aux dispositifs publics. Elle dispose désormais d'une plateforme d'inscription en ligne, en cours de déploiement dans ses bureaux d'emploi en 2025. Si elle ne couvre pas encore votre région, rendez-vous au bureau d'emploi le plus proche.
-5. **Organisez votre recherche.** Enregistrez sur Nextward des recherches d'[emplois débutants](/fr/opportunities/jobs?seniority=entry) pour consulter vite les nouvelles offres, et ouvrez la page de candidature d'origine depuis chaque annonce.
+5. **Organisez votre recherche.** Enregistrez sur {site} des recherches d'[emplois débutants](/fr/opportunities/jobs?seniority=entry) pour consulter vite les nouvelles offres, et ouvrez la page de candidature d'origine depuis chaque annonce.
 
 ## Où trouver des offres d'emploi pour débutants en Tunisie ?
 
-- **Les sites d'offres et Nextward.** Utilisez les filtres par niveau, lieu et mode de travail pour aller à l'essentiel.
+- **Les sites d'offres et {site}.** Utilisez les filtres par niveau, lieu et mode de travail pour aller à l'essentiel.
 - **Les pages carrières des entreprises.** Dressez une liste de 20 à 30 entreprises qui vous intéressent et consultez leurs pages chaque semaine.
 - **LinkedIn.** Créez des alertes, suivez des entreprises et lisez les publications des recruteurs et des chefs d'équipe.
 - **Les entreprises de votre PFE et de vos stages.** Demandez à votre encadrant s'il y a un poste ouvert ou s'il connaît une équipe qui recrute.

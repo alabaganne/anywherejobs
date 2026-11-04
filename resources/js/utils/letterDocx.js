@@ -34,5 +34,5 @@ export async function downloadLetterDocx({ letter, name = '', contact = [], loca
 	setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
-export const letterFileName = (name, company, locale) => [name || 'nextward', locale === 'fr' ? 'lettre' : 'cover letter', company]
+export const letterFileName = (name, company, locale) => [name, locale === 'fr' ? 'lettre' : 'cover letter', company]
 	.filter(Boolean).join(' ').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');

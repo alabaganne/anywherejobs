@@ -16,7 +16,7 @@ onMounted(() => { mounted.value = true; });
 
 <template>
 	<div class="flex items-end justify-between flex-wrap gap-4 mb-7">
-		<Head v-if="mounted" :title="`${documentTitle || title} | Nextward`" />
+		<Head v-if="mounted" :title="`${documentTitle || title} | ${appName}`" />
 		<div class="min-w-0">
 			<slot name="before" />
 			<h1 class="font-display text-[28px] font-semibold tracking-[-.02em] leading-tight">{{ title }}</h1>

@@ -23,6 +23,7 @@ createInertiaApp({
         const page = usePage();
         app.config.globalProperties.route = (name, params, absolute) => ziggyRoute(name, params, absolute, { ...page.props.ziggy, location: new URL(page.props.ziggy.location) });
         Object.defineProperty(app.config.globalProperties, 'currentUser', { get: () => page.props.auth?.user });
+        Object.defineProperty(app.config.globalProperties, 'appName', { get: () => page.props.brand?.name });
         app.component('Link', Link);
         app.component('InertiaLink', Link);
         app.component('Icon', Icon);

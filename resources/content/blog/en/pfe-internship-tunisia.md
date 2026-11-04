@@ -65,7 +65,7 @@ Use several channels at once. Each one reaches different companies.
 
 - **Company PFE books and career pages.** Banks, telecom operators, consulting firms and software companies often publish topics with a deadline.
 - **Your school's internship office.** Companies send topics straight to schools. Teachers also hear about projects and lab topics.
-- **Job and internship sites.** On Nextward, you can browse [PFE internships](/opportunities/internships?program_type=pfe), filter by field and city, save a search, and open the original application page.
+- **Job and internship sites.** On {site}, you can browse [PFE internships](/opportunities/internships?program_type=pfe), filter by field and city, save a search, and open the original application page.
 - **LinkedIn.** Follow the companies you like and the recruiters who post PFE topics.
 - **Alumni and former interns.** Ask students from the year above where they did their PFE and how they got it.
 - **Spontaneous applications.** Many small and mid-size companies post nothing but still take PFE students.

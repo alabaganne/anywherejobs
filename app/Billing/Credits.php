@@ -39,7 +39,7 @@ class Credits
         return $this->isFree($user) || ! $this->needsCredit($item) || $this->balance($user) > 0;
     }
 
-    // While Nextward is in beta, payments are locked and candidates can get free credits whenever they need more.
+    // While the site is in beta, payments are locked and candidates can get free credits whenever they need more.
     public function beta(): bool
     {
         return $this->enabled() && (bool) config('billing.beta');

@@ -42,7 +42,7 @@ class EmailTest extends TestCase
 
     private function assertBranded(string $html): void
     {
-        $this->assertStringContainsString('/brand/nextward/symbol-192.png', $html);
+        $this->assertStringContainsString(config('site.brand.icon_small'), $html);
         $this->assertStringContainsString('#2563eb', $html);
         $this->assertStringContainsString('Internships and jobs in Tunisia and worldwide', $html);
         $this->assertStringNotContainsString('Laravel', $html);
@@ -58,7 +58,7 @@ class EmailTest extends TestCase
 
         Notification::assertSentTo($user, VerifyEmail::class, function ($notification) use ($user) {
             $mail = $notification->toMail($user);
-            $this->assertSame('Confirm your email for Nextward', $mail->subject);
+            $this->assertSame('Confirm your email for '.config('app.name'), $mail->subject);
             $html = (string) $mail->render();
             $this->assertBranded($html);
             $this->assertStringContainsString('Confirm my email', $html);
@@ -104,7 +104,7 @@ class EmailTest extends TestCase
         $user = $this->candidate();
         $mail = (new ResetPassword('token-123'))->toMail($user);
 
-        $this->assertSame('Reset your Nextward password', $mail->subject);
+        $this->assertSame('Reset your '.config('app.name').' password', $mail->subject);
         $html = (string) $mail->render();
         $this->assertBranded($html);
         $this->assertStringContainsString('Choose a new password', $html);
@@ -211,7 +211,7 @@ class EmailTest extends TestCase
             'email' => 'sara@example.com',
             'topic' => 'listing',
             'message' => 'The deadline on this listing looks wrong, please check it.',
-            'page_url' => 'https://nextward.test/opportunities/1-role',
+            'page_url' => 'https://example.test/opportunities/1-role',
         ])->assertRedirect()->assertSessionHasNoErrors();
 
         Mail::assertSent(ContactMessage::class, function (ContactMessage $mail) {
@@ -234,7 +234,7 @@ class EmailTest extends TestCase
             'email' => 'sara@example.com',
             'topic' => 'bug',
             'message' => 'The save button does nothing.',
-            'page_url' => 'https://nextward.test/saved',
+            'page_url' => 'https://example.test/saved',
             'screenshot' => UploadedFile::fake()->image('shot.png'),
         ])->assertRedirect()->assertSessionHasNoErrors();
 

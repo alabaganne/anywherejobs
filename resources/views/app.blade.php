@@ -4,12 +4,13 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <link rel="icon" href="/brand/nextward/Nextward-colorful-symbol.png" type="image/png" sizes="1254x1254">
-        <link rel="apple-touch-icon" href="/brand/nextward/Nextward-colorful-symbol.png">
-        <meta name="theme-color" content="#2563EB">
+        <link rel="icon" href="{{ config('site.brand.logo') }}" type="image/svg+xml">
+        <link rel="icon" href="{{ config('site.brand.icon') }}" type="image/png" sizes="512x512">
+        <link rel="apple-touch-icon" href="{{ config('site.brand.apple_touch_icon') }}">
+        <meta name="theme-color" content="{{ config('site.brand.theme_color') }}">
         <link rel="manifest" href="/site.webmanifest">
         @php($blogLocale = ($page['props']['locale'] ?? 'en') === 'fr' ? 'fr' : 'en')
-        <link rel="alternate" type="application/rss+xml" title="{{ $blogLocale === 'fr' ? 'Guides carrière Nextward' : 'Nextward career guides' }}" href="{{ $blogLocale === 'fr' ? '/fr/blog/feed.xml' : '/blog/feed.xml' }}">
+        <link rel="alternate" type="application/rss+xml" title="{{ $blogLocale === 'fr' ? 'Guides carrière '.config('app.name') : config('app.name').' career guides' }}" href="{{ $blogLocale === 'fr' ? '/fr/blog/feed.xml' : '/blog/feed.xml' }}">
 
         <!-- Scripts -->
         @inertiaHead

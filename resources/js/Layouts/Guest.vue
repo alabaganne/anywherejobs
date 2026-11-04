@@ -1,11 +1,11 @@
 <template>
 	<div class="min-h-svh bg-white text-navy motion-reduce:**:transition-none">
-		<Head :title="`${pageTitle} | Nextward`" />
+		<Head :title="`${pageTitle} | ${appName}`" />
 		<a href="#auth-main" class="focus-ring absolute h-px w-px overflow-hidden [clip-path:inset(50%)] focus:top-5 focus:left-6 focus:z-50 focus:h-auto focus:w-auto focus:rounded-[6px] focus:bg-white focus:px-[18px] focus:py-3 focus:[clip-path:none]">{{ text('Skip to form', 'Aller au formulaire') }}</a>
 
 		<div class="grid min-h-svh grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] max-[900px]:block">
 			<aside class="sticky top-0 flex h-svh flex-col justify-between gap-8 overflow-hidden bg-navy px-[clamp(28px,4.5vw,72px)] py-8 text-white short-screen:gap-5 short-screen:py-6 max-[1024px]:px-8 max-[900px]:hidden" :aria-label="text('Your next chapter', 'Votre prochaine étape')">
-				<Link :href="prefix || '/'" :class="brand" class="inline-flex self-start focus-visible:outline-white"><brand-logo size="sm" /><span>Nextward</span></Link>
+				<Link :href="prefix || '/'" :class="brand" class="inline-flex self-start focus-visible:outline-white"><brand-logo size="sm" dark /><span>{{ appName }}</span></Link>
 				<div class="mx-auto w-full max-w-[440px]">
 					<p class="flex items-center gap-2.5 text-[11px] leading-[1.5] font-semibold tracking-[.15em] text-blue-200 uppercase">{{ text('Your next chapter', 'Votre prochaine étape') }}</p>
 					<h2 class="mt-[22px] font-display text-[length:clamp(40px,4vw,58px)] leading-[1.06] font-semibold tracking-[-.06em] max-[1024px]:text-[45px] lg:short-screen:text-[length:clamp(36px,3.4vw,48px)] [&_span]:text-blue-300">
@@ -26,7 +26,7 @@
 
 			<div class="flex min-h-svh min-w-0 flex-col">
 				<header class="flex h-[88px] items-center justify-end gap-6 px-[clamp(24px,4.5vw,72px)] max-[1024px]:px-8 max-[900px]:justify-between max-[900px]:bg-navy max-[900px]:text-white max-[540px]:h-[72px] max-[540px]:gap-4 max-[540px]:px-6">
-					<Link :href="prefix || '/'" :class="brand" class="hidden self-center max-[900px]:inline-flex max-[900px]:focus-visible:outline-white"><brand-logo size="sm" /><span>Nextward</span></Link>
+					<Link :href="prefix || '/'" :class="brand" class="hidden self-center max-[900px]:inline-flex max-[900px]:focus-visible:outline-white"><brand-logo size="sm" dark /><span>{{ appName }}</span></Link>
 					<div class="flex items-center gap-4 sm:gap-6">
 						<a v-if="languageHref" :href="languageHref" :hreflang="fr ? 'en' : 'fr'" :lang="fr ? 'en' : 'fr'" :class="back">{{ fr ? 'English' : 'Français' }}</a>
 						<Link :href="prefix || '/'" :class="back"><icon name="arrow-left" class="size-4" /><span>{{ text('Back to home', 'Retour à l’accueil') }}</span></Link>
@@ -90,9 +90,9 @@ export default {
 			return this.text(...(pageTitles[this.$page.component] || ['Your account', 'Votre compte']));
 		},
 		illustration() {
-			if (this.isRegister) return { src: '/nextward-assets/mascots/15-student-company-conversation.svg', width: 1100, height: 760, scene: true };
-			if (this.$page.component === 'Auth/Login') return { src: '/nextward-assets/mascots/17-student-presenter.webp', width: 900, height: 900 };
-			return { src: '/nextward-assets/mascots/04-mentor-pointing.svg', width: 768, height: 768 };
+			if (this.isRegister) return { src: '/site-assets/mascots/15-student-company-conversation.svg', width: 1100, height: 760, scene: true };
+			if (this.$page.component === 'Auth/Login') return { src: '/site-assets/mascots/17-student-presenter.webp', width: 900, height: 900 };
+			return { src: '/site-assets/mascots/04-mentor-pointing.svg', width: 768, height: 768 };
 		},
 	},
 	methods: {

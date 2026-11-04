@@ -38,7 +38,7 @@ watch(hiring, reload);
 
 <template>
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
-		<PageHeader title="Companies" description="Employers with roles on Nextward.">
+		<PageHeader title="Companies" :description="`Employers with roles on ${appName}.`">
 			<template v-if="page.props.auth?.user?.is_admin" #actions>
 				<Link class="cbtn cbtn-primary h-11 !py-0" :href="route('companies.create')">Add company</Link>
 			</template>

@@ -20,7 +20,7 @@ use Throwable;
 // The owner's job leads: the daily list, every lead with its status and notes, the jobs left out, and contacts.
 class LeadController extends Controller
 {
-    private const DATE_SOURCES = ['ats' => 'employer job board', 'jsonld' => 'employer site', 'board' => 'job board date, not checked', 'seen' => 'first seen on Nextward'];
+    private const DATE_SOURCES = ['ats' => 'employer job board', 'jsonld' => 'employer site', 'board' => 'job board date, not checked', 'seen' => 'first seen here'];
 
     public function index(Request $request)
     {

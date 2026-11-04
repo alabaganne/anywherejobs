@@ -34,6 +34,9 @@ class AppServiceProvider extends ServiceProvider
     {
         JsonResource::withoutWrapping();
 
+        // Shared here, not in the Inertia middleware, so error pages get them too.
+        \Inertia\Inertia::share('brand', fn () => ['name' => config('app.name'), 'logo' => config('site.brand.logo')]);
+
         Relation::morphMap([
             'candidate' => \App\Models\Candidate::class,
             'company' => \App\Models\Company::class,
@@ -56,16 +59,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         VerifyEmail::toMailUsing(fn ($user, string $url) => (new MailMessage)
-            ->subject('Confirm your email for Nextward')
+            ->subject('Confirm your email for '.config('app.name'))
             ->greeting('Hi '.Str::of($user->name)->before(' ').',')
-            ->line('Thanks for joining Nextward. Please confirm this is your email address so you can apply to roles, message employers and get alerts.')
+            ->line('Thanks for joining '.config('app.name').'. Please confirm this is your email address so you can apply to roles, message employers and get alerts.')
             ->action('Confirm my email', $url)
             ->line('The link works for '.config('auth.verification.expire', 60).' minutes. If you did not create an account, you can ignore this email.'));
 
         ResetPassword::toMailUsing(fn ($user, string $token) => (new MailMessage)
-            ->subject('Reset your Nextward password')
+            ->subject('Reset your '.config('app.name').' password')
             ->greeting('Hi '.Str::of($user->name)->before(' ').',')
-            ->line('We got a request to reset the password for your Nextward account.')
+            ->line('We got a request to reset the password for your '.config('app.name').' account.')
             ->action('Choose a new password', url(route('password.reset', ['token' => $token, 'email' => $user->getEmailForPasswordReset()], false)))
             ->line('The link works for '.config('auth.passwords.'.config('auth.defaults.passwords').'.expire').' minutes. If you did not ask for this, you can ignore this email and your password stays the same.'));
     }

@@ -22,8 +22,8 @@ class ResumeReader implements Agent, HasProviderOptions, HasStructuredOutput
 
     public function instructions(): string
     {
-        return <<<'PROMPT'
-You read a candidate's resume (attached PDF) for Nextward, a job board, and fill in their profile.
+        return str_replace(':site', config('app.name'), <<<'PROMPT'
+You read a candidate's resume (attached PDF) for :site, a job board, and fill in their profile.
 
 - Copy only what the resume says. Never invent a job, date, skill, degree, number or link. Use an empty string, 0 or an empty list when the resume does not say.
 - Keep the resume's language for free text.
@@ -36,7 +36,7 @@ You read a candidate's resume (attached PDF) for Nextward, a job board, and fill
 - experience, education, projects: newest first. Dates as "YYYY-MM" or "YYYY"; end is "" when current is true. summary: one to three short lines of what they did.
 - website and linkedin_profile_url: full https links, or "".
 - language: the two-letter code of the language the resume is written in, like "en" or "fr".
-PROMPT;
+PROMPT);
     }
 
     public function schema(JsonSchema $schema): array

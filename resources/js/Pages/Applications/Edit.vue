@@ -49,12 +49,12 @@ const choice = ref(attachedResume.value ? 'keep' : editing.value ? 'none' : main
 // A draft from the cover letter button on the opportunity page, and the CV picked on the kit page.
 onMounted(() => {
 	try {
-		const key = `nextward.cover-letter.${props.opportunity.id}`;
+		const key = `site.cover-letter.${props.opportunity.id}`;
 		const draft = sessionStorage.getItem(key);
 		sessionStorage.removeItem(key);
 		if (draft && !form.cover_letter) form.cover_letter = draft;
 
-		const kitKey = `nextward.kit-cv.${props.opportunity.id}`;
+		const kitKey = `site.kit-cv.${props.opportunity.id}`;
 		const kit = Number(sessionStorage.getItem(kitKey));
 		sessionStorage.removeItem(kitKey);
 		if (!editing.value && props.kits.some((item) => item.id === kit)) choice.value = `kit:${kit}`;

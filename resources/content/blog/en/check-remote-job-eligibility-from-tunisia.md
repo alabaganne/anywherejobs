@@ -19,8 +19,8 @@ Look for required working hours, travel, office visits, and the stated employmen
 
 ## Treat relocation and visa sponsorship separately
 
-Relocation assistance may describe travel or moving support. Visa sponsorship is a separate detail. Record only what the employer confirms, and use the official application page to check the current requirements. Nextward displays an unknown state when the source does not establish an answer.
+Relocation assistance may describe travel or moving support. Visa sponsorship is a separate detail. Record only what the employer confirms, and use the official application page to check the current requirements. {site} displays an unknown state when the source does not establish an answer.
 
 ## Return to the original source
 
-Check the employer, the original listing, the deadline, and the application destination. Use the source link on Nextward and report a listing if its link is broken or the source says that it has closed. A last-checked date describes a source check, not a guarantee of an offer or endorsement of an employer.
+Check the employer, the original listing, the deadline, and the application destination. Use the source link on {site} and report a listing if its link is broken or the source says that it has closed. A last-checked date describes a source check, not a guarantee of an offer or endorsement of an employer.

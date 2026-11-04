@@ -33,7 +33,7 @@ class ResumeProfileTest extends TestCase
             'skills' => ['Laravel', 'Vue'],
             'experience' => [['title' => 'Developer', 'company' => 'Acme', 'location' => '', 'start' => '2023-01', 'end' => '', 'current' => true, 'summary' => 'Built APIs.'], ['title' => '', 'company' => 'Empty', 'location' => '', 'start' => '', 'end' => '', 'current' => false, 'summary' => '']],
             'education' => [['school' => 'ISSAT Sousse', 'degree' => 'Engineering', 'field' => 'Software', 'start' => '2018', 'end' => '2023']],
-            'projects' => [['name' => 'Nextward', 'summary' => 'Job board', 'url' => 'https://example.com']],
+            'projects' => [['name' => config('app.name'), 'summary' => 'Job board', 'url' => 'https://example.com']],
         ]))]);
 
         $this->actingAs($user)->postJson('/app/profile/resume/read')->assertOk()
@@ -112,7 +112,7 @@ class ResumeProfileTest extends TestCase
             'name' => $user->name, 'email' => $user->email,
             'experience' => [['title' => 'Developer', 'company' => 'Acme', 'start' => '2023-01', 'current' => true, 'junk' => 'x']],
             'education' => [['school' => 'ISSAT Sousse', 'degree' => 'Engineering']],
-            'projects' => [['name' => 'Nextward', 'url' => 'https://example.com']],
+            'projects' => [['name' => config('app.name'), 'url' => 'https://example.com']],
         ])->assertSessionHasNoErrors();
 
         $candidate = $user->userable->fresh();

@@ -41,7 +41,7 @@ class OpportunitySeeder extends Seeder
                     'url' => $record['url'], 'allowed_domains' => [parse_url($record['url'], PHP_URL_HOST)],
                     'company_id' => $company->id, 'enabled' => false, 'publication_mode' => 'review',
                     'permission_status' => 'approved',
-                    'permission_notes' => 'Editorial inclusion of public vacancy facts and an original Nextward summary, last checked on '.$verifiedAt->toDateString().'. Approval covers this curated snapshot only. No employer affiliation or permission for automated full-text copying is claimed. Review permissions and adapter support before enabling imports.',
+                    'permission_notes' => 'Editorial inclusion of public vacancy facts and an original '.config('app.name').' summary, last checked on '.$verifiedAt->toDateString().'. Approval covers this curated snapshot only. No employer affiliation or permission for automated full-text copying is claimed. Review permissions and adapter support before enabling imports.',
                     'settings' => ['employer_name' => $company->name, 'curated_snapshot' => true, 'freshness_hours' => self::FRESHNESS_HOURS],
                     'cadence_hours' => 24, 'request_delay_ms' => 1000, 'max_requests' => 5,
                 ]);

@@ -6,6 +6,7 @@ import AppShell from '@/Layouts/AppShell.vue';
 import ProfileBanner from '@/Components/Candidate/ProfileBanner.vue';
 import SkillList from '@/Components/Candidate/SkillList.vue';
 import ResumeList from '@/Components/Candidate/ResumeList.vue';
+import { siteName } from '@/brand';
 
 defineOptions({
 	layout: (_h, page) => h(AppShell, { active: 'profile' }, () => page),
@@ -74,10 +75,10 @@ const updatePublic = (data) =>
 		onFinish: () => (publicBusy.value = false),
 	});
 const publicState = computed(() => ({
-	pending: { title: 'Waiting for review', text: 'The Nextward team is checking your profile. It stays private until it is approved.' },
+	pending: { title: 'Waiting for review', text: `The ${siteName()} team is checking your profile. It stays private until it is approved.` },
 	approved: { title: 'Your profile is public', text: 'Companies and visitors can find you on the Talent page.' },
 	declined: { title: 'Not approved yet', text: 'Update your profile, then ask again.' },
-}[props.profile.public_status] || { title: 'Let companies find you', text: 'Show your profile on the Talent page so companies can find you. The Nextward team checks each profile first. Your email, phone number and resume stay hidden unless you choose to share them.' }));
+}[props.profile.public_status] || { title: 'Let companies find you', text: `Show your profile on the Talent page so companies can find you. The ${siteName()} team checks each profile first. Your email, phone number and resume stay hidden unless you choose to share them.` }));
 </script>
 
 <template>

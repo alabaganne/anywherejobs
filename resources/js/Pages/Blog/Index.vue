@@ -38,12 +38,12 @@ const tab = (pressed) => ['focus-ring relative rounded-[2px] pt-2.5 pb-3 text-[1
 			<section aria-labelledby="guides-title" class="hero-dark">
 				<div class="public-container hero-grid hero-pad">
 					<div>
-						<p class="landing-label">{{ text('The Nextward career guide', 'Le guide carrière Nextward') }}</p>
+						<p class="landing-label">{{ text(`The ${appName} career guide`, `Le guide carrière ${appName}`) }}</p>
 						<h1 id="guides-title" class="hero-title">{{ text('A little guidance for', 'Quelques conseils pour') }} <span class="accent">{{ text('your next move.', 'votre prochaine étape.') }}</span></h1>
 						<p class="hero-lead">{{ text('Practical advice for your first application, your next role and everything in between.', 'Des conseils pratiques pour votre première candidature, votre prochain poste et tout ce qui se passe entre les deux.') }}</p>
 					</div>
 					<figure class="hero-stage w-[min(100%,320px)]">
-						<img src="/nextward-assets/mascots/11-learning-books-and-cap.svg" alt="" width="768" height="768" fetchpriority="high" />
+						<img src="/site-assets/mascots/11-learning-books-and-cap.svg" alt="" width="768" height="768" fetchpriority="high" />
 						<Sparkle style="top: 16%; left: 14%; --i: 0" />
 						<Sparkle class="is-sky" style="top: 10%; right: 12%; width: 16px; height: 16px; --i: 1" />
 					</figure>

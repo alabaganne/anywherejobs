@@ -125,7 +125,7 @@ class CompanyVerifier
         ]));
     }
 
-    private function site(string $url): ?string
+    public function site(string $url): ?string
     {
         $url = trim($url);
         if ($url !== '' && ! preg_match('~^https?://~i', $url)) { $url = 'https://'.$url; }

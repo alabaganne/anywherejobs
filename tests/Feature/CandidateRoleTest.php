@@ -40,7 +40,7 @@ class CandidateRoleTest extends TestCase
         $this->actingAs($admin)->put('/app/profile', [
             'name' => $admin->name,
             'email' => $admin->email,
-            'about' => 'Founder of Nextward and a software engineer.',
+            'about' => 'Founder of '.config('app.name').' and a software engineer.',
             'website' => 'https://example.com',
             'country_code' => 'tn',
             'location' => 'Monastir',
@@ -51,7 +51,7 @@ class CandidateRoleTest extends TestCase
         $this->assertTrue($admin->isAdmin());
         $this->assertTrue($admin->isCandidate());
         $this->assertSame(1, Candidate::count());
-        $this->assertSame('Founder of Nextward and a software engineer.', $admin->userable->about);
+        $this->assertSame('Founder of '.config('app.name').' and a software engineer.', $admin->userable->about);
         $this->assertSame('https://example.com', $admin->userable->website);
         $this->assertSame('TN', $admin->userable->country_code);
         $this->assertSame('Monastir', $admin->userable->location);
@@ -60,7 +60,7 @@ class CandidateRoleTest extends TestCase
     public function test_imports_follow_the_owner_profile_with_its_visa_preference(): void
     {
         // Factory emails can be on example.com, which imports leave out.
-        $admin = User::factory()->create(['is_admin' => true, 'email' => 'owner@nextward.test']);
+        $admin = User::factory()->create(['is_admin' => true, 'email' => 'owner@example.test']);
         $this->actingAs($admin)->get('/app/settings')->assertOk();
         $this->actingAs($admin)->put('/app/profile', [
             'name' => $admin->name,
@@ -68,7 +68,7 @@ class CandidateRoleTest extends TestCase
             'preferences' => ['kinds' => ['job'], 'countries' => ['DE', 'US'], 'skills' => ['React', 'Laravel'], 'needs_visa' => true],
         ])->assertRedirect(route('profile.show'));
         $other = Candidate::factory()->create(['preferences' => ['kinds' => ['internship'], 'skills' => ['Java', 'Spring']]]);
-        $other->user()->save(User::factory()->make(['email' => 'friend@nextward.test']));
+        $other->user()->save(User::factory()->make(['email' => 'friend@example.test']));
 
         $profiles = CandidateProfiles::load()->profiles;
         $this->assertSame([$admin->name], array_column($profiles, 'name'));

@@ -5,6 +5,7 @@ import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { appPath } from '@/utils/url';
 import AppShell from '@/Layouts/AppShell.vue';
 import CompanyLogo from '@/Components/Ui/CompanyLogo.vue';
+import { siteName } from '@/brand';
 
 defineOptions({
 	layout: (_h, page) => h(AppShell, { active: 'applications' }, () => page),
@@ -59,7 +60,7 @@ const STAGES = {
 
 const stage = computed(() => {
 	const base = STAGES[normalizedStatus.value] || STAGES.submitted;
-	if (isExternal.value) return { ...base, title: `Your update: ${normalizedStatus.value === 'submitted' ? 'Applied' : normalizedStatus.value === 'closed' ? 'Closed' : base.label}`, note: 'Candidate-reported status. Nextward has not submitted or verified this application.' };
+	if (isExternal.value) return { ...base, title: `Your update: ${normalizedStatus.value === 'submitted' ? 'Applied' : normalizedStatus.value === 'closed' ? 'Closed' : base.label}`, note: `Candidate-reported status. ${siteName()} has not submitted or verified this application.` };
 	const notes = {
 		submitted: 'Waiting for the company to review this application.',
 		viewed: `${props.application.company.name} has viewed this application.`,

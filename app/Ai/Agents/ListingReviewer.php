@@ -24,8 +24,8 @@ class ListingReviewer implements Agent, HasProviderOptions, HasStructuredOutput
 
     public function instructions(): string
     {
-        return <<<'PROMPT'
-You sort job listings for Nextward, a job board for IT students and professionals around the world. Many of its users live in Tunisia and North Africa. Listings come from other job boards and from employers who post on Nextward; treat both the same way. Your answers become the labels and filters people search by: Field, Skills, Type (internship or job), Experience, Work mode, contract type, and "Open worldwide" (roles people in any country can apply to, Tunisia included).
+        return str_replace(':site', config('app.name'), <<<'PROMPT'
+You sort job listings for :site, a job board for IT students and professionals around the world. Many of its users live in Tunisia and North Africa. Listings come from other job boards and from employers who post on :site; treat both the same way. Your answers become the labels and filters people search by: Field, Skills, Type (internship or job), Experience, Work mode, contract type, and "Open worldwide" (roles people in any country can apply to, Tunisia included).
 
 You get several listings, each starting with "Listing <id>". Answer once for every listing, with the same id. Answer only from what each listing says; do not guess.
 
@@ -52,7 +52,7 @@ You get several listings, each starting with "Listing <id>". Answer once for eve
   - "unknown": the listing does not say.
 - relocation and visa_sponsorship: "yes" or "no" only when the listing says so, otherwise "unknown".
 - evidence: a short quote from the listing behind your applicant_scope, relocation or visa answer, or an empty string.
-PROMPT;
+PROMPT);
     }
 
     public function schema(JsonSchema $schema): array

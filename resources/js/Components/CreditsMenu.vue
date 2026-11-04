@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
 					<p v-else class="rounded-xl bg-amber-50 text-amber-900 text-[13px] leading-relaxed px-3.5 py-2.5 mt-4">Verify your email to use the AI tools and get {{ billing.monthly }} free credits each month<template v-if="billing.beta">, and free credits whenever you need them during the beta</template>.</p>
 					<div v-if="billing.beta" class="rounded-xl bg-paper-2 px-3.5 py-3 mt-2.5">
 						<p class="flex items-center gap-1.5 text-[13px] font-semibold text-ink"><span class="rounded-full bg-navy-800 text-white text-[10.5px] font-bold px-1.5 py-px">Beta</span>Credits are free for now</p>
-						<p class="text-[12.5px] leading-relaxed text-muted mt-1.5">Nextward is in beta and payments are still being built. Get {{ billing.beta_credits }} free credits whenever you run low.</p>
+						<p class="text-[12.5px] leading-relaxed text-muted mt-1.5">{{ appName }} is in beta and payments are still being built. Get {{ billing.beta_credits }} free credits whenever you run low.</p>
 					</div>
 					<button v-if="canClaim" class="cbtn cbtn-primary w-full !text-sm !py-2.5 mt-5 disabled:opacity-60" type="button" :disabled="claiming" @click="claim">
 						<Gift class="size-4" aria-hidden="true" />{{ claiming ? 'Adding…' : `Get ${billing.beta_credits} free credits` }}

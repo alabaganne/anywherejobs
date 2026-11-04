@@ -129,7 +129,7 @@ class CvRenderTest extends TestCase
             'skills' => ['Laravel', 'Vue'],
             'experience' => [['title' => 'Developer', 'company' => 'Acme', 'location' => 'Tunis', 'start' => '2023-01', 'end' => '', 'current' => true, 'highlights' => ['Built the billing API.']]],
             'education' => [['school' => 'ISSAT Sousse', 'degree' => 'Engineering', 'field' => 'Software', 'start' => '2018', 'end' => '2023']],
-            'projects' => [['name' => 'Nextward', 'summary' => 'Job board', 'url' => 'https://example.com']],
+            'projects' => [['name' => config('app.name'), 'summary' => 'Job board', 'url' => 'https://example.com']],
             'languages' => ['Arabic', 'French', 'English'],
         ];
     }

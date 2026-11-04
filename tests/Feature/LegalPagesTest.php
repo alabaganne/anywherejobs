@@ -13,10 +13,10 @@ class LegalPagesTest extends TestCase
     public function test_legal_pages_render_in_english_and_french()
     {
         $pages = [
-            '/privacy' => ['Privacy', 'en', 'Privacy policy | Nextward'],
-            '/terms' => ['Terms', 'en', 'Terms of use | Nextward'],
-            '/fr/privacy' => ['Privacy', 'fr', 'Politique de confidentialité | Nextward'],
-            '/fr/terms' => ['Terms', 'fr', 'Conditions d’utilisation | Nextward'],
+            '/privacy' => ['Privacy', 'en', 'Privacy policy | '.config('app.name')],
+            '/terms' => ['Terms', 'en', 'Terms of use | '.config('app.name')],
+            '/fr/privacy' => ['Privacy', 'fr', 'Politique de confidentialité | '.config('app.name')],
+            '/fr/terms' => ['Terms', 'fr', 'Conditions d’utilisation | '.config('app.name')],
         ];
         foreach ($pages as $uri => [$component, $locale, $title]) {
             $this->get($uri)->assertOk()->assertInertia(fn (Assert $page) => $page

@@ -15,7 +15,7 @@ Before applying everywhere, define the type of internship you want: software eng
 
 ## Use public internship boards and company pages
 
-Internships are often spread across job boards, company websites, university career portals, and LinkedIn. A public internship platform like Nextward makes this easier by collecting opportunities in one searchable place and keeping listings accessible without forcing students to log in first.
+Internships are often spread across job boards, company websites, university career portals, and LinkedIn. A public internship platform like {site} makes this easier by collecting opportunities in one searchable place and keeping listings accessible without forcing students to log in first.
 
 ## Prepare one strong profile before applying
 

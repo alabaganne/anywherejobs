@@ -10,7 +10,7 @@ translation: what-makes-a-good-internship-platform
 links:
   - label: "Offres de stage"
     href: "/fr/opportunities/internships"
-  - label: "À propos de Nextward"
+  - label: "À propos de {site}"
     href: "/fr/about"
 faq:
   - q: "Faut-il un compte pour voir les offres de stage ?"
@@ -27,7 +27,7 @@ Une bonne plateforme de stage montre des offres publiques et faciles à trouver,
 
 Une bonne plateforme rend les offres visibles sur les moteurs de recherche et faciles à parcourir. Les étudiants doivent pouvoir lire le vrai détail d'un stage avant de créer un compte.
 
-Sur Nextward, vous pouvez parcourir les [offres de stage](/fr/opportunities/internships) sans vous connecter.
+Sur {site}, vous pouvez parcourir les [offres de stage](/fr/opportunities/internships) sans vous connecter.
 
 ## Des candidatures simples pour les étudiants
 

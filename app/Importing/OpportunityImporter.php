@@ -247,6 +247,8 @@ class OpportunityImporter
         $reviews = $ask && $classifier->enabled()
             ? $classifier->classifyMany(array_map(fn ($pair) => $pair[1], $ask), $this->fieldNames(), $this->skillNames())
             : [];
+        // New listings are only published from a followed company whose own website links to the source.
+        $trusted = $source->publication_mode === 'leads' || ! config('importer.trusted_sources') || CompanyRegistry::trusted($source);
         foreach ($waiting as $key => [$item, $data]) {
             try {
                 if (isset($reviews[$key])) { $item->ai_review = $reviews[$key]; }
@@ -267,6 +269,8 @@ class OpportunityImporter
                     $stats['rejected']++;
                 } elseif ($source->publication_mode === 'leads') {
                     $item->update(['state' => 'lead', 'error' => null]);
+                } elseif (! $trusted && ! $item->opportunity_id) {
+                    $item->update(['state' => 'review', 'error' => 'Not linked from a checked company website.']);
                 } elseif (! $item->opportunity_id && ($check = $this->companyCheck($source, $item, $data))) {
                     if ($check === 'rejected') {
                         $item->update(['state' => 'rejected', 'error' => 'Company website not found.']);

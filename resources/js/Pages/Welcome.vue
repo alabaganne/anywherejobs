@@ -8,6 +8,7 @@ import CompanyLogo from '@/Components/Ui/CompanyLogo.vue';
 import GuideCard from '@/Components/Blog/GuideCard.vue';
 import LandingHero from '@/Components/Landing/LandingHero.vue';
 import ClosingBanner from '@/Components/Landing/ClosingBanner.vue';
+import { siteName } from '@/brand';
 const props = defineProps({
     locale: { type: String, default: 'en' },
     opportunities: { type: [Object, Array], default: () => ({ data: [] }) },
@@ -33,7 +34,7 @@ const roles = (count) => text(`${count} open ${count === 1 ? 'role' : 'roles'}`,
 const href = (shortcut) => `${prefix.value}${shortcut.path}${shortcut.query ? `?${shortcut.query}` : ''}`;
 const steps = computed(() => [
     { art: '07-search-internships', title: text('Discover and save', 'Découvrez et sauvegardez'), body: text('Browse internships and jobs, check their requirements, and save the ones you want to come back to.', 'Consultez les stages et les emplois, vérifiez leurs critères et sauvegardez ceux qui vous intéressent.') },
-    { art: '08-application-envelope', title: text('Apply at the right place', 'Candidatez au bon endroit'), body: text('Apply on Nextward for roles posted here, or follow the link to the employer. Tailor your CV and cover letter to the role first.', 'Candidatez sur Nextward pour les offres publiées ici, ou suivez le lien vers l’employeur. Adaptez d’abord votre CV et votre lettre à l’offre.') },
+    { art: '08-application-envelope', title: text('Apply at the right place', 'Candidatez au bon endroit'), body: text(`Apply on ${siteName()} for roles posted here, or follow the link to the employer. Tailor your CV and cover letter to the role first.`, `Candidatez sur ${siteName()} pour les offres publiées ici, ou suivez le lien vers l’employeur. Adaptez d’abord votre CV et votre lettre à l’offre.`) },
     { art: '09-interview-calendar', title: text('Track your progress', 'Suivez vos démarches'), body: text('Keep every application in one place. For roles on other websites, mark “I applied” and update your progress.', 'Regroupez toutes vos candidatures. Pour les offres d’autres sites, indiquez « J’ai postulé » et mettez votre suivi à jour.') },
 ]);
 const promises = computed(() => [
@@ -119,7 +120,7 @@ const aiPoints = computed(() => [
                 <h2 id="how-title" class="section-title">{{ text('Find your fit. Keep moving.', 'Trouvez votre place. Avancez.') }}</h2>
                 <ol class="mt-10 grid grid-cols-3 gap-8 max-[768px]:grid-cols-1 max-[768px]:gap-7">
                     <li v-for="(step, index) in steps" :key="step.title">
-                        <img :src="`/nextward-assets/mascots/${step.art}.svg`" alt="" width="768" height="768" loading="lazy" class="-ml-2.5 block size-28 max-[768px]:size-[92px]" />
+                        <img :src="`/site-assets/mascots/${step.art}.svg`" alt="" width="768" height="768" loading="lazy" class="-ml-2.5 block size-28 max-[768px]:size-[92px]" />
                         <span class="mt-3 grid size-11 place-items-center rounded-full bg-blue-50 font-display text-[15px] font-semibold text-brand tabular-nums" aria-hidden="true">0{{ index + 1 }}</span>
                         <h3 class="mt-[18px] text-[19px] font-semibold tracking-[-.025em]">{{ step.title }}</h3>
                         <p class="mt-2 text-[14.5px] leading-[1.75] text-subtle">{{ step.body }}</p>
@@ -129,7 +130,7 @@ const aiPoints = computed(() => [
 
             <section class="band-pale section" aria-labelledby="ai-title">
                 <div class="public-container grid grid-cols-[240px_minmax(0,1fr)] items-center gap-14 max-[1024px]:grid-cols-1 max-[1024px]:gap-6">
-                    <img src="/nextward-assets/mascots/02-student-prepare-cv.svg" alt="" width="768" height="768" loading="lazy" class="size-60 max-[1024px]:size-40" />
+                    <img src="/site-assets/mascots/02-student-prepare-cv.svg" alt="" width="768" height="768" loading="lazy" class="size-60 max-[1024px]:size-40" />
                     <div>
                         <p class="landing-label inline-flex items-center gap-2"><Sparkles class="size-4" aria-hidden="true" />{{ text('20 free credits to start', '20 crédits offerts pour commencer') }}</p>
                         <h2 id="ai-title" class="section-title">{{ text('A CV and cover letter for every role.', 'Un CV et une lettre pour chaque offre.') }}</h2>
@@ -155,7 +156,7 @@ const aiPoints = computed(() => [
                         </dl>
                     </div>
                     <div class="relative pt-24 max-[768px]:pt-[76px]">
-                        <img src="/nextward-assets/mascots/03-recruiter-clipboard.svg" alt="" width="768" height="768" loading="lazy" class="absolute top-0 right-4 size-[140px] max-[768px]:size-[110px]" />
+                        <img src="/site-assets/mascots/03-recruiter-clipboard.svg" alt="" width="768" height="768" loading="lazy" class="absolute top-0 right-4 size-[140px] max-[768px]:size-[110px]" />
                         <figure class="panel relative m-0 overflow-hidden" :aria-label="text('Example listing', 'Exemple d’offre')">
                             <div class="border-b border-line px-[26px] pt-6 pb-[18px] max-[768px]:px-5">
                                 <p class="text-[11.5px] font-semibold tracking-[.12em] text-brand uppercase">{{ text('Example listing', 'Exemple d’offre') }}</p>
@@ -172,7 +173,7 @@ const aiPoints = computed(() => [
 
             <section class="public-container section pt-0!" aria-labelledby="employers-title">
                 <div class="relative flex aspect-[1672/941] items-center overflow-hidden rounded-[22px] bg-[#0d2353] text-white max-[1024px]:aspect-auto max-[1024px]:flex-col max-[1024px]:items-stretch max-[768px]:rounded-[18px]">
-                    <img class="absolute inset-0 size-full object-cover object-right-bottom max-[1024px]:static max-[1024px]:aspect-video max-[1024px]:h-auto max-[1024px]:object-[85%_100%] max-[768px]:aspect-[4/3]" src="/nextward-assets/mascots/21-cozy-career-workspace-night.webp" alt="" width="1672" height="941" loading="lazy" decoding="async" />
+                    <img class="absolute inset-0 size-full object-cover object-right-bottom max-[1024px]:static max-[1024px]:aspect-video max-[1024px]:h-auto max-[1024px]:object-[85%_100%] max-[768px]:aspect-[4/3]" src="/site-assets/mascots/21-cozy-career-workspace-night.webp" alt="" width="1672" height="941" loading="lazy" decoding="async" />
                     <div class="relative w-[48%] max-w-[580px] py-12 pr-12 pl-20 max-[1024px]:-order-1 max-[1024px]:w-auto max-[1024px]:max-w-none max-[1024px]:px-8 max-[1024px]:pt-10 max-[1024px]:pb-2 max-[768px]:px-6 max-[768px]:pt-8 max-[768px]:pb-0">
                         <p class="landing-label text-blue-200">{{ text('For employers', 'Pour les employeurs') }}</p>
                         <h2 id="employers-title" class="section-title">{{ text('Hire students and professionals.', 'Recrutez des étudiants et des professionnels.') }}</h2>
@@ -192,7 +193,7 @@ const aiPoints = computed(() => [
 
             <section v-if="faqs.length" class="public-container grid grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)] items-start gap-16 py-22 max-[1024px]:grid-cols-1 max-[1024px]:gap-8 max-[1024px]:py-18 max-[768px]:py-14" aria-labelledby="faq-title">
                 <div>
-                    <img src="/nextward-assets/mascots/04-mentor-pointing.svg" alt="" width="768" height="768" loading="lazy" class="mb-2 -ml-3.5 size-32" />
+                    <img src="/site-assets/mascots/04-mentor-pointing.svg" alt="" width="768" height="768" loading="lazy" class="mb-2 -ml-3.5 size-32" />
                     <h2 id="faq-title" class="section-title">{{ text('Questions people ask us', 'Les questions qu’on nous pose') }}</h2>
                     <p class="section-description">{{ text('Still unsure about something? Write to us from the contact page.', 'Une autre question ? Écrivez-nous depuis la page contact.') }} <Link :href="`${prefix}/contact`" class="font-semibold text-brand underline underline-offset-4 focus-ring">{{ text('Contact us', 'Nous contacter') }}</Link></p>
                 </div>

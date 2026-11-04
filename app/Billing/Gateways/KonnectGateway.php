@@ -24,7 +24,7 @@ class KonnectGateway implements Gateway
             'token' => 'TND',
             'amount' => $payment->amount,
             'type' => 'immediate',
-            'description' => "Nextward: {$payment->credits} credits",
+            'description' => config('app.name').": {$payment->credits} credits",
             'lifespan' => 30,
             'checkoutForm' => false,
             'addPaymentFeesToAmount' => false,

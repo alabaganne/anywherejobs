@@ -59,9 +59,9 @@ Une méthode simple : listez 20 à 30 entreprises d'un technopôle ou d'une rég
 
 Beaucoup d'entreprises publient leurs stages et leurs sujets de PFE uniquement sur leur site ou leur page LinkedIn. Allez les voir directement, surtout en début d'année universitaire.
 
-### Les sites d'offres et Nextward
+### Les sites d'offres et {site}
 
-Les sites d'offres regroupent les annonces de nombreuses entreprises. Sur Nextward, vous pouvez filtrer les [offres de stage](/fr/opportunities/internships) par type, par lieu et selon l'éligibilité au travail à distance depuis la Tunisie, enregistrer vos recherches, et ouvrir la page de candidature d'origine en un clic.
+Les sites d'offres regroupent les annonces de nombreuses entreprises. Sur {site}, vous pouvez filtrer les [offres de stage](/fr/opportunities/internships) par type, par lieu et selon l'éligibilité au travail à distance depuis la Tunisie, enregistrer vos recherches, et ouvrir la page de candidature d'origine en un clic.
 
 ### LinkedIn
 

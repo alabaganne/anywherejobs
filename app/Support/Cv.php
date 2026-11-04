@@ -5,7 +5,7 @@ namespace App\Support;
 use App\Models\Candidate;
 use Illuminate\Support\Str;
 
-// One CV shape for resumes made on Nextward, AI translations and the CVs in kits.
+// One CV shape for resumes made on the site, AI translations and the CVs in kits.
 class Cv
 {
     public const ROWS = [

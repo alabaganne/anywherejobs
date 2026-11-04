@@ -70,7 +70,7 @@
         ],
         "discover": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan opportunities:discover --ansi"
+            "@php artisan companies:discover --ansi"
         ]
     },
     "extra": {

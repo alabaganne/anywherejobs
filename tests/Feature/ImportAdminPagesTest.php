@@ -34,6 +34,7 @@ class ImportAdminPagesTest extends TestCase
 
         $this->actingAs($admin)->get('/app/admin/imports')->assertRedirect(route('imports.review'));
         foreach ([
+            route('imports.companies') => 'Imports/Companies',
             route('imports.sources.index') => 'Imports/Sources',
             route('imports.sources.create') => 'Imports/SourceForm',
             route('imports.sources.edit', $source) => 'Imports/SourceForm',

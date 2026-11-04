@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title>Opportunity alerts | Nextward</title>
+    <title>Opportunity alerts | {{ config('app.name') }}</title>
     <link rel="icon" href="/favicon.ico">
     <style>
         body { margin: 0; background: #f6f8fc; color: #0c1322; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; }
@@ -23,7 +23,7 @@
 </head>
 <body>
 <main>
-    <a class="logo" href="{{ url('/') }}"><img src="/brand/nextward/symbol-192.png" alt="" width="36" height="36">Nextward</a>
+    <a class="logo" href="{{ url('/') }}"><img src="{{ config('site.brand.logo') }}" alt="" width="36" height="36">{{ config('app.name') }}</a>
     <div class="card">
         @if ($done)
             <h1>Alerts paused</h1>

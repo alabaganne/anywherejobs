@@ -1,4 +1,4 @@
-# Deploy Nextward to a VPS
+# Deploy Sudo Jobs to a VPS
 
 Follow this guide for a single Linux VPS. It describes deployment steps; it does not mean the VPS has already been configured. Application code comes from the `main` branch of [alabaganne/Nextward](https://github.com/alabaganne/Nextward).
 
@@ -14,20 +14,20 @@ Provision the following before running application commands:
 - Google Chrome or Chromium, used to print resumes and cover letters as PDF. See [the VPS guide](VPS_DEPLOYMENT.md#chrome-for-pdfs).
 - MySQL or PostgreSQL, with an application database and a dedicated database user. The examples use MySQL.
 - Supervisor and cron, enabled on boot.
-- A service account named `nextward`, with access to the repository, and the `www-data` web server group.
-- A Resend API key and a sender on a domain verified in Resend (today `nextward@alabaganne.com`), for email verification, password resets and notifications.
+- A service account named `sudojobs`, with access to the repository, and the `www-data` web server group.
+- A Resend API key and a sender on a domain verified in Resend (today `sudojobs@alabaganne.com`), for email verification, password resets and notifications.
 
-Keep database and SSR ports private. Serve only `/srv/nextward/current/public`. Configure the dedicated PHP-FPM pool to run as `nextward`, using the example in [the VPS guide](VPS_DEPLOYMENT.md#php-fpm).
+Keep database and SSR ports private. Serve only `/srv/sudojobs/current/public`. Configure the dedicated PHP-FPM pool to run as `sudojobs`, using the example in [the VPS guide](VPS_DEPLOYMENT.md#php-fpm).
 
 Create the base directories as a server administrator:
 
 ```bash
-sudo install -d -o nextward -g www-data -m 0750 \
-  /srv/nextward /srv/nextward/releases /srv/nextward/shared
-sudo install -d -o nextward -g www-data -m 0700 /srv/nextward/shared/secrets
+sudo install -d -o sudojobs -g www-data -m 0750 \
+  /srv/sudojobs /srv/sudojobs/releases /srv/sudojobs/shared
+sudo install -d -o sudojobs -g www-data -m 0700 /srv/sudojobs/shared/secrets
 ```
 
-Run the remaining Git, Composer, npm and Artisan commands as `nextward`, not as root. Commands prefixed with `sudo` require an administrator. Keep the same shell for blocks using `release_dir`.
+Run the remaining Git, Composer, npm and Artisan commands as `sudojobs`, not as root. Commands prefixed with `sudo` require an administrator. Keep the same shell for blocks using `release_dir`.
 
 ## 2. Prepare a release
 
@@ -35,21 +35,21 @@ Use a new directory for each deployment, including updates:
 
 ```bash
 umask 022
-release_dir="/srv/nextward/releases/$(date -u +%Y%m%dT%H%M%SZ)"
+release_dir="/srv/sudojobs/releases/$(date -u +%Y%m%dT%H%M%SZ)"
 git clone --branch main --single-branch https://github.com/alabaganne/Nextward.git "$release_dir"
 cd "$release_dir"
 git rev-parse HEAD
 
-mkdir -p /srv/nextward/shared/storage/app/private
-mkdir -p /srv/nextward/shared/storage/app/public
-mkdir -p /srv/nextward/shared/storage/framework/cache/data
-mkdir -p /srv/nextward/shared/storage/framework/sessions
-mkdir -p /srv/nextward/shared/storage/framework/views
-mkdir -p /srv/nextward/shared/storage/logs
+mkdir -p /srv/sudojobs/shared/storage/app/private
+mkdir -p /srv/sudojobs/shared/storage/app/public
+mkdir -p /srv/sudojobs/shared/storage/framework/cache/data
+mkdir -p /srv/sudojobs/shared/storage/framework/sessions
+mkdir -p /srv/sudojobs/shared/storage/framework/views
+mkdir -p /srv/sudojobs/shared/storage/logs
 
 mv storage storage.release-template
-ln -s /srv/nextward/shared/storage storage
-ln -s /srv/nextward/shared/.env .env
+ln -s /srv/sudojobs/shared/storage storage
+ln -s /srv/sudojobs/shared/.env .env
 ```
 
 Record the commit ID for the release. The `mv storage` command is for this fresh checkout only. Never move or replace an existing installation's live storage with an empty directory. If migrating an existing installation into this layout, transfer its complete storage and private `.env` into `shared` first, preserving the database and `APP_KEY`.
@@ -57,24 +57,23 @@ Record the commit ID for the release. The `mv storage` command is for this fresh
 On the **first installation only**, create the environment file if it does not exist:
 
 ```bash
-if [ ! -e /srv/nextward/shared/.env ]; then
-  install -m 0600 .env.example /srv/nextward/shared/.env
+if [ ! -e /srv/sudojobs/shared/.env ]; then
+  install -m 0600 .env.example /srv/sudojobs/shared/.env
 fi
 ```
 
-Edit `/srv/nextward/shared/.env` privately. Use [the production environment example](VPS_DEPLOYMENT.md#environment), including:
+Edit `/srv/sudojobs/shared/.env` privately. Use [the production environment example](VPS_DEPLOYMENT.md#environment), including:
 
 ```dotenv
-APP_NAME=Nextward
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://nextward.example.com
+APP_URL=https://sudojobs.example.com
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=nextward
-DB_USERNAME=nextward
+DB_DATABASE=sudojobs
+DB_USERNAME=sudojobs
 DB_PASSWORD="replace-with-a-private-password"
 
 CACHE_STORE=file
@@ -125,9 +124,9 @@ Preserve the existing key on updates. Keep a protected backup of it alongside th
 Apply [storage and cache permissions](VPS_DEPLOYMENT.md#runtime-and-directory-layout) before running the services. For a prepared release, use its path instead of `current`:
 
 ```bash
-sudo chown -R nextward:www-data /srv/nextward/shared/storage "$release_dir/bootstrap/cache"
-sudo find /srv/nextward/shared/storage "$release_dir/bootstrap/cache" -type d -exec chmod 2770 {} \;
-sudo find /srv/nextward/shared/storage "$release_dir/bootstrap/cache" -type f -exec chmod 660 {} \;
+sudo chown -R sudojobs:www-data /srv/sudojobs/shared/storage "$release_dir/bootstrap/cache"
+sudo find /srv/sudojobs/shared/storage "$release_dir/bootstrap/cache" -type d -exec chmod 2770 {} \;
+sudo find /srv/sudojobs/shared/storage "$release_dir/bootstrap/cache" -type f -exec chmod 660 {} \;
 ```
 
 ## 4. Migrate and seed
@@ -171,8 +170,8 @@ Do not clear the shared application cache as a routine deployment step. It conta
 Point `current` at the prepared release. These commands assume GNU/Linux and a `current` path that is absent or already a symlink:
 
 ```bash
-ln -s "$release_dir" /srv/nextward/current.next
-mv -Tf /srv/nextward/current.next /srv/nextward/current
+ln -s "$release_dir" /srv/sudojobs/current.next
+mv -Tf /srv/sudojobs/current.next /srv/sudojobs/current
 ```
 
 Configure [Nginx](VPS_DEPLOYMENT.md#nginx) and [Supervisor](VPS_DEPLOYMENT.md#queue-worker-and-ssr) using the provided templates. Validate their configurations, reload the correct PHP-FPM service to refresh OPcache, then reload Nginx. Install the Supervisor programs:
@@ -184,21 +183,21 @@ sudo supervisorctl update
 sudo supervisorctl status
 ```
 
-Both `nextward-queue` and `nextward-ssr` must show `RUNNING`. Use the Supervisor template's 300-second worker timeout, 360-second queue retry interval and 360-second shutdown allowance. SSR listens on `127.0.0.1:13714`; only Nginx exposes the app publicly.
+Both `sudojobs-queue` and `sudojobs-ssr` must show `RUNNING`. Use the Supervisor template's 300-second worker timeout, 360-second queue retry interval and 360-second shutdown allowance. SSR listens on `127.0.0.1:13714`; only Nginx exposes the app publicly.
 
-Install exactly one [scheduler cron entry](VPS_DEPLOYMENT.md#cron-and-actual-schedules). For `/etc/cron.d/nextward`, include the service username:
+Install exactly one [scheduler cron entry](VPS_DEPLOYMENT.md#cron-and-actual-schedules). For `/etc/cron.d/sudojobs`, include the service username:
 
 ```cron
 SHELL=/bin/sh
 PATH=/usr/local/bin:/usr/bin:/bin
-* * * * * nextward cd /srv/nextward/current && /usr/bin/php artisan schedule:run >> /srv/nextward/shared/storage/logs/scheduler.log 2>&1
+* * * * * sudojobs cd /srv/sudojobs/current && /usr/bin/php artisan schedule:run >> /srv/sudojobs/shared/storage/logs/scheduler.log 2>&1
 ```
 
 The file must be owned by root, mode `644`, and end with a newline. Do not also install a user crontab entry or run `schedule:work`. Enable cron and rotate its log. Laravel checks due imports every five minutes, reconciles availability every fifteen minutes, and dispatches digests and indexing hourly. The queue worker executes queued work. No approved and enabled sources means no automatic imports.
 
 ## 6. Verify before launch
 
-Run these from `/srv/nextward/current` as `nextward`:
+Run these from `/srv/sudojobs/current` as `sudojobs`:
 
 ```bash
 php artisan migrate:status
@@ -211,10 +210,10 @@ After leaving maintenance with `php artisan up` and enabling the single cron ent
 
 ```bash
 php artisan opportunities:health --public
-curl --fail --silent --show-error https://nextward.example.com/up
-curl --fail --silent --show-error https://nextward.example.com/robots.txt
-curl --fail --silent --show-error https://nextward.example.com/sitemap.xml
-curl --fail --silent --show-error https://nextward.example.com/opportunities
+curl --fail --silent --show-error https://sudojobs.example.com/up
+curl --fail --silent --show-error https://sudojobs.example.com/robots.txt
+curl --fail --silent --show-error https://sudojobs.example.com/sitemap.xml
+curl --fail --silent --show-error https://sudojobs.example.com/opportunities
 ```
 
 Check the following manually before announcing the site:
@@ -232,7 +231,7 @@ Submit `/sitemap.xml` in Search Console. Configure an external monitor for `oppo
 Production seeding creates no users. Create a dedicated admin with an email address you control that is not already registered:
 
 ```bash
-sudo -u nextward php artisan nextward:make-admin you@example.com
+sudo -u sudojobs php artisan app:make-admin you@example.com
 ```
 
 It asks for a name and a password (typed hidden) and marks the email as confirmed. An admin must have no student/company profile under the current `User::isAdmin()` rules, so the command refuses accounts that have one. On updates, keep the existing admin account.
@@ -246,10 +245,10 @@ Enable email digests only after consent and unsubscribe delivery are checked wit
 1. Run release checks in a separate local/staging environment. Rehearse migrations against a restored production-like database. Do not run tests against production.
 2. Back up the database, public/private storage, `.env` and private credentials. Record the current release path, commit and backup identifier. Keep encrypted backups off the VPS and verify restores.
 3. Prepare a new release using sections 2 and 3. Reuse the shared `.env`, storage, database and key. Do not copy the example environment over production settings or generate a new key.
-4. Disable the single scheduler cron entry, put the current release into maintenance with `php /srv/nextward/current/artisan down`, and gracefully stop the workers and SSR:
+4. Disable the single scheduler cron entry, put the current release into maintenance with `php /srv/sudojobs/current/artisan down`, and gracefully stop the workers and SSR:
 
    ```bash
-   sudo supervisorctl stop nextward-queue nextward-ssr
+   sudo supervisorctl stop sudojobs-queue sudojobs-ssr
    ```
 
    Wait for active jobs, requests and scheduler invocations to finish. Take a final consistent backup before changing the database.
@@ -258,12 +257,12 @@ Enable email digests only after consent and unsubscribe delivery are checked wit
 6. Switch `current` using section 5, reload PHP-FPM, then start the stopped services:
 
    ```bash
-   sudo supervisorctl start nextward-ssr nextward-queue
+   sudo supervisorctl start sudojobs-ssr sudojobs-queue
    ```
 
    Updating Supervisor configuration requires `reread` and `update` as well. Rebuilding bundles does not restart running SSR or queue processes.
 
-7. Check migrations, process status and SSR while maintenance remains active. Run `php /srv/nextward/current/artisan up`, restore the cron entry and repeat section 6. Keep the previous release until these checks pass.
+7. Check migrations, process status and SSR while maintenance remains active. Run `php /srv/sudojobs/current/artisan up`, restore the cron entry and repeat section 6. Keep the previous release until these checks pass.
 
 For configuration changes, rebuild the configuration cache and restart SSR/workers. Rebuild frontend bundles too if changing a `VITE_*` setting. Never put private credentials in frontend variables.
 

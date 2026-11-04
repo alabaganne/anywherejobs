@@ -25,7 +25,7 @@ class AccountCreated extends Notification implements ShouldQueue
         $url = url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false));
 
         return (new MailMessage)
-            ->subject('Your Nextward account is ready')
+            ->subject('Your '.config('app.name').' account is ready')
             ->markdown('mail.account-created', [
                 'name' => MailText::plain(MailText::firstName($notifiable->name), 80),
                 'url' => $url,

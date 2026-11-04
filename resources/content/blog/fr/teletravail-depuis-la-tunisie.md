@@ -30,7 +30,7 @@ Le télétravail depuis la Tunisie pour une entreprise étrangère est possible,
 
 ## Où trouver un emploi remote depuis la Tunisie ?
 
-- **Nextward.** La page [remote depuis la Tunisie](/fr/opportunities/remote-from-tunisia) regroupe les offres dont la source indique que les candidats basés en Tunisie peuvent postuler. Vous pouvez enregistrer votre recherche et ouvrir la page de candidature d'origine depuis chaque annonce.
+- **{site}.** La page [remote depuis la Tunisie](/fr/opportunities/remote-from-tunisia) regroupe les offres dont la source indique que les candidats basés en Tunisie peuvent postuler. Vous pouvez enregistrer votre recherche et ouvrir la page de candidature d'origine depuis chaque annonce.
 - **Les pages carrières des entreprises « remote-first ».** Beaucoup d'entreprises entièrement à distance publient la liste des pays où elles peuvent recruter. Commencez par là.
 - **Les sites d'offres spécialisés dans le télétravail.** Ils regroupent les postes à distance de nombreuses entreprises. Filtrez toujours par pays, car beaucoup de postes sont réservés aux États-Unis ou à l'Europe.
 - **LinkedIn.** Cherchez votre métier avec le filtre « télétravail », puis lisez les conditions de lieu de chaque annonce. Suivez les entreprises qui recrutent sur plusieurs régions.
@@ -120,7 +120,7 @@ Méfiez-vous si un « recruteur » :
 - vous envoie un chèque ou de l'argent et vous demande d'en renvoyer une partie ;
 - propose un salaire très au-dessus du marché pour très peu de travail.
 
-Vérifiez que le site de l'entreprise, le domaine de l'e-mail et la page LinkedIn concordent. Postulez via la page de candidature d'origine, vers laquelle renvoie chaque annonce Nextward, plutôt que via un lien envoyé par un inconnu.
+Vérifiez que le site de l'entreprise, le domaine de l'e-mail et la page LinkedIn concordent. Postulez via la page de candidature d'origine, vers laquelle renvoie chaque annonce {site}, plutôt que via un lien envoyé par un inconnu.
 
 ## Sources
 

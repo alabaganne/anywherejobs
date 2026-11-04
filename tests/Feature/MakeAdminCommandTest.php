@@ -17,7 +17,7 @@ class MakeAdminCommandTest extends TestCase
         $user = User::factory()->unverified()->create(['email' => 'ops@example.com']);
         $this->assertFalse($user->isAdmin());
 
-        $this->artisan('nextward:make-admin', ['email' => 'ops@example.com'])->assertSuccessful();
+        $this->artisan('app:make-admin', ['email' => 'ops@example.com'])->assertSuccessful();
 
         $user->refresh();
         $this->assertTrue($user->isAdmin());
@@ -29,7 +29,7 @@ class MakeAdminCommandTest extends TestCase
         $candidate = Candidate::create(['about' => 'Candidate profile']);
         $user = $candidate->user()->create(['name' => 'Candidate', 'email' => 'candidate@example.com', 'password' => Hash::make('password')]);
 
-        $this->artisan('nextward:make-admin', ['email' => 'candidate@example.com'])->assertSuccessful();
+        $this->artisan('app:make-admin', ['email' => 'candidate@example.com'])->assertSuccessful();
         $user->refresh();
         $this->assertTrue($user->isAdmin());
         $this->assertTrue($user->isCandidate());
@@ -37,13 +37,13 @@ class MakeAdminCommandTest extends TestCase
 
         $company = \App\Models\Company::create(['name' => 'Acme']);
         $owner = $company->user()->create(['name' => 'Acme', 'email' => 'acme@example.com', 'password' => Hash::make('password')]);
-        $this->artisan('nextward:make-admin', ['email' => 'acme@example.com'])->assertFailed();
+        $this->artisan('app:make-admin', ['email' => 'acme@example.com'])->assertFailed();
         $this->assertFalse((bool) $owner->fresh()->is_admin);
     }
 
     public function test_it_creates_a_new_admin_after_asking_for_a_name_and_password(): void
     {
-        $this->artisan('nextward:make-admin', ['email' => 'new-admin@example.com'])
+        $this->artisan('app:make-admin', ['email' => 'new-admin@example.com'])
             ->expectsQuestion('Name', 'New Admin')
             ->expectsQuestion('Password (at least 8 characters)', 'a-long-secret')
             ->expectsQuestion('Type the password again', 'a-long-secret')
@@ -60,19 +60,19 @@ class MakeAdminCommandTest extends TestCase
 
     public function test_it_stops_when_the_input_is_not_valid(): void
     {
-        $this->artisan('nextward:make-admin', ['email' => 'new-admin@example.com'])
+        $this->artisan('app:make-admin', ['email' => 'new-admin@example.com'])
             ->expectsQuestion('Name', 'New Admin')
             ->expectsQuestion('Password (at least 8 characters)', 'a-long-secret')
             ->expectsQuestion('Type the password again', 'another-secret')
             ->assertFailed();
 
-        $this->artisan('nextward:make-admin', ['email' => 'new-admin@example.com'])
+        $this->artisan('app:make-admin', ['email' => 'new-admin@example.com'])
             ->expectsQuestion('Name', 'New Admin')
             ->expectsQuestion('Password (at least 8 characters)', 'short')
             ->expectsQuestion('Type the password again', 'short')
             ->assertFailed();
 
-        $this->artisan('nextward:make-admin', ['email' => 'not-an-email'])->assertFailed();
+        $this->artisan('app:make-admin', ['email' => 'not-an-email'])->assertFailed();
 
         $this->assertDatabaseCount('users', 0);
     }

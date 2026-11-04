@@ -1,9 +1,10 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
+import { siteName } from '@/brand';
 const page = usePage();
 onMounted(() => watch(() => page.props.locale, (locale) => { document.documentElement.lang = locale || 'en'; }, { immediate: true }));
-const seo = computed(() => page.props.seo || { title: 'Nextward', robots: 'noindex, nofollow' });
+const seo = computed(() => page.props.seo || { title: siteName(), robots: 'noindex, nofollow' });
 const json = computed(() => JSON.stringify(seo.value.structured_data || []).replace(/</g, '\\u003c'));
 </script>
 <template>
@@ -12,7 +13,7 @@ const json = computed(() => JSON.stringify(seo.value.structured_data || []).repl
         <meta head-key="robots" name="robots" :content="seo.robots" />
         <link v-if="seo.canonical" head-key="canonical" rel="canonical" :href="seo.canonical" />
         <link v-for="alternate in seo.alternates || []" :key="alternate.lang" :head-key="`language-${alternate.lang}`" rel="alternate" :hreflang="alternate.lang" :href="alternate.url" />
-        <meta head-key="og-site" property="og:site_name" content="Nextward" />
+        <meta head-key="og-site" property="og:site_name" :content="appName" />
         <meta head-key="og-title" property="og:title" :content="seo.title" />
         <meta head-key="og-description" property="og:description" :content="seo.description || ''" />
         <meta head-key="og-type" property="og:type" :content="seo.type || 'website'" />

@@ -40,11 +40,11 @@ This does not mean you will wait for years. It means a method helps: clear targe
 2. **Update your CV and LinkedIn.** Put your PFE, internships and best projects first, with results. Use the job titles you are aiming for.
 3. **Get your documents ready.** Diploma or certificate of success, transcripts, internship certificates, and one or two people who can give a reference.
 4. **Register with ANETI.** ANETI is the national employment agency. Registering lets you use its services and public programmes. It now has an online registration platform, which was being rolled out to its employment offices in 2025. If it does not work for your area, go to your local employment office.
-5. **Set up your search.** Save searches for [entry-level jobs](/opportunities/jobs?seniority=entry) on Nextward so you can check new offers quickly, and open the original application page from each listing.
+5. **Set up your search.** Save searches for [entry-level jobs](/opportunities/jobs?seniority=entry) on {site} so you can check new offers quickly, and open the original application page from each listing.
 
 ## Where can I find entry-level jobs in Tunisia?
 
-- **Job boards and Nextward.** Use filters for entry level, location and work type to cut the noise.
+- **Job boards and {site}.** Use filters for entry level, location and work type to cut the noise.
 - **Company career pages.** Make a list of 20 to 30 companies you would like to work for and check their pages every week.
 - **LinkedIn.** Set job alerts, follow companies, and read posts from recruiters and team leads.
 - **Your PFE and internship companies.** Ask your supervisor if there is an opening, or if they know a team that is hiring.

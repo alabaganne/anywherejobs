@@ -91,7 +91,7 @@ class CvPdf
     private function print(string $html, string $paper): string
     {
         if (config('cv.fake')) {
-            return "%PDF-1.4\n% Nextward test PDF\n".strip_tags($html)."\n%%EOF";
+            return "%PDF-1.4\n% ".config('app.name')." test PDF\n".strip_tags($html)."\n%%EOF";
         }
 
         // Browsershot refuses HTML strings that mention local files or hosts, which a CV may do in plain text, so print from a file.
@@ -101,23 +101,28 @@ class CvPdf
         file_put_contents($path, $html);
 
         try {
-            $shot = Browsershot::htmlFromFilePath($path)
-                ->setNodeModulePath(base_path('node_modules'))
+            return self::browser(Browsershot::htmlFromFilePath($path))
                 ->disableJavascript()
                 ->showBackground()
                 ->margins(0, 0, 0, 0)
                 ->format($paper === 'letter' ? 'Letter' : 'A4')
-                ->timeout(config('cv.timeout', 60));
-            if ($chrome = config('cv.chrome') ?: collect(['/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser'])->first(fn ($bin) => is_executable($bin))) {
-                $shot->setChromePath($chrome);
-            }
-            config('cv.node') && $shot->setNodeBinary(config('cv.node'));
-            config('cv.npm') && $shot->setNpmBinary(config('cv.npm'));
-            config('cv.no_sandbox') && $shot->noSandbox();
-
-            return $shot->pdf();
+                ->pdf();
         } finally {
             @unlink($path);
         }
+    }
+
+    // Points Browsershot at the Chrome and Node set in config/cv.php.
+    public static function browser(Browsershot $shot): Browsershot
+    {
+        $shot->setNodeModulePath(base_path('node_modules'))->timeout(config('cv.timeout', 60));
+        if ($chrome = config('cv.chrome') ?: collect(['/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser'])->first(fn ($bin) => is_executable($bin))) {
+            $shot->setChromePath($chrome);
+        }
+        config('cv.node') && $shot->setNodeBinary(config('cv.node'));
+        config('cv.npm') && $shot->setNpmBinary(config('cv.npm'));
+        config('cv.no_sandbox') && $shot->noSandbox();
+
+        return $shot;
     }
 }

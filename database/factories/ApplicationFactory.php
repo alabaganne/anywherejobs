@@ -44,7 +44,7 @@ class ApplicationFactory extends Factory
             'status' => 'submitted',
             'cover_letter' => fn (array $attributes) => $attributes['channel'] === 'external' ? null : 'Fictional demo application. '.$this->faker->randomElement($coverLetters),
             'message' => fn (array $attributes) => $attributes['channel'] === 'external' ? null : $this->faker->randomElement($messages),
-            'candidate_notes' => fn (array $attributes) => $attributes['channel'] === 'external' ? 'Private fictional tracking note. No application has been submitted by Nextward.' : null,
+            'candidate_notes' => fn (array $attributes) => $attributes['channel'] === 'external' ? 'Private fictional tracking note. No application has been submitted by '.config('app.name').'.' : null,
             'attachments' => [],
         ];
     }

@@ -1,7 +1,7 @@
 <template>
 	<span class="inline-flex shrink-0 flex-col" :class="stacked ? 'items-center gap-2 text-center' : 'items-start gap-1'">
 		<img
-			src="/brand/nextward/symbol-192.png"
+			:src="$page.props.brand?.logo"
 			:alt="label"
 			:width="height"
 			:height="height"
@@ -13,11 +13,11 @@
 </template>
 
 <script>
-const SIZES = { sm: 40, md: 48, lg: 56 };
+const SIZES = { xs: 36, sm: 40, md: 48, lg: 56 };
 
 export default {
 	props: {
-		// Leave empty when "Nextward" is shown as text next to the logo.
+		// The logo file is set in config/site.php (brand.logo). Leave the label empty when the name is shown as text next to it.
 		label: {
 			type: String,
 			default: '',

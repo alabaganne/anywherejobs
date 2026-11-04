@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 class FetchCompanyLogos extends Command
 {
     protected $signature = 'companies:logos {--limit=50 : Most logos to download in one run}';
-    protected $description = 'Download outside company logos once, so pages only show copies served by Nextward';
+    protected $description = 'Download outside company logos once, so pages only show copies served by the site';
 
     public function handle(CompanyLogos $logos): int
     {

@@ -59,9 +59,9 @@ A simple method: list 20 to 30 companies from a park or region, then check each 
 
 Many companies post internships and PFE subjects only on their own website or LinkedIn page. Check them directly, especially at the start of the academic year.
 
-### Job boards and Nextward
+### Job boards and {site}
 
-Job boards collect offers from many companies. On Nextward, you can filter [internships](/opportunities/internships) by type, location and remote eligibility from Tunisia, save your searches, and open the original application page in one click.
+Job boards collect offers from many companies. On {site}, you can filter [internships](/opportunities/internships) by type, location and remote eligibility from Tunisia, save your searches, and open the original application page in one click.
 
 ### LinkedIn
 

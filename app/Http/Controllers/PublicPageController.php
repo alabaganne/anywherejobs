@@ -23,7 +23,7 @@ class PublicPageController extends Controller
             'companies' => PublicCompanyController::cards(Company::listed()->whereHas('opportunities', fn ($query) => $query->available()))
                 ->limit(8)->get()->map(fn ($company) => PublicCompanyController::card($company, $request)),
             'hiringCount' => Company::listed()->whereHas('opportunities', fn ($query) => $query->available())->count(),
-            'faqs' => config('nextward_public.faq.'.$locale),
+            'faqs' => config('site.faq.'.$locale),
         ]);
     }
 

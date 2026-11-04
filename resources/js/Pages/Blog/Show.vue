@@ -67,7 +67,7 @@ const image = computed(() => guideImage(props.post));
 						</section>
 
 						<p class="mt-14 border-t border-line pt-6 text-sm text-slate-600">
-							{{ text('Written by', 'Écrit par') }} <a href="https://www.alabaganne.com/" class="font-semibold text-navy hover:text-brand">Ala Baganne</a>, {{ text('founder of Nextward', 'fondateur de Nextward') }}.
+							{{ text('Written by', 'Écrit par') }} <a href="https://www.alabaganne.com/" class="font-semibold text-navy hover:text-brand">Ala Baganne</a>, {{ text(`founder of ${appName}`, `fondateur de ${appName}`) }}.
 							<template v-if="updated"> {{ text('Updated on', 'Mis à jour le') }} <time :datetime="post.updated_at">{{ formatDate(post.updated_at) }}</time>.</template>
 						</p>
 					</div>
@@ -93,7 +93,7 @@ const image = computed(() => guideImage(props.post));
 				</div>
 			</section>
 
-			<ClosingBanner mascot="01-student-wave" :title="text('Put it into practice on Nextward', 'Passez à l’action sur Nextward')" :body="text('Explore internships and jobs in Tunisia and worldwide, with clear sources and application details.', 'Découvrez des stages et des emplois en Tunisie et à l’international, avec des sources et des conditions claires.')">
+			<ClosingBanner mascot="01-student-wave" :title="text(`Put it into practice on ${appName}`, `Passez à l’action sur ${appName}`)" :body="text('Explore internships and jobs in Tunisia and worldwide, with clear sources and application details.', 'Découvrez des stages et des emplois en Tunisie et à l’international, avec des sources et des conditions claires.')">
 				<Link :href="`${prefix}/opportunities`" class="cta cta-light focus-ring">{{ text('Browse opportunities', 'Voir les offres') }}</Link>
 				<Link v-if="!page.props.auth?.user" :href="`${prefix}/register`" class="cta cta-ghost focus-ring">{{ text('Create account', 'Créer un compte') }}</Link>
 			</ClosingBanner>

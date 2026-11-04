@@ -55,7 +55,7 @@ onBeforeUnmount(() => {
         <a href="#main" class="focus-ring sr-only z-50 rounded-lg bg-white px-4 py-2 font-semibold focus:not-sr-only focus:fixed focus:left-4 focus:top-4">{{ fr ? 'Aller au contenu' : 'Skip to content' }}</a>
         <header class="sticky top-0 z-40 border-b border-white/8 bg-navy text-white">
             <div class="public-container flex h-[72px] items-center justify-between gap-4">
-                <Link :href="prefix || '/'" :class="brandLink"><BrandLogo size="sm" class="!h-9 [&>img]:!h-9 [&>img]:!w-9" /><span>Nextward</span></Link>
+                <Link :href="prefix || '/'" :class="brandLink"><BrandLogo size="sm" dark class="!h-9 [&>img]:!h-9 [&>img]:!w-9" /><span>{{ appName }}</span></Link>
                 <nav :aria-label="fr ? 'Navigation principale' : 'Main navigation'" class="hidden xl:flex items-center gap-8">
                     <Link v-for="link in links" :key="link.href" :href="link.href" :class="navLink" :aria-current="isActive(link.href) ? 'page' : undefined">{{ link.label }}</Link>
                 </nav>
@@ -98,7 +98,7 @@ onBeforeUnmount(() => {
         <footer class="bg-navy text-white">
             <div class="public-container grid gap-10 py-14 md:grid-cols-[1.2fr_1fr]">
                 <div class="max-w-md">
-                    <Link :href="prefix || '/'" :class="brandLink"><BrandLogo size="sm" class="[&>img]:!h-9 [&>img]:!w-9" /><span>Nextward</span></Link>
+                    <Link :href="prefix || '/'" :class="brandLink"><BrandLogo size="sm" dark class="[&>img]:!h-9 [&>img]:!w-9" /><span>{{ appName }}</span></Link>
                     <p class="mt-4 text-sm leading-6 text-slate-300">{{ fr ? 'Stages et emplois pour étudiants et professionnels, partout dans le monde. Des sources claires pour préparer votre prochaine candidature.' : 'Internships and jobs for students and professionals, around the world. Clear sources and practical details for your next application.' }}</p>
                 </div>
                 <nav :aria-label="fr ? 'Pied de page' : 'Footer'" class="grid grid-cols-2 content-start gap-x-8 gap-y-3 text-sm font-medium">

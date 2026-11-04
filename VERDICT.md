@@ -9,7 +9,7 @@ Actions). Candidates, companies and admins all have working flows: search, saved
 external applications, messages, saved-search alerts, company pages, a daily import from Tunisian boards and
 employer job boards, an admin review screen, English and French public pages, and branded emails sent
 through Resend with email verification. Started as a university project (`alabaganne/internships-for-students`,
-DB `issatso_internships`); the name is now Nextward everywhere. **There is still no payment code** — no plan
+DB `issatso_internships`); the name is now Sudo Jobs everywhere. **There is still no payment code** — no plan
 table, no payment provider, no pricing page, no quotas.
 
 ## Why the SaaS is dead — checked competitor by competitor

@@ -21,6 +21,7 @@ class SourceReader
     {
         if ($source->provider === 'himalayas') { return $this->himalayas($source); }
         if ($source->provider === 'hn') { return $this->hackerNews($source); }
+        if ($source->provider === 'careers') { return (new CareersReader($this->http, $this))->discover($source); }
         $body = $this->http->get($source->url);
         if ($source->provider === 'jsonld') {
             return $this->sitemap($source, $body);
@@ -188,25 +189,10 @@ class SourceReader
             if (! $data) { throw new RuntimeException('No valid JobPosting object found; review the source.'); }
             // Kept so the page can be parsed again without reading it.
             $item->payload = $data;
-            $identifier = $data['identifier'] ?? null;
-            $website = $data['hiringOrganization']['sameAs'] ?? $data['hiringOrganization']['url'] ?? null;
-            // Boards often link the employer to their own company page, which is not the employer site.
-            if (is_string($website) && in_array(strtolower((string) parse_url($website, PHP_URL_HOST)), $source->allowed_domains ?? [], true)) {
-                $website = null;
-            }
-            return [
-                'title' => $data['title'] ?? '', 'description' => $data['description'] ?? '',
-                'employer' => $data['hiringOrganization']['name'] ?? null,
-                'website' => $website,
-                'posted_at' => $data['datePosted'] ?? null, 'expires_at' => $data['validThrough'] ?? null,
-                'locations' => $this->list($data['jobLocation'] ?? []),
-                'employment_types' => (array) ($data['employmentType'] ?? []),
-                'work_type' => preg_grep('/^\s*telecommute\s*$/i', array_filter((array) ($data['jobLocationType'] ?? []), 'is_string')) ? 'remote' : null,
-                'applicant_locations' => $this->list($data['applicantLocationRequirements'] ?? []),
-                'salary' => $data['baseSalary'] ?? null, 'language' => $data['inLanguage'] ?? null,
-                'application_url' => $data['url'] ?? $item->source_url,
-                'requisition_id' => is_array($identifier) ? ($identifier['value'] ?? null) : $identifier,
-            ];
+            return $this->fromJobPosting($source, $item, $data);
+        }
+        if ($source->provider === 'careers') {
+            return (new CareersReader($this->http, $this))->read($source, $item);
         }
         if ($source->provider === 'greenhouse') {
             if (! isset($data['content'])) {
@@ -342,6 +328,29 @@ class SourceReader
             'greenhouse' => isset($item->payload['content']), 'jsonld' => false, default => in_array($source->provider, self::FROM_LIST, true),
         };
         return $saved ? $this->read($source, $item) : null;
+    }
+
+    public function fromJobPosting(ImportSource $source, OpportunitySource $item, array $data): array
+    {
+        $identifier = $data['identifier'] ?? null;
+        $website = $data['hiringOrganization']['sameAs'] ?? $data['hiringOrganization']['url'] ?? null;
+        // Boards often link the employer to their own company page, which is not the employer site.
+        if (is_string($website) && in_array(strtolower((string) parse_url($website, PHP_URL_HOST)), $source->allowed_domains ?? [], true)) {
+            $website = null;
+        }
+        return [
+            'title' => $data['title'] ?? '', 'description' => $data['description'] ?? '',
+            'employer' => $data['hiringOrganization']['name'] ?? null,
+            'website' => $website,
+            'posted_at' => $data['datePosted'] ?? null, 'expires_at' => $data['validThrough'] ?? null,
+            'locations' => $this->list($data['jobLocation'] ?? []),
+            'employment_types' => (array) ($data['employmentType'] ?? []),
+            'work_type' => preg_grep('/^\s*telecommute\s*$/i', array_filter((array) ($data['jobLocationType'] ?? []), 'is_string')) ? 'remote' : null,
+            'applicant_locations' => $this->list($data['applicantLocationRequirements'] ?? []),
+            'salary' => $data['baseSalary'] ?? null, 'language' => $data['inLanguage'] ?? null,
+            'application_url' => $data['url'] ?? $item->source_url,
+            'requisition_id' => is_array($identifier) ? ($identifier['value'] ?? null) : $identifier,
+        ];
     }
 
     public function jobPosting(string $html): ?array

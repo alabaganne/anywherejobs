@@ -26,8 +26,8 @@ class ApplicationKitWriter implements Agent, HasProviderOptions, HasStructuredOu
     public function instructions(): string
     {
         $language = LanguageGuess::name($this->locale) ?? 'English';
-        return <<<PROMPT
-You prepare job applications for candidates on Nextward, a job board for IT students and professionals around the world. You get the candidate's profile (and often their resume as a PDF) and one job listing in its original language. You write a CV and a cover letter for that job, in {$language}.
+        return str_replace(':site', config('app.name'), <<<PROMPT
+You prepare job applications for candidates on :site, a job board for IT students and professionals around the world. You get the candidate's profile (and often their resume as a PDF) and one job listing in its original language. You write a CV and a cover letter for that job, in {$language}.
 
 Rules for both:
 - Use only facts from the profile and resume. Never invent a job, title, date, skill, degree, number, result or link. If something useful is missing, leave it out.
@@ -46,7 +46,7 @@ Cover letter:
 - Name the company and the role. Pick the two or three facts that best match the job and say why they matter for this team.
 - 150 to 250 words: a greeting, three short paragraphs and a sign-off with the candidate's name.
 - Plain text only: no markdown, no subject line, no placeholders in brackets.
-PROMPT;
+PROMPT);
     }
 
     public function schema(JsonSchema $schema): array

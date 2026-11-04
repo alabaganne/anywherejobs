@@ -112,16 +112,16 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Nextward')),
+        'name' => env('MAIL_FROM_NAME', config('app.name')),
     ],
 
     'reply_to' => [
         'address' => env('MAIL_REPLY_TO_ADDRESS'),
-        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Nextward')),
+        'name' => env('MAIL_FROM_NAME', config('app.name')),
     ],
 
     'markdown' => [
-        'theme' => env('MAIL_MARKDOWN_THEME', 'nextward'),
+        'theme' => env('MAIL_MARKDOWN_THEME', 'site'),
         'paths' => [
             resource_path('views/vendor/mail'),
         ],

@@ -146,7 +146,7 @@ class PublicCandidateController extends Controller
             $message = 'Your request is already saved.';
         } else {
             $candidate->forceFill(['public_status' => 'pending', 'public_reviewed_at' => null])->save();
-            $message = 'Request sent. Your profile goes public once the Nextward team approves it.';
+            $message = 'Request sent. Your profile goes public once the '.config('app.name').' team approves it.';
         }
 
         return back()->with('toast', ['type' => 'update', 'message' => $message]);

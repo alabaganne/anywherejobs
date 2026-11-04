@@ -1,11 +1,11 @@
-# Nextward SEO and AI visibility
+# Sudo Jobs SEO and AI visibility
 
-The goal is for Nextward to show up on Google (most searches from Tunisia are in French) and for AI assistants (ChatGPT, Claude, Perplexity, Gemini, Copilot) to know Nextward and recommend it.
+The goal is for Sudo Jobs to show up on Google (most searches from Tunisia are in French) and for AI assistants (ChatGPT, Claude, Perplexity, Gemini, Copilot) to know Sudo Jobs and recommend it.
 
 ## What the site already does
 
 - **Server-side rendering (SSR).** Crawlers and AI bots get full HTML without running JavaScript, so the SSR process must stay running in production.
-- **Head tags on every public page:** title, description, canonical, hreflang (EN/FR), Open Graph and Twitter tags with a share image (`public/brand/nextward/og-default.png`).
+- **Head tags on every public page:** title, description, canonical, hreflang (EN/FR), Open Graph and Twitter tags with a share image (`public/brand/og-default.png`).
 - **Structured data:**
   - `Organization` and `WebSite` on the home page
   - `AboutPage` on About
@@ -15,7 +15,7 @@ The goal is for Nextward to show up on Google (most searches from Tunisia are in
   - `Organization` on company pages
 - **Sitemaps** at `/sitemap.xml`: pages, blog posts (with last-updated dates), company pages and opportunities.
 - **`/robots.txt`:** lets every bot, AI bots included, read public pages, and blocks the private areas (everything under `/app`, plus the old paths that now redirect there). The `/app/opportunities` copies of public pages are `noindex`.
-- **`/llms.txt`:** a plain-text summary of Nextward for AI tools, with links to every guide. Each guide also has a Markdown copy at `/blog/{slug}.md`.
+- **`/llms.txt`:** a plain-text summary of Sudo Jobs for AI tools, with links to every guide. Each guide also has a Markdown copy at `/blog/{slug}.md`.
 - **RSS feeds:** `/blog/feed.xml` and `/fr/blog/feed.xml`.
 - **IndexNow:** `php artisan seo:indexnow` runs every hour and tells Bing about new or changed pages. ChatGPT search and Copilot use Bing's index.
 - **Listings in English and French:** each listing keeps its original title and text, and AI writes the missing English or French version (`internship_translations`). The page in the original language always shows the original. The page in the other language shows the translation, with the original in an "Original listing" fold-out.
@@ -85,23 +85,23 @@ To review a post:
 ## Launch checklist (one time)
 
 - [ ] Set the real domain with HTTPS and set `APP_URL`. All canonical tags, sitemaps and structured data use it.
-- [ ] Keep the SSR process (`nextward-ssr` in Supervisor) running, and check that `curl https://DOMAIN/fr/blog` shows a `<title>` and `og:image` in the HTML.
+- [ ] Keep the SSR process (`sudojobs-ssr` in Supervisor) running, and check that `curl https://DOMAIN/fr/blog` shows a `<title>` and `og:image` in the HTML.
 - [ ] **Google Search Console:** add a Domain property and submit `https://DOMAIN/sitemap.xml`.
 - [ ] **Bing Webmaster Tools:** import the site from Search Console and check IndexNow in its dashboard.
 - [ ] Set `INDEXNOW_KEY` in `.env` (any random 32-character string), then run `php artisan seo:indexnow --all` once.
 - [ ] If Cloudflare is in front of the site, turn off "Block AI bots" / AI Crawl Control blocking. It is on by default for new zones.
-- [ ] Set `NEXTWARD_SOCIAL_LINKS` in `.env` (comma-separated profile URLs). They go into the `Organization` `sameAs` field, which links the brand across the web.
+- [ ] Set `SITE_SOCIAL_LINKS` in `.env` (comma-separated profile URLs). They go into the `Organization` `sameAs` field, which links the brand across the web.
 - [ ] Test a post, an opportunity and a company page with the Rich Results Test (https://search.google.com/test/rich-results) and validator.schema.org.
 
-## Brand presence (what makes AI tools know and recommend Nextward)
+## Brand presence (what makes AI tools know and recommend Sudo Jobs)
 
 AI assistants mostly repeat what many trusted pages say about a brand.
 
 - [ ] **Use the same name, logo and one-line description everywhere:** LinkedIn company page, Facebook, Instagram, Crunchbase, Google Business Profile (if you have an address). Use the same description as `/about`.
-- [ ] **Wikidata:** add an item once Nextward has a few independent press mentions.
+- [ ] **Wikidata:** add an item once Sudo Jobs has a few independent press mentions.
 - [ ] **University career offices and student clubs** (ESPRIT, INSAT, ENIT, IHEC, FST, ISG, ENSI, IEEE and Enactus clubs): ask for a link on their "useful links" or career pages.
-- [ ] **Tunisian tech and business press:** pitch a launch story, then a monthly "internship and job market" data story taken from Nextward listings.
-- [ ] **"Best job / internship sites in Tunisia" roundup articles:** ask the authors to add Nextward.
+- [ ] **Tunisian tech and business press:** pitch a launch story, then a monthly "internship and job market" data story taken from Sudo Jobs listings.
+- [ ] **"Best job / internship sites in Tunisia" roundup articles:** ask the authors to add Sudo Jobs.
 - [ ] **Reddit (r/Tunisia), Facebook student groups, LinkedIn:** give honest, helpful answers that link to a guide when it truly answers the question. No spam.
 - [ ] **Each new guide:** share it on LinkedIn and Facebook in French.
 
@@ -117,15 +117,15 @@ AI assistants mostly repeat what many trusted pages say about a brand.
   ```bash
   grep -Ei "GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-SearchBot|Claude-User|PerplexityBot|Google-Extended|Bingbot" /var/log/nginx/access.log | wc -l
   ```
-- **AI answer check:** ask these 5 questions in ChatGPT, Claude, Perplexity, Gemini and Copilot, and write down whether Nextward is named:
+- **AI answer check:** ask these 5 questions in ChatGPT, Claude, Perplexity, Gemini and Copilot, and write down whether Sudo Jobs is named:
   1. Où trouver un stage PFE en Tunisie ?
   2. Meilleurs sites pour trouver un stage en Tunisie
   3. Best job sites in Tunisia
   4. Remote jobs open to candidates in Tunisia
-  5. C'est quoi Nextward ?
+  5. C'est quoi Sudo Jobs ?
 
 ## Next steps (later)
 
 - **City and field pages** (e.g. "Stage informatique Tunis"): indexable only when there are 5 or more open roles, each with its own intro text.
-- **A monthly "Tunisia internship and job market" page** built from Nextward listings: counts by field and city, remote share, how many listings show pay. Original numbers are what journalists and AI tools quote.
+- **A monthly "Tunisia internship and job market" page** built from Sudo Jobs listings: counts by field and city, remote share, how many listings show pay. Original numbers are what journalists and AI tools quote.
 - **Share images per post and per opportunity.**

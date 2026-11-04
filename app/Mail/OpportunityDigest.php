@@ -17,7 +17,7 @@ class OpportunityDigest extends Mailable
 
     public function headers(): Headers
     {
-        $domain = parse_url(config('app.url'), PHP_URL_HOST) ?: 'nextward.local';
+        $domain = parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost';
         return new Headers(messageId: 'opportunities.'.$this->batchId.'@'.$domain, text: [
             'List-Unsubscribe' => '<'.URL::signedRoute('saved-searches.unsubscribe', ['savedSearch' => $this->search->id]).'>',
         ]);
@@ -25,7 +25,7 @@ class OpportunityDigest extends Mailable
 
     public function build()
     {
-        return $this->subject('New roles for '.$this->search->name.' on Nextward')->markdown('emails.opportunity-digest')->with([
+        return $this->subject('New roles for '.$this->search->name.' on '.config('app.name'))->markdown('emails.opportunity-digest')->with([
             'unsubscribeUrl' => URL::signedRoute('saved-searches.unsubscribe', ['savedSearch' => $this->search->id]),
             'browseUrl' => SavedSearchController::browseUrl($this->search->filters),
         ]);

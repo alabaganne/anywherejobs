@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/Public.vue';
 import LegalPage from '@/Shared/LegalPage.vue';
+import { siteName } from '@/brand';
 
 const page = usePage();
 const fr = computed(() => page.props.locale === 'fr');
@@ -10,7 +11,7 @@ const prefix = computed(() => fr.value ? '/fr' : '');
 const text = (en, french) => fr.value ? french : en;
 const sections = computed(() => [
 	{ id: 'about', title: text('About these terms', 'À propos de ces conditions'), body: [
-		text('Nextward is a website for finding and posting internships and jobs, run by [[legal name of the company or person running Nextward]], [[registered address]]. These terms apply to everyone who uses Nextward. By creating an account, you accept them and our privacy policy.', 'Nextward est un site pour trouver et publier des stages et des emplois, géré par [[nom légal de la société ou de la personne qui gère Nextward]], [[adresse du siège]]. Ces conditions s’appliquent à toute personne qui utilise Nextward. En créant un compte, vous les acceptez, ainsi que notre politique de confidentialité.'),
+		text(`${siteName()} is a website for finding and posting internships and jobs, run by [[legal name of the company or person running ${siteName()}]], [[registered address]]. These terms apply to everyone who uses ${siteName()}. By creating an account, you accept them and our privacy policy.`, `${siteName()} est un site pour trouver et publier des stages et des emplois, géré par [[nom légal de la société ou de la personne qui gère ${siteName()}]], [[adresse du siège]]. Ces conditions s’appliquent à toute personne qui utilise ${siteName()}. En créant un compte, vous les acceptez, ainsi que notre politique de confidentialité.`),
 	] },
 	{ id: 'accounts', title: text('Your account', 'Votre compte'), body: [
 		[
@@ -22,8 +23,8 @@ const sections = computed(() => [
 	{ id: 'candidates', title: text('For candidates', 'Pour les candidats'), body: [
 		[
 			text('Only send your own CV and files, and make sure what you write is true.', 'N’envoyez que votre propre CV et vos propres fichiers, et vérifiez que ce que vous écrivez est exact.'),
-			text('Nextward helps you find and apply to opportunities. We are not the employer and we cannot promise you an interview or a job.', 'Nextward vous aide à trouver des offres et à y postuler. Nous ne sommes pas l’employeur et ne pouvons pas vous promettre un entretien ou un poste.'),
-			text('Applying through Nextward is free. Never pay anyone to get an internship or a job listed here, and tell us if a company asks you to.', 'Postuler via Nextward est gratuit. Ne payez jamais pour obtenir un stage ou un emploi publié ici, et prévenez-nous si une entreprise vous le demande.'),
+			text(`${siteName()} helps you find and apply to opportunities. We are not the employer and we cannot promise you an interview or a job.`, `${siteName()} vous aide à trouver des offres et à y postuler. Nous ne sommes pas l’employeur et ne pouvons pas vous promettre un entretien ou un poste.`),
+			text(`Applying through ${siteName()} is free. Never pay anyone to get an internship or a job listed here, and tell us if a company asks you to.`, `Postuler via ${siteName()} est gratuit. Ne payez jamais pour obtenir un stage ou un emploi publié ici, et prévenez-nous si une entreprise vous le demande.`),
 		],
 	] },
 	{ id: 'companies', title: text('For companies', 'Pour les entreprises'), body: [
@@ -39,7 +40,7 @@ const sections = computed(() => [
 		text('Credits do not expire while your account is open, and a credit used for a task that failed is given back. When credit packs are on sale, prices are shown before you pay, and the payment is handled by the payment provider you choose.', 'Les crédits n’expirent pas tant que votre compte est ouvert, et un crédit utilisé pour une tâche qui a échoué vous est rendu. Quand des packs de crédits sont en vente, les prix sont affichés avant le paiement, et le paiement est traité par le prestataire que vous choisissez.'),
 	] },
 	{ id: 'listings', title: text('Listings from other sites', 'Offres venant d’autres sites'), body: [
-		text('Some listings are imported from public job sites and company career pages. Each one names its source and links to the original page, where you apply. We check sources regularly, but details can change or be wrong: always confirm them on the original page. An imported listing does not mean the employer has an account on Nextward or works with us.', 'Certaines offres sont importées depuis des sites d’emploi publics et des pages carrières d’entreprises. Chacune indique sa source et renvoie vers l’annonce d’origine, où vous postulez. Nous vérifions les sources régulièrement, mais les informations peuvent changer ou être inexactes : vérifiez-les toujours sur l’annonce d’origine. Une offre importée ne signifie pas que l’employeur a un compte sur Nextward ou travaille avec nous.'),
+		text(`Some listings are imported from public job sites and company career pages. Each one names its source and links to the original page, where you apply. We check sources regularly, but details can change or be wrong: always confirm them on the original page. An imported listing does not mean the employer has an account on ${siteName()} or works with us.`, `Certaines offres sont importées depuis des sites d’emploi publics et des pages carrières d’entreprises. Chacune indique sa source et renvoie vers l’annonce d’origine, où vous postulez. Nous vérifions les sources régulièrement, mais les informations peuvent changer ou être inexactes : vérifiez-les toujours sur l’annonce d’origine. Une offre importée ne signifie pas que l’employeur a un compte sur ${siteName()} ou travaille avec nous.`),
 		text('If you own a source or a listing and want it changed or removed, contact us and we will act quickly.', 'Si vous êtes propriétaire d’une source ou d’une offre et souhaitez la modifier ou la retirer, contactez-nous : nous agirons rapidement.'),
 	] },
 	{ id: 'rules', title: text('What you must not do', 'Ce qui est interdit'), body: [
@@ -52,16 +53,16 @@ const sections = computed(() => [
 		text('We can remove content or suspend an account that breaks these rules.', 'Nous pouvons retirer un contenu ou suspendre un compte qui ne respecte pas ces règles.'),
 	] },
 	{ id: 'content', title: text('Your content', 'Votre contenu'), body: [
-		text('You keep the rights to what you post (profile, CV, listings, messages). You allow us to store and show it on Nextward only as needed to run the service, for example to show your listing to candidates or send your application to a company. The Nextward name, logo and design belong to us.', 'Vous gardez les droits sur ce que vous publiez (profil, CV, offres, messages). Vous nous autorisez à le stocker et à l’afficher sur Nextward uniquement pour faire fonctionner le service, par exemple pour montrer votre offre aux candidats ou envoyer votre candidature à une entreprise. Le nom, le logo et le design de Nextward nous appartiennent.'),
+		text(`You keep the rights to what you post (profile, CV, listings, messages). You allow us to store and show it on ${siteName()} only as needed to run the service, for example to show your listing to candidates or send your application to a company. The ${siteName()} name, logo and design belong to us.`, `Vous gardez les droits sur ce que vous publiez (profil, CV, offres, messages). Vous nous autorisez à le stocker et à l’afficher sur ${siteName()} uniquement pour faire fonctionner le service, par exemple pour montrer votre offre aux candidats ou envoyer votre candidature à une entreprise. Le nom, le logo et le design de ${siteName()} nous appartiennent.`),
 	] },
 	{ id: 'liability', title: text('Our responsibility', 'Notre responsabilité'), body: [
-		text('We work to keep Nextward available and correct, but we provide it as it is, without a promise that it will always work or that every listing is accurate. We are not part of the hiring decision or of any work contract between a candidate and a company. As far as the law allows, we are not responsible for losses that come from using the site or from a listing. Nothing in these terms limits rights the law gives you that cannot be removed.', 'Nous faisons en sorte que Nextward reste disponible et exact, mais nous le fournissons tel quel, sans garantir qu’il fonctionnera toujours ni que chaque offre est exacte. Nous ne participons ni à la décision d’embauche ni au contrat de travail entre un candidat et une entreprise. Dans les limites permises par la loi, nous ne sommes pas responsables des pertes liées à l’utilisation du site ou d’une offre. Rien dans ces conditions ne limite les droits que la loi vous accorde et auxquels on ne peut pas renoncer.'),
+		text(`We work to keep ${siteName()} available and correct, but we provide it as it is, without a promise that it will always work or that every listing is accurate. We are not part of the hiring decision or of any work contract between a candidate and a company. As far as the law allows, we are not responsible for losses that come from using the site or from a listing. Nothing in these terms limits rights the law gives you that cannot be removed.`, `Nous faisons en sorte que ${siteName()} reste disponible et exact, mais nous le fournissons tel quel, sans garantir qu’il fonctionnera toujours ni que chaque offre est exacte. Nous ne participons ni à la décision d’embauche ni au contrat de travail entre un candidat et une entreprise. Dans les limites permises par la loi, nous ne sommes pas responsables des pertes liées à l’utilisation du site ou d’une offre. Rien dans ces conditions ne limite les droits que la loi vous accorde et auxquels on ne peut pas renoncer.`),
 	] },
 	{ id: 'ending', title: text('Closing your account', 'Fermer votre compte'), body: [
 		text('You can delete your account at any time in Settings. We can close an account that breaks these terms, after telling you why when we can.', 'Vous pouvez supprimer votre compte à tout moment dans les Paramètres. Nous pouvons fermer un compte qui ne respecte pas ces conditions, en vous en expliquant la raison quand c’est possible.'),
 	] },
 	{ id: 'law', title: text('Changes and law', 'Modifications et droit applicable'), body: [
-		text('If we change these terms, we will update the date at the top and tell account holders by email about important changes. If you keep using Nextward after that, the new terms apply.', 'Si nous modifions ces conditions, nous mettrons à jour la date en haut de la page et préviendrons les titulaires de compte par e-mail en cas de changement important. Si vous continuez à utiliser Nextward ensuite, les nouvelles conditions s’appliquent.'),
+		text(`If we change these terms, we will update the date at the top and tell account holders by email about important changes. If you keep using ${siteName()} after that, the new terms apply.`, `Si nous modifions ces conditions, nous mettrons à jour la date en haut de la page et préviendrons les titulaires de compte par e-mail en cas de changement important. Si vous continuez à utiliser ${siteName()} ensuite, les nouvelles conditions s’appliquent.`),
 		text('These terms follow Tunisian law. Any dispute goes to the courts of [[city of the competent courts]], unless the law of your country gives you the right to go to your local courts.', 'Ces conditions sont soumises au droit tunisien. Tout litige relève des tribunaux de [[ville des tribunaux compétents]], sauf si la loi de votre pays vous permet de saisir vos tribunaux locaux.'),
 		text('Questions? Write to alabaganne9@gmail.com.', 'Des questions ? Écrivez à alabaganne9@gmail.com.'),
 	] },
@@ -73,7 +74,7 @@ const sections = computed(() => [
 		<LegalPage
 			:label="text('Legal', 'Mentions légales')"
 			:title="text('Terms of use', 'Conditions d’utilisation')"
-			:lead="text('The rules for using Nextward, for candidates and for companies.', 'Les règles d’utilisation de Nextward, pour les candidats et pour les entreprises.')"
+			:lead="text(`The rules for using ${appName}, for candidates and for companies.`, `Les règles d’utilisation de ${appName}, pour les candidats et pour les entreprises.`)"
 			:updated="text('Last updated: 20 October 2026', 'Dernière mise à jour : 20 octobre 2026')"
 			:toc-label="text('On this page', 'Sur cette page')"
 			:sections="sections"

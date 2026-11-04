@@ -65,7 +65,7 @@ const importFile = (event) => {
 				<button type="button" class="font-semibold text-ink-700 hover:underline" @click="disconnectGmail">Disconnect</button>
 			</template>
 			<template v-else-if="gmail.ready">
-				<span class="text-muted">Connect Gmail to add applications from confirmation emails. Nextward only reads them.</span>
+				<span class="text-muted">Connect Gmail to add applications from confirmation emails. {{ appName }} only reads them.</span>
 				<a :href="route('leads.gmail.connect')" class="font-semibold text-blue-700 hover:underline">Connect Gmail</a>
 			</template>
 			<span v-else class="text-muted">Gmail can add applications from confirmation emails once GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set.</span>

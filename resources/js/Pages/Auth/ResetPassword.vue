@@ -1,5 +1,5 @@
 <template>
-	<auth-heading kicker="A fresh start" description="Choose a new password for your Nextward account.">A new password.<br />A fresh start.</auth-heading>
+	<auth-heading kicker="A fresh start" :description="`Choose a new password for your ${appName} account.`">A new password.<br />A fresh start.</auth-heading>
 	<auth-feedback :errors="form.errors" />
 	<form @submit.prevent="submit" :aria-busy="form.processing">
 		<div :class="classes.fields">

@@ -58,7 +58,7 @@ Here is a simple plan for a July internship:
 
 ## Where can you find a summer internship in Tunisia?
 
-- **Nextward.** Browse [summer internships](/opportunities/internships?program_type=summer), filter by field and city, save your search, and apply on the original page.
+- **{site}.** Browse [summer internships](/opportunities/internships?program_type=summer), filter by field and city, save your search, and apply on the original page.
 - **Your school's internship office.** Some companies send offers straight to schools, and staff know which hosts took students before.
 - **Company websites and LinkedIn.** Larger companies often run a summer internship campaign with a deadline.
 - **Public companies, banks and administrations.** They take many interns, but the process can be slow. In July 2025, La Presse described a student accepted by a public bank who waited weeks for news before his start date. Ask early for the start date and the person to contact.

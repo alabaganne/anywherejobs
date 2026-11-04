@@ -23,7 +23,8 @@ class Company extends Model
         'location',
     ];
 
-    protected $casts = ['logo_fetched_at' => 'datetime', 'verified_at' => 'datetime', 'researched_at' => 'datetime', 'verification' => 'array'];
+    protected $casts = ['logo_fetched_at' => 'datetime', 'verified_at' => 'datetime', 'researched_at' => 'datetime', 'verification' => 'array',
+        'tracked_at' => 'datetime', 'tracking' => 'array'];
 
     protected static function booted(): void
     {
@@ -49,6 +50,10 @@ class Company extends Model
 
     public function opportunities() {
         return $this->hasMany(Opportunity::class);
+    }
+
+    public function importSources() {
+        return $this->hasMany(ImportSource::class);
     }
 
     public function city() {

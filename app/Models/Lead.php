@@ -52,7 +52,7 @@ class Lead extends Model
         return $user && $user->isAdmin() && $user->isCandidate();
     }
 
-    // Marks the matching lead applied when the owner applies or tracks an application on Nextward, or adds one.
+    // Marks the matching lead applied when the owner applies or tracks an application on the site, or adds one.
     public static function fromApplication(Application $application): void
     {
         $application->loadMissing('opportunity.company', 'candidate.user');

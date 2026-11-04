@@ -13,7 +13,8 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Nextward'),
+    // The site name, shown in titles, emails, the AI instructions and the copy. Change it here.
+    'name' => env('APP_NAME', 'Sudo Jobs'),
 
     /*
     |--------------------------------------------------------------------------

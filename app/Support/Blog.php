@@ -65,7 +65,8 @@ class Blog
         foreach (self::LOCALES as $locale) {
             $files = array_merge($files, glob(self::directory().'/'.$locale.'/*.md') ?: []);
         }
-        $version = md5(implode('|', array_map(fn ($file) => $file.':'.filemtime($file), $files)));
+        // The site name is part of the key because posts write it as {site}.
+        $version = md5(config('app.name').'|'.implode('|', array_map(fn ($file) => $file.':'.filemtime($file), $files)));
         return Cache::rememberForever('blog.posts.'.$version, fn () => self::load($files));
     }
 
@@ -80,7 +81,7 @@ class Blog
         $posts = array_fill_keys(self::LOCALES, []);
         foreach ($files as $file) {
             $locale = basename(dirname($file));
-            $source = file_get_contents($file);
+            $source = str_replace('{site}', config('app.name'), file_get_contents($file));
             $result = $converter->convert($source);
             $meta = $result instanceof RenderedContentWithFrontMatter ? (array) $result->getFrontMatter() : [];
             $html = (string) $result->getContent();

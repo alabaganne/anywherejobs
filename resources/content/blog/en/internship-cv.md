@@ -123,4 +123,4 @@ Some companies use software to sort CVs before a person reads them. A simple one
 | No typos | The first sign of care |
 | Read aloud once | Catches odd or missing words |
 
-Next, write a short letter with our guide to the [internship cover letter](/blog/internship-cover-letter). For timing and where to apply, read the [PFE internship guide](/blog/pfe-internship-tunisia) or the [summer internship guide](/blog/summer-internship-tunisia), then browse [internships on Nextward](/opportunities/internships). Before your first call, practice with our [internship interview questions](/blog/internship-interview-questions).
+Next, write a short letter with our guide to the [internship cover letter](/blog/internship-cover-letter). For timing and where to apply, read the [PFE internship guide](/blog/pfe-internship-tunisia) or the [summer internship guide](/blog/summer-internship-tunisia), then browse [internships on {site}](/opportunities/internships). Before your first call, practice with our [internship interview questions](/blog/internship-interview-questions).

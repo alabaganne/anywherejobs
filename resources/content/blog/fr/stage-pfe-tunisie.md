@@ -65,7 +65,7 @@ Multipliez les canaux : chacun touche des entreprises différentes.
 
 - **Les PFE books et les pages carrières.** Banques, opérateurs télécoms, cabinets de conseil et éditeurs de logiciels publient souvent des sujets avec une date limite.
 - **Le service des stages de votre école.** Des entreprises envoient leurs sujets directement aux établissements. Vos enseignants connaissent aussi des projets et des sujets en laboratoire.
-- **Les sites d'offres.** Sur Nextward, vous pouvez parcourir les [stages PFE](/fr/opportunities/internships?program_type=pfe), filtrer par domaine et par ville, enregistrer une recherche et ouvrir la page de candidature d'origine.
+- **Les sites d'offres.** Sur {site}, vous pouvez parcourir les [stages PFE](/fr/opportunities/internships?program_type=pfe), filtrer par domaine et par ville, enregistrer une recherche et ouvrir la page de candidature d'origine.
 - **LinkedIn.** Suivez les entreprises qui vous intéressent et les recruteurs qui publient des sujets.
 - **Les anciens.** Demandez aux étudiants de la promotion précédente où ils ont fait leur PFE et comment ils l'ont obtenu.
 - **La candidature spontanée.** Beaucoup de PME ne publient rien mais accueillent quand même des stagiaires PFE.

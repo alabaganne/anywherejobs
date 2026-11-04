@@ -52,7 +52,7 @@ class FrenchPagesTest extends TestCase
             ->where('opportunity.translated', false)
             ->where('opportunity.original', null)
             ->where('translation', '/opportunities/'.$this->opportunity->id.'-backend-intern')
-            ->where('seo.title', 'Backend intern chez Atlas Cloud | Nextward')
+            ->where('seo.title', 'Backend intern chez Atlas Cloud | '.config('app.name'))
             ->where('seo.canonical', $fr)
             ->where('seo.locale', 'fr_FR')
             ->where('seo.robots', 'noindex, follow')
@@ -82,7 +82,7 @@ class FrenchPagesTest extends TestCase
             ->where('opportunity.original.title', 'Backend intern')
             ->where('opportunity.original.description', 'Internship used in tests.')
             ->where('opportunity.original.label', 'anglais')
-            ->where('seo.title', 'Stagiaire backend chez Atlas Cloud | Nextward')
+            ->where('seo.title', 'Stagiaire backend chez Atlas Cloud | '.config('app.name'))
             ->where('seo.canonical', $fr)
             ->where('seo.robots', 'index, follow, max-image-preview:large')
             ->where('seo.alternates', [['lang' => 'en', 'url' => $en], ['lang' => 'fr', 'url' => $fr], ['lang' => 'x-default', 'url' => $en]]));
@@ -120,7 +120,7 @@ class FrenchPagesTest extends TestCase
             ->where('locale', 'fr')
             ->where('opportunities.0.public_url', $this->opportunity->publicUrl('fr'))
             ->where('translation', '/companies/'.$this->company->id.'-atlas-cloud')
-            ->where('seo.title', 'Stages et emplois chez Atlas Cloud | Nextward')
+            ->where('seo.title', 'Stages et emplois chez Atlas Cloud | '.config('app.name'))
             ->where('seo.canonical', $fr)
             ->where('seo.alternates.0.url', $this->company->public_url));
         $this->get('/fr/companies/'.$this->company->id.'-old-name')->assertStatus(301)->assertRedirect($fr);

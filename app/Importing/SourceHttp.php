@@ -37,6 +37,11 @@ class SourceHttp
         return $this->request($url);
     }
 
+    public function allowedHosts(): array
+    {
+        return array_map('strtolower', $this->source->allowed_domains ?? []);
+    }
+
     public function validate(string $url): array
     {
         $parts = parse_url($url);
@@ -175,7 +180,7 @@ class SourceHttp
         }
         $groups[] = [$agents, $rules];
         // Keep honoring the former bot name while sources update their rules.
-        $specific = array_filter($groups, fn ($group) => (bool) array_intersect(['nextwardbot', 'internlybot'], $group[0]));
+        $specific = array_filter($groups, fn ($group) => (bool) array_intersect([strtolower(strtok(config('importer.user_agent'), '/')), 'nextwardbot', 'internlybot'], $group[0]));
         $groups = $specific ?: array_filter($groups, fn ($group) => in_array('*', $group[0], true));
         $path = (parse_url($url, PHP_URL_PATH) ?: '/').(($q = parse_url($url, PHP_URL_QUERY)) ? '?'.$q : '');
         $longest = -1; $allowed = true;

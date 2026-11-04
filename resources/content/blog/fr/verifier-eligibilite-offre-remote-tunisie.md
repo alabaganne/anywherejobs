@@ -19,7 +19,7 @@ faq:
     a: "Non. Une offre en remote peut être réservée à certains pays ou régions. Lisez la condition de lieu, et si la Tunisie n'est pas citée, demandez à l'employeur."
   - q: "Aide à la relocalisation et sponsoring de visa, c'est la même chose ?"
     a: "Non. L'aide à la relocalisation concerne le voyage ou le déménagement. Le sponsoring de visa est un point à part, à vérifier auprès de l'employeur."
-  - q: "Que veut dire « inconnu » sur une offre Nextward ?"
+  - q: "Que veut dire « inconnu » sur une offre {site} ?"
     a: "Cela veut dire que la source ne donne pas de réponse claire sur ce point. Vérifiez la page officielle de candidature ou demandez à l'employeur."
 ---
 
@@ -29,7 +29,7 @@ Une offre en remote ne veut pas toujours dire que vous pouvez travailler depuis 
 
 Une offre en remote peut quand même limiter les candidats à un pays ou à une région. Vérifiez les vraies conditions de recrutement, y compris les pays exclus. Ne partez pas du principe que « remote » veut dire « partout ».
 
-Une entreprise présente dans le monde entier n'accepte pas forcément des candidats de tous les pays pour chaque poste. Sur Nextward, vous pouvez commencer par les [offres en remote depuis la Tunisie](/fr/opportunities/remote-from-tunisia), puis vérifier chaque offre.
+Une entreprise présente dans le monde entier n'accepte pas forcément des candidats de tous les pays pour chaque poste. Sur {site}, vous pouvez commencer par les [offres en remote depuis la Tunisie](/fr/opportunities/remote-from-tunisia), puis vérifier chaque offre.
 
 ## Vérifiez les conditions de travail concrètes
 
@@ -48,7 +48,7 @@ Ce sont deux choses différentes :
 - **Aide à la relocalisation** : elle peut couvrir le voyage ou le déménagement.
 - **Sponsoring de visa** : c'est une information à part.
 
-Ne notez que ce que l'employeur confirme, et vérifiez les conditions à jour sur la page officielle de candidature. Quand la source ne donne pas de réponse claire, Nextward affiche « inconnu ». Vous pouvez aussi consulter les [offres avec relocalisation](/fr/opportunities/relocation).
+Ne notez que ce que l'employeur confirme, et vérifiez les conditions à jour sur la page officielle de candidature. Quand la source ne donne pas de réponse claire, {site} affiche « inconnu ». Vous pouvez aussi consulter les [offres avec relocalisation](/fr/opportunities/relocation).
 
 ## Revenez à la source d'origine
 
@@ -59,4 +59,4 @@ Avant de postuler, vérifiez :
 - la date limite ;
 - l'endroit où vous envoyez votre candidature.
 
-Utilisez le lien vers la source sur Nextward. Signalez l'offre si le lien ne marche plus ou si la source indique qu'elle est close. La date de dernière vérification dit quand la source a été contrôlée. Ce n'est ni une garantie d'embauche, ni une recommandation de l'employeur.
+Utilisez le lien vers la source sur {site}. Signalez l'offre si le lien ne marche plus ou si la source indique qu'elle est close. La date de dernière vérification dit quand la source a été contrôlée. Ce n'est ni une garantie d'embauche, ni une recommandation de l'employeur.

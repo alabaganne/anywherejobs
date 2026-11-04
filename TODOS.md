@@ -2,6 +2,15 @@
 
 Unfinished work, small fixes and chores that are not on the roadmap (`FUTURE_PLANS.md`).
 
+## Move the server to the company registry
+
+New listings are now only published from sources of followed companies (`importer.trusted_sources`), so until older sources are linked their new listings wait in the review queue.
+
+To do:
+- After deploying, run `php artisan migrate --force`, then `php artisan companies:link-sources --limit=100`. It checks each source's company website (AI and web requests) and links or pauses the source; `--dry-run` only covers companies already checked. A paused source can be turned back on under Sources.
+- The daily 05:30 run then keeps going ten at a time.
+- Run `php artisan companies:discover --count=2` once and check the new companies under Imports > Companies.
+
 ## Match imports to the owner's job search (done 25 October 2026)
 
 Update `CandidateProfiles` and the resume profile so imports favour the roles the owner would actually take. Today a profile only checks kind, level, field, skills and a plain country list; it doesn't know about visas or remote from Tunisia.

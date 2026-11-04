@@ -38,7 +38,7 @@ const meta = computed(() => props.candidates.meta ?? props.candidates);
 		<div class="mb-6 flex items-end justify-between gap-4 flex-wrap">
 			<div>
 			<h1 class="font-display text-[28px] font-semibold tracking-[-.02em] leading-tight">Candidates</h1>
-			<p class="text-muted text-[15px] mt-1.5">Every candidate profile on Nextward. Approve the ones that asked to be shown on the public site.</p>
+			<p class="text-muted text-[15px] mt-1.5">Every candidate profile on {{ appName }}. Approve the ones that asked to be shown on the public site.</p>
 			</div>
 			<Link class="cbtn bg-blue-600 text-white hover:bg-blue-700" :href="route('candidates.create')">Add candidate</Link>
 		</div>

@@ -111,8 +111,8 @@ const applyHere = computed(() => role.value.is_open && role.value.application_mo
 const useToApply = async () => {
 	if (!(await save())) return;
 	try {
-		sessionStorage.setItem(`nextward.cover-letter.${role.value.id}`, letter.value);
-		sessionStorage.setItem(`nextward.kit-cv.${role.value.id}`, String(kit.value.id));
+		sessionStorage.setItem(`site.cover-letter.${role.value.id}`, letter.value);
+		sessionStorage.setItem(`site.kit-cv.${role.value.id}`, String(kit.value.id));
 	} catch (e) { /* storage may be off */ }
 	router.visit(route('applications.create', role.value.id));
 };

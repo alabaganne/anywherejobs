@@ -15,7 +15,7 @@ links:
   - label: "Stages d'été"
     href: "/fr/opportunities/internships?program_type=summer"
 faq:
-  - q: "Faut-il créer un compte pour voir les offres de stage sur Nextward ?"
+  - q: "Faut-il créer un compte pour voir les offres de stage sur {site} ?"
     a: "Non. Les offres sont publiques : vous pouvez les lire et les filtrer sans vous connecter."
   - q: "Combien de candidatures faut-il envoyer ?"
     a: "Il n'y a pas de bon chiffre. Mieux vaut quelques candidatures adaptées à chaque offre que le même message envoyé partout."
@@ -35,7 +35,7 @@ Avant de postuler partout, choisissez le type de stage que vous voulez : dévelo
 
 ## Utilisez les plateformes de stage publiques et les sites des entreprises
 
-Les offres de stage sont souvent dispersées : sites d'emploi, pages carrières des entreprises, portails des universités, LinkedIn. Une plateforme publique comme Nextward vous simplifie la tâche. Elle regroupe les offres au même endroit, avec une recherche, et vous pouvez les consulter sans créer de compte.
+Les offres de stage sont souvent dispersées : sites d'emploi, pages carrières des entreprises, portails des universités, LinkedIn. Une plateforme publique comme {site} vous simplifie la tâche. Elle regroupe les offres au même endroit, avec une recherche, et vous pouvez les consulter sans créer de compte.
 
 Pour commencer, parcourez les [offres de stage](/fr/opportunities/internships) et filtrez par type : stage PFE, stage d'été ou autre.
 

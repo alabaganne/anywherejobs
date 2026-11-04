@@ -4,12 +4,13 @@ import { router } from '@inertiajs/vue3';
 import { Gift, Lock } from '@lucide/vue';
 import AppShell from '@/Layouts/AppShell.vue';
 import PageHeader from '@/Components/Ui/PageHeader.vue';
+import { siteName } from '@/brand';
 
 defineOptions({ layout: AppShell });
 const props = defineProps({ balance: Number, drafts_per_credit: Number, beta: Boolean, beta_credits: Number, gateways: Array, packs: Array, history: Array });
 const names = { konnect: 'Konnect (cards, e-DINAR, wallet · TND)', flouci: 'Flouci (wallet, cards · TND)', lemonsqueezy: 'International card or PayPal (USD)' };
 const currencyOf = { konnect: 'TND', flouci: 'TND', lemonsqueezy: 'USD' };
-const reasons = { welcome: 'Free credits', monthly: 'Free credits for the month', beta: 'Free beta credits', purchase: 'Pack bought', kit: 'CV and letter for a role', resume: 'Resume translation', resume_read: 'Profile filled from a resume', refund: 'Given back', grant: 'Added by Nextward' };
+const reasons = { welcome: 'Free credits', monthly: 'Free credits for the month', beta: 'Free beta credits', purchase: 'Pack bought', kit: 'CV and letter for a role', resume: 'Resume translation', resume_read: 'Profile filled from a resume', refund: 'Given back', grant: `Added by ${siteName()}` };
 const gateway = ref(props.gateways[0] || null);
 const busy = ref(null);
 const price = (pack) => {
@@ -45,7 +46,7 @@ const claim = () => {
 						<span class="rounded-full bg-navy-800 text-white text-[11px] font-bold px-2 py-0.5">Beta</span>
 						<span id="beta-title" class="font-display text-[17px] font-semibold text-ink">Free credits during the beta</span>
 					</p>
-					<p class="text-sm leading-relaxed text-ink-700 mt-2.5">Nextward is in beta and payments are still being built. Until they open, get {{ beta_credits }} free credits whenever you need more.</p>
+					<p class="text-sm leading-relaxed text-ink-700 mt-2.5">{{ appName }} is in beta and payments are still being built. Until they open, get {{ beta_credits }} free credits whenever you need more.</p>
 				</div>
 				<button class="cbtn cbtn-primary !text-sm !py-3 !px-5 disabled:opacity-60" type="button" :disabled="claiming" @click="claim">
 					<Gift class="size-4" aria-hidden="true" />{{ claiming ? 'Adding…' : `Get ${beta_credits} free credits` }}

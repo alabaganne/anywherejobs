@@ -1,9 +1,9 @@
 <x-mail::message>
-# Your Nextward account is ready
+# Your {{ config('app.name') }} account is ready
 
 Hi {!! $name !!},
 
-An account was created for you on Nextward, where students and professionals find internships and jobs in Tunisia and worldwide.
+An account was created for you on {{ config('app.name') }}, where students and professionals find internships and jobs in Tunisia and worldwide.
 
 Choose a password to sign in. This also confirms your email address.
 

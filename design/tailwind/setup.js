@@ -1,5 +1,5 @@
 /* ===========================================================
-   Nextward — Tailwind (Play CDN) shared config
+   Tailwind (Play CDN) shared config
    Load order in <head>:
      <link rel="preconnect" ...> + Google Fonts <link>
      <script src="https://cdn.tailwindcss.com"></script>

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class MakeAdmin extends Command
 {
-    protected $signature = 'nextward:make-admin {email : Email of the admin account}';
+    protected $signature = 'app:make-admin {email : Email of the admin account}';
     protected $description = 'Make an existing account an admin, or create a new admin account';
 
     public function handle(): int

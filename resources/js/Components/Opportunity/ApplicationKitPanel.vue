@@ -130,7 +130,7 @@ const exportDocx = async () => {
 
 const applyHere = computed(() => props.opportunity.application_mode === 'internal' && !props.opportunity.application);
 const useToApply = () => {
-    try { sessionStorage.setItem(`nextward.cover-letter.${props.opportunity.id}`, letter.value); } catch { /* storage may be off */ }
+    try { sessionStorage.setItem(`site.cover-letter.${props.opportunity.id}`, letter.value); } catch { /* storage may be off */ }
     router.visit(route('applications.create', props.opportunity.id));
 };
 </script>

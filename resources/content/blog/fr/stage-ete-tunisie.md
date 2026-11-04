@@ -58,7 +58,7 @@ Voici un calendrier type pour un stage en juillet :
 
 ## Où trouver un stage d'été en Tunisie ?
 
-- **Nextward.** Parcourez les [stages d'été](/fr/opportunities/internships?program_type=summer), filtrez par domaine et par ville, enregistrez votre recherche et postulez sur la page d'origine.
+- **{site}.** Parcourez les [stages d'été](/fr/opportunities/internships?program_type=summer), filtrez par domaine et par ville, enregistrez votre recherche et postulez sur la page d'origine.
 - **Le service des stages de votre école.** Certaines entreprises y envoient directement leurs offres, et l'équipe sait quelles entreprises ont déjà accueilli des étudiants.
 - **Les sites des entreprises et LinkedIn.** Les grandes entreprises lancent souvent une campagne de stages d'été avec une date limite.
 - **Les entreprises publiques, banques et administrations.** Elles accueillent beaucoup de stagiaires, mais les démarches peuvent être lentes. En juillet 2025, La Presse racontait le cas d'un étudiant accepté dans une banque publique, resté des semaines sans nouvelles avant le début de son stage. Demandez tôt la date de début et le nom de la personne à contacter.

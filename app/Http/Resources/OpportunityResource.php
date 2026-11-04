@@ -91,11 +91,11 @@ class OpportunityResource extends JsonResource
             'posted_at' => $this->posted_at?->toIso8601String(),
             'posted_label' => $this->posted_at
                 ? __('Posted :time', ['time' => $this->posted_at->diffForHumans()])
-                : __('Added to Nextward :time', ['time' => $this->first_seen_at?->diffForHumans() ?? __('recently')]),
+                : __('Added to :app :time', ['app' => config('app.name'), 'time' => $this->first_seen_at?->diffForHumans() ?? __('recently')]),
             'first_seen_at' => $this->first_seen_at?->toIso8601String(),
             'last_verified_at' => $this->last_verified_at?->toIso8601String(),
             'last_verified_label' => $this->last_verified_at?->diffForHumans(),
-            'source_name' => $source?->importSource?->name ?? ($this->origin === 'native' ? __('Posted on Nextward') : null),
+            'source_name' => $source?->importSource?->name ?? ($this->origin === 'native' ? __('Posted on :app', ['app' => config('app.name')]) : null),
             'source_url' => $source?->source_url,
             'company' => [
                 'id' => $company?->id,

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Ai\OpportunityClassifier;
-use App\Ai\SourceDiscovery;
 use App\Importing\CandidateProfiles;
 use App\Importing\OpportunityImporter;
 use App\Importing\OpportunityNormalizer;
@@ -32,7 +31,7 @@ class OpportunityImportTest extends TestCase
         parent::setUp();
         $this->travelTo(Carbon::parse('2026-10-15 10:00:00', 'UTC'));
         SourceHttp::$resolveUsing = fn () => ['93.184.216.34'];
-        config(['importer.csv_path' => sys_get_temp_dir().'/nextward-test-'.uniqid().'.csv']);
+        config(['importer.csv_path' => sys_get_temp_dir().'/opportunities-test-'.uniqid().'.csv']);
         Field::create(['name' => 'Web Development']);
         // Most tests here cover other rules with any kind of title; the scope tests turn it back on.
         config(['importer.scope' => null]);
@@ -138,14 +137,6 @@ class OpportunityImportTest extends TestCase
         $this->travel(1)->days();
         app(OpportunityImporter::class)->run(ImportSource::sole(), 100);
         $this->assertSame(2, Opportunity::count());
-    }
-
-    public function test_discovery_turns_down_tunisian_sites(): void
-    {
-        $result = app(SourceDiscovery::class)->store(['provider' => 'sitemap', 'board' => 'https://www.example.tn/sitemap.xml', 'company' => 'Example']);
-
-        $this->assertSame(['skipped', 'Rejected: Nextward no longer reads Tunisian job sites.'], [$result[0], $result[2]]);
-        $this->assertFalse(ImportSource::exists());
     }
 
     public function test_board_import_keeps_recent_reachable_roles_and_reads_the_list_payload(): void
@@ -585,51 +576,6 @@ class OpportunityImportTest extends TestCase
 
         $this->travel(3)->days();
         $this->artisan('opportunities:import-csv')->expectsOutputToContain('0 added, 0 already here, 1 skipped.')->assertSuccessful();
-    }
-
-    public function test_suggested_sources_are_checked_and_saved_switched_off(): void
-    {
-        Http::fake([
-            '*/robots.txt' => Http::response('', 404),
-            'boards-api.greenhouse.io/v1/boards/tunisoft/jobs' => Http::response(['jobs' => [['id' => 1, 'title' => 'Developer', 'absolute_url' => 'https://job-boards.greenhouse.io/tunisoft/jobs/1']]]),
-            'boards-api.greenhouse.io/v1/boards/empty/jobs' => Http::response(['jobs' => []]),
-        ]);
-        $discovery = app(SourceDiscovery::class);
-        $suggest = fn (string $board) => $discovery->store(['provider' => 'greenhouse', 'board' => $board, 'company' => 'TuniSoft', 'job_path_prefix' => '', 'why' => 'Hires developers in Tunis.']);
-
-        $this->assertSame('added', $suggest('tunisoft')[0]);
-        $this->assertSame('skipped', $suggest('tunisoft')[0]);
-        $this->assertSame('skipped', $suggest('empty')[0]);
-        $this->assertSame('skipped', $suggest('https://boards.greenhouse.io/x')[0]);
-
-        $source = ImportSource::sole();
-        $this->assertSame(['greenhouse-tunisoft', false, 'pending'], [$source->key, $source->enabled, $source->permission_status]);
-        $this->assertSame(['boards-api.greenhouse.io', 'job-boards.greenhouse.io'], $source->allowed_domains);
-    }
-
-    public function test_openai_discovery_saves_the_sources_it_suggests(): void
-    {
-        $this->useOpenAi();
-        $call = ['type' => 'function_call', 'id' => 'fc_1', 'call_id' => 'call_1', 'name' => 'suggest_source', 'status' => 'completed',
-            'arguments' => json_encode(['provider' => 'greenhouse', 'board' => 'tunisoft', 'company' => 'TuniSoft', 'job_path_prefix' => '', 'why' => 'Hires developers in Tunis.'])];
-        Http::fake([
-            '*/robots.txt' => Http::response('', 404),
-            'boards-api.greenhouse.io/v1/boards/tunisoft/jobs' => Http::response(['jobs' => [['id' => 1, 'title' => 'Developer', 'absolute_url' => 'https://job-boards.greenhouse.io/tunisoft/jobs/1']]]),
-            'api.openai.com/v1/responses' => Http::sequence()
-                ->push($this->openAiReply([['type' => 'web_search_call', 'id' => 'ws_1', 'status' => 'completed'], $call]))
-                ->push($this->openAiReply([$this->openAiText('Saved one source.')])),
-        ]);
-
-        $this->artisan('opportunities:discover --max=1')->expectsOutputToContain('1 new source saved for review in Imports.')
-            ->expectsOutputToContain('and 1 web searches.')->assertSuccessful();
-
-        $source = ImportSource::sole();
-        $this->assertSame(['greenhouse-tunisoft', false], [$source->key, $source->enabled]);
-        $this->assertStringStartsWith('Suggested by OpenAI on', $source->permission_notes);
-        $requests = Http::recorded(fn ($request) => str_ends_with($request->url(), '/responses'))->map(fn ($pair) => $pair[0]->data())->values();
-        $this->assertSame('gpt-5.5', $requests[0]['model']);
-        $this->assertContains('web_search', collect($requests[0]['tools'])->pluck('type')->all());
-        $this->assertSame('call_1', collect($requests[1]['input'])->firstWhere('type', 'function_call_output')['call_id']);
     }
 
     public function test_follow_up_batches_reuse_the_saved_backlog(): void

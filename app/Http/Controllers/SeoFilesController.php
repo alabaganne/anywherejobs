@@ -23,20 +23,20 @@ class SeoFilesController extends Controller
     public function llms()
     {
         $base = rtrim(config('app.url'), '/');
-        $brand = config('nextward_public.brand');
+        $brand = config('site.brand');
         $copy = PublicSeo::copy('en');
         $open = Opportunity::available()->selectRaw('kind, count(*) as total')->groupBy('kind')->pluck('total', 'kind');
         $link = fn (string $title, string $path, string $note = '') => "- [{$title}]({$base}{$path})".($note ? ": {$note}" : '');
 
         $lines = [
-            '# Nextward', '',
+            '# '.config('app.name'), '',
             '> '.$brand['description'], '',
             'Key facts:',
             '- Website: '.$base,
             '- Audience: everyone looking for work, from students (PFE and summer internships, graduate programmes, first jobs) to experienced people (full-time, part-time, contract and remote roles).',
-            '- Price: browsing, saving, applying, alerts and tracking are free. AI tools that fill a profile from a resume and tailor a CV and cover letter to a role are free while Nextward launches.',
+            '- Price: browsing, saving, applying, alerts and tracking are free. AI tools that fill a profile from a resume and tailor a CV and cover letter to a role are free while '.config('app.name').' launches.',
             '- Coverage: internships and jobs around the world. Each listing says who can apply when the source does, and an "Open worldwide" filter shows roles anyone can apply to.',
-            '- Sources: employers publish directly on Nextward; other listings come from approved public sources, are checked daily, and always link to the original listing and application page.',
+            '- Sources: employers publish directly on '.config('app.name').'; other listings come from approved public sources, are checked daily, and always link to the original listing and application page.',
             '- Open listings right now: '.(int) ($open['internship'] ?? 0).' internships and '.(int) ($open['job'] ?? 0).' jobs.',
             '- Languages: every page and every listing in French and English; listings keep their original text too.',
             '- Founder: '.$brand['founder']['name'].' ('.$brand['founder']['url'].')',
@@ -58,10 +58,28 @@ class SeoFilesController extends Controller
         }
         $lines[] = '';
         $lines[] = '## About';
-        $lines[] = $link('About Nextward', '/about');
+        $lines[] = $link('About '.config('app.name'), '/about');
         $lines[] = $link('Contact', '/contact');
         $lines[] = $link('Sitemap', '/sitemap.xml');
         return $this->text(implode("\n", $lines)."\n", 'text/markdown');
+    }
+
+    public function manifest()
+    {
+        $brand = config('site.brand');
+        return response()->json([
+            'name' => config('app.name'),
+            'short_name' => config('app.name'),
+            'description' => 'IT internships and jobs worldwide.',
+            'start_url' => '/',
+            'display' => 'standalone',
+            'background_color' => $brand['background_color'],
+            'theme_color' => $brand['theme_color'],
+            'icons' => [
+                ['src' => $brand['icon_small'], 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => $brand['icon'], 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+            ],
+        ], 200, ['Content-Type' => 'application/manifest+json']);
     }
 
     public function indexNowKey()

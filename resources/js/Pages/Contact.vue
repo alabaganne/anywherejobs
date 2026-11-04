@@ -4,6 +4,7 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/Public.vue';
 import Sparkle from '@/Shared/Sparkle.vue';
 import { previousPageUrl } from '@/composables/usePreviousPage';
+import { siteName } from '@/brand';
 
 const page = usePage();
 const fr = computed(() => page.props.locale === 'fr');
@@ -15,7 +16,7 @@ const contactEmail = 'alabaganne9@gmail.com';
 const topics = computed(() => [
 	{ value: 'help', icon: 'lifebuoy', label: text('Get help', 'Obtenir de l’aide'), hint: text('Stuck with your account, an application or a page.', 'Bloqué avec votre compte, une candidature ou une page.'), placeholder: text('Tell us what you are trying to do and where you are stuck.', 'Dites-nous ce que vous essayez de faire et où vous bloquez.') },
 	{ value: 'bug', icon: 'bug', label: text('Report a bug', 'Signaler un bug'), hint: text('Something is broken, wrong or will not load.', 'Quelque chose ne marche pas, s’affiche mal ou ne charge pas.'), placeholder: text('What did you do, what did you expect, and what happened instead?', 'Qu’avez-vous fait, à quoi vous attendiez-vous et que s’est-il passé ?') },
-	{ value: 'feature', icon: 'light-bulb', label: text('Suggest a feature', 'Proposer une idée'), hint: text('Something Nextward should do or do better.', 'Ce que Nextward devrait faire, ou mieux faire.'), placeholder: text('What would you like Nextward to do, and how would it help you?', 'Que voudriez-vous que Nextward fasse, et en quoi cela vous aiderait ?') },
+	{ value: 'feature', icon: 'light-bulb', label: text('Suggest a feature', 'Proposer une idée'), hint: text(`Something ${siteName()} should do or do better.`, `Ce que ${siteName()} devrait faire, ou mieux faire.`), placeholder: text(`What would you like ${siteName()} to do, and how would it help you?`, `Que voudriez-vous que ${siteName()} fasse, et en quoi cela vous aiderait ?`) },
 	{ value: 'listing', icon: 'exclamation-triangle', label: text('Problem with a listing', 'Problème avec une offre'), hint: text('Wrong details, a dead link or a suspicious role.', 'Infos fausses, lien mort ou offre suspecte.'), placeholder: text('What is wrong with this listing?', 'Quel est le problème avec cette offre ?') },
 	{ value: 'business', icon: 'briefcase', label: text('Hiring or partnership', 'Recrutement ou partenariat'), hint: text('Post roles, share a job feed or work with us.', 'Publier des offres, partager un flux ou travailler avec nous.'), placeholder: text('Tell us about your company or project.', 'Parlez-nous de votre entreprise ou de votre projet.') },
 	{ value: 'other', icon: 'chat-alt-2', label: text('Something else', 'Autre chose'), hint: text('Any other question or comment.', 'Toute autre question ou remarque.'), placeholder: text('How can we help?', 'Comment pouvons-nous vous aider ?') },
@@ -67,7 +68,7 @@ const submit = () => form
 						<p class="hero-lead">{{ text('Ask for help with anything, report a bug or suggest a feature. We read every message and answer by email.', 'Demandez de l’aide sur n’importe quel sujet, signalez un bug ou proposez une idée. Nous lisons chaque message et répondons par e-mail.') }}</p>
 					</div>
 					<figure class="hero-stage w-[min(100%,320px)]">
-						<img src="/nextward-assets/mascots/04-mentor-pointing.svg" alt="" width="768" height="768" fetchpriority="high" />
+						<img src="/site-assets/mascots/04-mentor-pointing.svg" alt="" width="768" height="768" fetchpriority="high" />
 						<Sparkle style="top: 14%; right: 10%; --i: 0" />
 						<Sparkle class="is-sky" style="top: 30%; left: 12%; width: 14px; height: 14px; --i: 1" />
 					</figure>

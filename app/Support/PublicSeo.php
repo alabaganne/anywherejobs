@@ -31,19 +31,19 @@ class PublicSeo
             '/' => 'home',
             '/about' => 'about', '/contact' => 'contact', '/privacy' => 'privacy', '/terms' => 'terms', '/blog' => 'blog', default => null,
         };
-        $copy = $texts[$key] ?? ['title' => 'Nextward', 'description' => ''];
+        $copy = $texts[$key] ?? ['title' => config('app.name'), 'description' => ''];
         $seo = self::base($request, $copy['title'], $copy['description'], self::isPublic($request));
         if ($key) {
             $seo['alternates'] = self::alternates($path);
         }
         if ($key === 'home') {
             $seo['structured_data'] = [self::organization(), [
-                '@context' => 'https://schema.org', '@type' => 'WebSite', '@id' => self::url('/').'#website', 'name' => 'Nextward', 'url' => self::url('/'),
+                '@context' => 'https://schema.org', '@type' => 'WebSite', '@id' => self::url('/').'#website', 'name' => config('app.name'), 'url' => self::url('/'),
                 'inLanguage' => $fr ? 'fr' : 'en', 'publisher' => ['@id' => self::url('/').'#organization'],
                 'potentialAction' => ['@type' => 'SearchAction', 'target' => self::url('/opportunities').'?search={search_term_string}', 'query-input' => 'required name=search_term_string'],
             ], [
                 '@context' => 'https://schema.org', '@type' => 'FAQPage', 'inLanguage' => $fr ? 'fr' : 'en',
-                'mainEntity' => array_map(fn ($item) => ['@type' => 'Question', 'name' => $item['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']]], config('nextward_public.faq.'.($fr ? 'fr' : 'en'), [])),
+                'mainEntity' => array_map(fn ($item) => ['@type' => 'Question', 'name' => $item['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']]], config('site.faq.'.($fr ? 'fr' : 'en'), [])),
             ]];
         }
         if ($key === 'about') {
@@ -67,7 +67,7 @@ class PublicSeo
     public static function post(array $post, ?array $translation = null): array
     {
         $fr = $post['locale'] === 'fr';
-        $seo = self::base(request(), $post['title'].' | Nextward', $post['description'], !$post['draft']);
+        $seo = self::base(request(), $post['title'].' | '.config('app.name'), $post['description'], !$post['draft']);
         $seo['canonical'] = Blog::url($post);
         $seo['type'] = 'article';
         $seo['published_time'] = $post['published_at'];
@@ -93,7 +93,7 @@ class PublicSeo
             'author' => self::founder(), 'publisher' => self::organization(false), 'isPartOf' => ['@type' => 'Blog', 'url' => $blog],
         ], [
             '@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
-                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Nextward', 'item' => self::url($fr ? '/fr' : '/')],
+                ['@type' => 'ListItem', 'position' => 1, 'name' => config('app.name'), 'item' => self::url($fr ? '/fr' : '/')],
                 ['@type' => 'ListItem', 'position' => 2, 'name' => $fr ? 'Guides carrière' : 'Career guides', 'item' => $blog],
                 ['@type' => 'ListItem', 'position' => 3, 'name' => $post['title'], 'item' => $seo['canonical']],
             ],
@@ -115,12 +115,12 @@ class PublicSeo
         $about = trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags((string) $company->about))));
         $description = $fr
             ? ($openRoles
-                ? Str::limit("{$openRoles} ".($openRoles === 1 ? 'offre ouverte' : 'stages et emplois ouverts')." chez {$name}".($location ? " ({$location})" : '').'. '.($about ?: 'Consultez les exigences, le lieu et la façon de postuler sur Nextward.'), 155)
-                : Str::limit($about ?: "{$name} sur Nextward : profil de l’entreprise et anciens stages et emplois.", 155))
+                ? Str::limit("{$openRoles} ".($openRoles === 1 ? 'offre ouverte' : 'stages et emplois ouverts')." chez {$name}".($location ? " ({$location})" : '').'. '.($about ?: 'Consultez les exigences, le lieu et la façon de postuler sur '.config('app.name').'.'), 155)
+                : Str::limit($about ?: "{$name} sur ".config('app.name')." : profil de l’entreprise et anciens stages et emplois.", 155))
             : ($openRoles
-                ? Str::limit("{$openRoles} open ".($openRoles === 1 ? 'opportunity' : 'internships and jobs')." at {$name}".($location ? " ({$location})" : '').'. '.($about ?: 'See the requirements, location and how to apply on Nextward.'), 155)
-                : Str::limit($about ?: "{$name} on Nextward: company profile and past internships and jobs.", 155));
-        $seo = self::base(request(), ($fr ? "Stages et emplois chez {$name}" : $name.' internships and jobs').' | Nextward', $description, $company->isIndexable($openRoles));
+                ? Str::limit("{$openRoles} open ".($openRoles === 1 ? 'opportunity' : 'internships and jobs')." at {$name}".($location ? " ({$location})" : '').'. '.($about ?: 'See the requirements, location and how to apply on '.config('app.name').'.'), 155)
+                : Str::limit($about ?: "{$name} on ".config('app.name').": company profile and past internships and jobs.", 155));
+        $seo = self::base(request(), ($fr ? "Stages et emplois chez {$name}" : $name.' internships and jobs').' | '.config('app.name'), $description, $company->isIndexable($openRoles));
         $seo['canonical'] = $company->publicUrl($fr ? 'fr' : 'en');
         $seo['alternates'] = self::pairs($company->publicUrl('en'), $company->publicUrl('fr'));
         if ($company->logo && filter_var($company->logo, FILTER_VALIDATE_URL)) {
@@ -161,9 +161,9 @@ class PublicSeo
     public static function candidates(): array
     {
         $fr = request()->is('fr', 'fr/*');
-        $seo = self::base(request(), $fr ? 'Profils de candidats | Nextward' : 'Candidate profiles | Nextward', $fr
-            ? 'Des étudiants et des professionnels qui ont choisi de rendre leur profil public sur Nextward.'
-            : 'Students and professionals who chose to make their profile public on Nextward.', false);
+        $seo = self::base(request(), $fr ? 'Profils de candidats | '.config('app.name') : 'Candidate profiles | '.config('app.name'), $fr
+            ? 'Des étudiants et des professionnels qui ont choisi de rendre leur profil public sur '.config('app.name').'.'
+            : 'Students and professionals who chose to make their profile public on '.config('app.name').'.', false);
         $seo['alternates'] = self::pairs(self::url('/candidates'), self::url('/fr/candidates'));
         return $seo;
     }
@@ -173,7 +173,7 @@ class PublicSeo
         $fr = request()->is('fr/*');
         $name = $candidate->user->name;
         $about = trim(preg_replace('/\s+/u', ' ', strip_tags((string) $candidate->about)));
-        $seo = self::base(request(), $name.' | Nextward', Str::limit($candidate->headline ?: ($about ?: ($fr ? "Profil de {$name} sur Nextward." : "{$name}'s profile on Nextward.")), 155), false);
+        $seo = self::base(request(), $name.' | '.config('app.name'), Str::limit($candidate->headline ?: ($about ?: ($fr ? "Profil de {$name} sur ".config('app.name')."." : "{$name}'s profile on ".config('app.name').".")), 155), false);
         $seo['canonical'] = $candidate->publicUrl($fr ? 'fr' : 'en');
         $seo['alternates'] = self::pairs($candidate->publicUrl('en'), $candidate->publicUrl('fr'));
         return $seo;
@@ -181,10 +181,10 @@ class PublicSeo
 
     public static function organization(bool $full = true): array
     {
-        $brand = config('nextward_public.brand');
+        $brand = config('site.brand');
         $organization = [
-            '@type' => 'Organization', '@id' => self::url('/').'#organization', 'name' => 'Nextward', 'url' => self::url('/'),
-            'logo' => ['@type' => 'ImageObject', 'url' => self::url($brand['logo']), 'width' => 1254, 'height' => 1254],
+            '@type' => 'Organization', '@id' => self::url('/').'#organization', 'name' => config('app.name'), 'url' => self::url('/'),
+            'logo' => ['@type' => 'ImageObject', 'url' => self::url($brand['icon']), 'width' => 512, 'height' => 512],
         ];
         if (!$full) return $organization;
         return ['@context' => 'https://schema.org'] + $organization + array_filter([
@@ -196,7 +196,7 @@ class PublicSeo
 
     private static function founder(): array
     {
-        $founder = config('nextward_public.brand.founder');
+        $founder = config('site.brand.founder');
         return array_filter(['@type' => 'Person', 'name' => $founder['name'], 'url' => $founder['url'], 'sameAs' => $founder['same_as'] ?: null]);
     }
 
@@ -226,7 +226,7 @@ class PublicSeo
         $text = $opportunity->descriptionFor($locale);
         $company = $opportunity->company?->user?->name ?: $opportunity->company?->name;
         $description = Str::limit(trim(html_entity_decode(strip_tags($text))), 155);
-        $seo = self::base(request(), $title.($company ? ($fr ? ' chez ' : ' at ').$company : '').' | Nextward', $description, $opportunity->isOpen() && $readable);
+        $seo = self::base(request(), $title.($company ? ($fr ? ' chez ' : ' at ').$company : '').' | '.config('app.name'), $description, $opportunity->isOpen() && $readable);
         $seo['canonical'] = $opportunity->publicUrl($locale);
         $seo['locale'] = $fr ? 'fr_FR' : 'en_US';
         $locales = $opportunity->availableLocales();
@@ -254,7 +254,7 @@ class PublicSeo
             'description' => '<p>'.nl2br(e(trim(strip_tags($text)))).'</p>',
             'datePosted' => $opportunity->posted_at->toIso8601String(), 'url' => $seo['canonical'],
             'hiringOrganization' => array_filter(['@type' => 'Organization', 'name' => $company, 'sameAs' => $opportunity->company?->website, 'logo' => $opportunity->company?->logo]),
-            'identifier' => ['@type' => 'PropertyValue', 'name' => 'Nextward', 'value' => (string) $opportunity->id],
+            'identifier' => ['@type' => 'PropertyValue', 'name' => config('app.name'), 'value' => (string) $opportunity->id],
             'directApply' => $opportunity->application_mode === 'internal',
         ];
         $employmentTypes = array_values(array_intersect((array) $opportunity->employment_types, ['FULL_TIME', 'PART_TIME', 'CONTRACTOR', 'TEMPORARY', 'INTERN', 'VOLUNTEER', 'PER_DIEM', 'OTHER']));
@@ -307,7 +307,7 @@ class PublicSeo
             'title' => $title, 'description' => $description,
             'canonical' => rtrim(config('app.url'), '/').'/'.ltrim($request->path(), '/').($query ? '?'.http_build_query($query) : ''),
             'robots' => $index ? 'index, follow, max-image-preview:large' : 'noindex, follow',
-            'image' => self::url(config('nextward_public.brand.og_image')), 'image_alt' => $request->is('fr', 'fr/*') ? 'Nextward : stages et emplois en Tunisie et à l’international' : 'Nextward: internships and jobs in Tunisia and worldwide',
+            'image' => self::url(config('site.brand.og_image')), 'image_alt' => $request->is('fr', 'fr/*') ? config('app.name').' : stages et emplois IT dans le monde entier' : config('app.name').': IT internships and jobs worldwide',
             'locale' => $request->is('fr', 'fr/*') ? 'fr_FR' : 'en_US',
             'structured_data' => [], 'alternates' => [],
         ];
@@ -335,6 +335,6 @@ class PublicSeo
 
     public static function copy(string $locale = 'en'): array
     {
-        return config('nextward_public.'.$locale);
+        return config('site.'.$locale);
     }
 }

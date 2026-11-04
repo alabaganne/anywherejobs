@@ -1,8 +1,8 @@
 {
-    "Added to Nextward :time": "Ajouté sur Nextward :time",
+    "Added to :app :time": "Ajouté sur :app :time",
     "Location not specified": "Lieu non précisé",
     "Posted :time": "Publié :time",
-    "Posted on Nextward": "Publié sur Nextward",
+    "Posted on :app": "Publié sur :app",
     "recently": "récemment",
     "Your session expired. Please try again.": "Votre session a expiré. Veuillez réessayer.",
     "Choose whether you want to find opportunities or hire candidates.": "Indiquez si vous cherchez une opportunité ou si vous recrutez.",

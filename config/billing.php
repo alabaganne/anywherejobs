@@ -9,7 +9,7 @@ return [
     'monthly_credits' => (int) env('BILLING_MONTHLY_CREDITS', 5),
     // Each credit covers the first draft of a kit or a resume translation plus this many rewrites.
     'rewrites_per_kit' => (int) env('BILLING_REWRITES_PER_KIT', 3),
-    // While Nextward is in beta, payments are locked and candidates with a verified email can get this many free credits as often as they like.
+    // While the site is in beta, payments are locked and candidates with a verified email can get this many free credits as often as they like.
     'beta' => (bool) env('BILLING_BETA', true),
     'beta_credits' => (int) env('BILLING_BETA_CREDITS', 100),
 

@@ -36,6 +36,7 @@ require __DIR__.'/auth.php';
 
 
 Route::get('/robots.txt', [SeoFilesController::class, 'robots']);
+Route::get('/site.webmanifest', [SeoFilesController::class, 'manifest']);
 Route::get('/llms.txt', [SeoFilesController::class, 'llms']);
 Route::get('/indexnow-key.txt', [SeoFilesController::class, 'indexNowKey']);
 
@@ -53,6 +54,10 @@ Route::permanentRedirect('/for-students', '/');
 Route::permanentRedirect('/for-professionals', '/');
 Route::permanentRedirect('/fr/for-students', '/fr');
 Route::permanentRedirect('/fr/for-professionals', '/fr');
+// Image paths from before the site was renamed.
+Route::permanentRedirect('/brand/nextward/Nextward-colorful-symbol.png', '/brand/symbol.png');
+Route::get('/brand/nextward/{file}', fn (string $file) => redirect('/brand/'.$file, 301))->where('file', '[A-Za-z0-9._-]+');
+Route::get('/nextward-assets/{path}', fn (string $path) => redirect('/site-assets/'.$path, 301))->where('path', '[A-Za-z0-9._/-]+');
 Route::prefix('fr')->name('fr.')->group(function () {
     Route::get('/', [PublicPageController::class, 'home'])->name('home');
     Route::get('/opportunities', [OpportunityController::class, 'index'])->name('opportunities');

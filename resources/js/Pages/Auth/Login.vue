@@ -12,7 +12,7 @@
 		</div>
 		<breeze-button :disabled="form.processing">{{ form.processing ? text('Logging in…', 'Connexion…') : text('Log in', 'Se connecter') }}<icon name="arrow-right" /></breeze-button>
 	</form>
-	<p :class="classes.switchRow">{{ text('New here?', 'Nouveau sur Nextward ?') }} <Link :href="`${prefix}/register`" :class="classes.link">{{ text('Create an account', 'Créer un compte') }}</Link></p>
+	<p :class="classes.switchRow">{{ text('New here?', `Nouveau sur ${appName} ?`) }} <Link :href="`${prefix}/register`" :class="classes.link">{{ text('Create an account', 'Créer un compte') }}</Link></p>
 </template>
 
 <script>

@@ -7,6 +7,7 @@ import PublicLayout from '@/Layouts/Public.vue';
 import ProfileBanner from '@/Components/Candidate/ProfileBanner.vue';
 import SkillList from '@/Components/Candidate/SkillList.vue';
 import { isAppPath } from '@/utils/url';
+import { siteName } from '@/brand';
 
 // /app/talent/{slug} opens the profile inside the workspace; /candidates/{slug} is the public page.
 defineOptions({
@@ -37,7 +38,7 @@ const history = computed(() => [
 const button = 'inline-flex items-center justify-center gap-1.5 font-semibold text-sm px-4 py-2.5 rounded-[10px] transition-colors';
 const preview = computed(() => ({
 	pending: text('Preview. This profile is waiting for review and is not public yet.', 'Aperçu. Ce profil attend une validation et n’est pas encore public.'),
-	declined: text('Preview. This profile was not approved, so only you and the Nextward team can see it.', 'Aperçu. Ce profil n’a pas été validé : seuls vous et l’équipe Nextward pouvez le voir.'),
+	declined: text(`Preview. This profile was not approved, so only you and the ${siteName()} team can see it.`, `Aperçu. Ce profil n’a pas été validé : seuls vous et l’équipe ${siteName()} pouvez le voir.`),
 	null: text('Preview. This profile is private.', 'Aperçu. Ce profil est privé.'),
 }[props.status] ?? null));
 </script>

@@ -33,7 +33,7 @@ Les étudiants postulent avec plus de confiance quand l'offre explique :
 - ce qu'ils vont construire ou soutenir ;
 - les compétences demandées.
 
-Évitez les descriptions vagues et listez les vraies missions. Pour vous faire une idée, regardez comment sont présentées les [offres de stage](/fr/opportunities/internships) sur Nextward.
+Évitez les descriptions vagues et listez les vraies missions. Pour vous faire une idée, regardez comment sont présentées les [offres de stage](/fr/opportunities/internships) sur {site}.
 
 ## Réduisez les freins à la candidature
 

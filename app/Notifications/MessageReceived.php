@@ -41,7 +41,7 @@ class MessageReceived extends Notification implements ShouldQueue
         $senderName = $sender->isCompany() ? ($sender->userable?->display_name ?? $sender->name) : $sender->name;
 
         return (new MailMessage)
-            ->subject($senderName.' sent you a message on Nextward')
+            ->subject($senderName.' sent you a message on '.config('app.name'))
             ->markdown('mail.message-received', [
                 'sender' => MailText::plain($senderName, 120),
                 'recipient' => MailText::plain(MailText::firstName($notifiable->name), 80),

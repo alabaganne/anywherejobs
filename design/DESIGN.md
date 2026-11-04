@@ -1,4 +1,4 @@
-# Nextward — Design Language
+# Sudo Jobs — Design Language
 
 This document is a workspace design reference retained from the earlier prototype.
 The implemented Vue components and current user-approved direction take precedence.
@@ -14,7 +14,7 @@ Tailwind 4, and Vite 8 integration.
 
 ## 1. Personality
 
-Nextward is a **calm, modern, trustworthy SaaS product** for students,
+Sudo Jobs is a **calm, modern, trustworthy SaaS product** for students,
 professionals and companies, covering internships and jobs.
 
 - **Clean, not flashy.** White space does the work. One accent colour, used with intent.

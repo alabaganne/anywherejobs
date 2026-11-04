@@ -39,7 +39,7 @@ watch([field, resume], reload);
 
 <template>
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
-		<PageHeader title="Talent" description="Candidates who chose to share their profile. The Nextward team checks each one before it shows here." />
+		<PageHeader title="Talent" :description="`Candidates who chose to share their profile. The ${appName} team checks each one before it shows here.`" />
 
 		<div class="flex items-center gap-3 mb-5 flex-wrap">
 			<label class="flex items-center gap-2.5 bg-white border border-line rounded-[12px] px-3.5 h-11 flex-1 min-w-[240px] focus-within:border-blue-500 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-blue-600">

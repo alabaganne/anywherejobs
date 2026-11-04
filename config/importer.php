@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'user_agent' => 'NextwardBot/1.0 (+'.rtrim(env('APP_URL', 'http://localhost'), '/').'/about)',
+    'user_agent' => str_replace(' ', '', config('app.name')).'Bot/1.0 (+'.rtrim(env('APP_URL', 'http://localhost'), '/').'/about)',
     'timezone' => 'Africa/Tunis',
     'max_run_seconds' => 240,
     'max_response_bytes' => 5 * 1024 * 1024,
@@ -16,6 +16,14 @@ return [
     'same_title' => 0.9,
     // New imported listings wait until their company's website is found and checked.
     'verify_companies' => (bool) env('OPPORTUNITY_VERIFY_COMPANIES', true),
+    // New listings are only published from sources of followed companies whose own website links to them
+    // (`companies:discover`, `companies:link-sources`); the rest go to the review queue.
+    'trusted_sources' => (bool) env('OPPORTUNITY_TRUSTED_SOURCES', true),
+    // The companies the site follows: how many new ones the AI looks for each day, and what to look for.
+    'registry' => [
+        'per_day' => (int) env('COMPANY_REGISTRY_PER_DAY', 2),
+        'brief' => env('COMPANY_REGISTRY_BRIEF', 'Look for employers that hire software engineers, web and mobile developers and data science and AI engineers, mid to senior level. Good fits: companies that hire fully remote from anywhere, including Tunisia or Africa; and companies in Europe or the USA that offer visa sponsorship or relocation for these roles, above all in Germany, the USA, France, Italy, Spain, Poland, Belgium and Romania.'),
+    ],
     // `opportunities:fetch` only adds listings posted in the last this many days.
     'fetch_max_age_days' => (int) env('OPPORTUNITY_FETCH_MAX_AGE_DAYS', 14),
     // Imports only add listings a candidate profile or a resume profile (`opportunities:profile`) wants.
@@ -26,7 +34,7 @@ return [
         'from' => env('OPPORTUNITY_PROFILES_FROM', 'admins'),
         'ignore_domains' => ['example.com'],
     ],
-    // Nextward is for IT roles: every import keeps only listings in this focus group. Empty takes every field.
+    // The site is for IT roles: every import keeps only listings in this focus group. Empty takes every field.
     'scope' => env('OPPORTUNITY_SCOPE', 'tech'),
     // Title keyword groups for the scope and `opportunities:fetch --focus=`. Lowercase, no accents, regex alternatives.
     'focus' => [

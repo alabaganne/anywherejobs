@@ -30,7 +30,7 @@ Remote jobs you can do from Tunisia exist, but many listings marked "remote" onl
 
 ## Where can I find remote jobs from Tunisia?
 
-- **Nextward.** The [remote from Tunisia](/opportunities/remote-from-tunisia) page lists roles where the source shows that people in Tunisia can apply. You can save your search and open the original application page from each listing.
+- **{site}.** The [remote from Tunisia](/opportunities/remote-from-tunisia) page lists roles where the source shows that people in Tunisia can apply. You can save your search and open the original application page from each listing.
 - **Career pages of remote-first companies.** Many fully remote companies publish the list of countries where they can hire. Check that list before anything else.
 - **Remote job boards.** They collect remote roles from many companies. Always filter or read by location, because many roles are limited to the US or Europe.
 - **LinkedIn.** Search for your role with the "remote" filter, then read each listing's location rules. Follow companies that hire across regions.
@@ -120,7 +120,7 @@ Be careful if a "recruiter":
 - sends you a cheque or money and asks you to send part of it back;
 - offers pay far above the market for very little work.
 
-Check that the company's website, email domain and LinkedIn page match. Apply through the original application page, which every Nextward listing links to, rather than through a link someone sent you.
+Check that the company's website, email domain and LinkedIn page match. Apply through the original application page, which every {site} listing links to, rather than through a link someone sent you.
 
 ## Sources
 

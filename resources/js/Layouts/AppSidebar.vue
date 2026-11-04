@@ -54,6 +54,7 @@ const main = computed(() => [
 const admin = computed(() => [
 	{ id: 'leads', label: 'Job leads', route: 'leads.index', icon: Target },
 	{ id: 'imports', label: 'Imports', icon: Database, children: [
+		{ id: 'imports.companies', label: 'Companies', route: 'imports.companies' },
 		{ id: 'imports.sources', label: 'Sources', route: 'imports.sources.index' },
 		{ id: 'imports.review', label: 'Review queue', route: 'imports.review', badge: badges.value.imports_review },
 		{ id: 'imports.reports', label: 'Reports', route: 'imports.reports', badge: badges.value.reports },
@@ -93,8 +94,8 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-blue-
 	>
 		<div class="flex items-center justify-between px-2.5 pb-6">
 			<Link :href="route('dashboard')" class="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-blue-400">
-				<img src="/brand/nextward/symbol-192.png" alt="" class="size-9 shrink-0" width="36" height="36">
-				<span class="font-display text-white text-[19px] font-semibold tracking-[-.01em]">Nextward</span>
+				<BrandLogo size="xs" dark />
+				<span class="font-display text-white text-[19px] font-semibold tracking-[-.01em]">{{ appName }}</span>
 			</Link>
 			<button class="hidden max-[900px]:grid place-items-center size-8 rounded-lg text-[#aeb9cf] hover:bg-white/10 hover:text-white" type="button" aria-label="Close navigation" @click="$emit('close')">
 				<X class="size-5" />
@@ -166,7 +167,7 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-blue-
 		<div class="flex-1"></div>
 
 		<div class="border-t border-white/[.07] pt-3 mt-4 flex flex-col gap-0.5">
-			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('home')" @click="$emit('close')">Nextward website</Link>
+			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('home')" @click="$emit('close')">{{ appName }} website</Link>
 			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('blog.index')" @click="$emit('close')">Career guides</Link>
 			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('contact')" @click="$emit('close')">Help and feedback</Link>
 		</div>

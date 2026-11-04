@@ -1,5 +1,5 @@
 <template>
-	<auth-heading :kicker="text('A fresh start', 'Un nouveau départ')" :description="text('Enter the email address you use for Nextward. We’ll send you a link to reset your password.', 'Saisissez l’adresse e-mail de votre compte Nextward. Nous vous enverrons un lien pour changer votre mot de passe.')">
+	<auth-heading :kicker="text('A fresh start', 'Un nouveau départ')" :description="text(`Enter the email address you use for ${appName}. We’ll send you a link to reset your password.`, `Saisissez l’adresse e-mail de votre compte ${appName}. Nous vous enverrons un lien pour changer votre mot de passe.`)">
 		<template v-if="fr">On vous aide<br />à revenir.</template>
 		<template v-else>Let’s get you<br />back in.</template>
 	</auth-heading>

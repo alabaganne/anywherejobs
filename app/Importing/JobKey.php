@@ -100,6 +100,29 @@ class JobKey
         return null;
     }
 
+    // The employer ATS board behind a link to a job, a board page or an embedded board: provider and slug, or null.
+    public static function board(?string $url): ?array
+    {
+        if (! $url) { return null; }
+        if ($ats = self::ats($url)) { return ['provider' => $ats['provider'], 'slug' => $ats['slug']]; }
+        $patterns = [
+            'greenhouse' => ['~boards(?:\.eu)?\.greenhouse\.io/embed/job_board(?:/js)?\?(?:[^"\'\s]*&(?:amp;)?)?for=([\w-]+)~i',
+                '~boards-api\.greenhouse\.io/v1/boards/([\w-]+)~i', '~(?:job-)?boards(?:\.eu)?\.greenhouse\.io/([\w-]+)~i'],
+            'lever' => ['~api\.lever\.co/v0/postings/([\w.-]+)~i', '~jobs\.(?:eu\.)?lever\.co/([\w.-]+)~i'],
+            'ashby' => ['~api\.ashbyhq\.com/posting-api/job-board/([^/?#"\'\s]+)~i', '~jobs\.ashbyhq\.com/([^/?#"\'\s]+)~i'],
+            'workable' => ['~apply\.workable\.com/api/v1/widget/accounts/([\w-]+)~i', '~apply\.workable\.com/(?!api/|j/)([\w-]+)~i'],
+            'recruitee' => ['~\b([\w-]+)\.recruitee\.com~i'],
+        ];
+        foreach ($patterns as $provider => $list) {
+            foreach ($list as $pattern) {
+                if (preg_match($pattern, $url, $m) && ! in_array($slug = strtolower(rawurldecode($m[1])), ['embed', 'api', 'www', 'app', 'v1', 'jobs'], true)) {
+                    return ['provider' => $provider, 'slug' => $slug];
+                }
+            }
+        }
+        return null;
+    }
+
     // The public board API for an ATS slug, as import sources store it.
     public static function boardUrl(string $provider, string $slug): ?string
     {

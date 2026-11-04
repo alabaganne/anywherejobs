@@ -21,6 +21,6 @@ See your application
 The {{ config('app.name') }} team
 
 <x-slot:subcopy>
-You get this email because you applied to this role on Nextward. If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
+You get this email because you applied to this role on {{ config('app.name') }}. If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
 </x-slot:subcopy>
 </x-mail::message>
