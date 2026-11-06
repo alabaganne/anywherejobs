@@ -43,7 +43,7 @@ const dismissMenu = (menu) => {
     menu.open = false;
     menu.querySelector('summary')?.focus();
 };
-const brandLink = 'focus-ring inline-flex items-center gap-2.5 rounded-lg text-[21px] font-semibold ';
+const brandLink = 'focus-ring inline-flex items-center rounded-lg ';
 const navLink = 'focus-ring relative py-2 text-[15px] tracking-[.06em] text-white/80 decoration-2 underline-offset-[10px] transition-colors duration-180 hover:text-white focus-visible:outline-white aria-[current=page]:text-white aria-[current=page]:underline';
 const footerLink = 'focus-ring w-fit rounded-[2px] tracking-[.06em] text-navy transition-colors duration-180 hover:text-brand';
 const helpLinks = computed(() => [
@@ -69,7 +69,7 @@ onBeforeUnmount(() => {
         <a href="#main" class="focus-ring sr-only z-50 rounded-lg bg-white px-4 py-2 font-semibold focus:not-sr-only focus:fixed focus:left-4 focus:top-4">{{ fr ? 'Aller au contenu' : 'Skip to content' }}</a>
         <header class="sticky top-0 z-40 text-white transition-colors duration-300 motion-reduce:transition-none" :class="scrolled ? 'bg-brand' : 'bg-navy'">
             <div class="public-container flex h-[84px] items-center justify-between gap-4 max-[768px]:h-[72px]">
-                <Link :href="prefix || '/'" :class="brandLink" class="focus-visible:outline-white"><BrandLogo size="sm" class="!h-9 [&>img]:!h-9 [&>img]:!w-9" /><span>{{ appName }}</span></Link>
+                <Link :href="prefix || '/'" :class="brandLink" class="focus-visible:outline-white"><BrandLogo wordmark dark size="sm" class="max-[768px]:[&>img]:!h-9" /></Link>
                 <nav :aria-label="fr ? 'Navigation principale' : 'Main navigation'" class="hidden xl:flex items-center gap-9">
                     <Link v-for="link in links" :key="link.href" :href="link.href" :class="navLink" :aria-current="isActive(link.href) ? 'page' : undefined">{{ link.label }}</Link>
                 </nav>
@@ -120,7 +120,7 @@ onBeforeUnmount(() => {
                 </div>
             </div>
             <div class="public-container mt-16 flex flex-wrap items-center justify-between gap-x-10 gap-y-6 pb-10 max-[768px]:mt-12">
-                <Link :href="prefix || '/'" :class="brandLink"><BrandLogo size="sm" class="[&>img]:!h-9 [&>img]:!w-9" /><span>{{ appName }}</span></Link>
+                <Link :href="prefix || '/'" :class="brandLink"><BrandLogo wordmark size="sm" /></Link>
                 <nav :aria-label="fr ? 'Pied de page' : 'Footer'" class="flex flex-wrap gap-x-9 gap-y-3 text-[15px]">
                     <Link v-for="link in links" :key="link.href" :href="link.href" :class="footerLink">{{ link.label }}</Link>
                     <Link :href="`${prefix}/contact`" :class="footerLink">Contact</Link>

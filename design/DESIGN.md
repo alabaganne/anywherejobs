@@ -1,4 +1,4 @@
-# Sudo Jobs — Design Language
+# Anywhere Jobs — Design Language
 
 This document is a workspace design reference retained from the earlier prototype.
 The implemented Vue components and current user-approved direction take precedence.
@@ -19,7 +19,7 @@ Tailwind 4, and Vite 8 integration.
 
 ## 1. Personality
 
-Sudo Jobs is a **calm, modern, trustworthy SaaS product** for students,
+Anywhere Jobs is a **calm, modern, trustworthy SaaS product** for students,
 professionals and companies, covering internships and jobs.
 
 - **Clean, not flashy.** White space does the work. One accent colour, used with intent.
@@ -88,8 +88,8 @@ one. No gradients. Initials are white, `font-medium`.
 
 One family everywhere: **Poppins** (`font-sans`, `font-body` and `font-display`
 all point at it), weights 400, 500 and 600. Keep text light like the template:
-body, labels and buttons 400, headings and numbers 500; 600 only for the logo
-and small count badges.
+body, labels and buttons 400, headings and numbers 500; 600 only for small
+count badges. The logo is a script wordmark drawn as shapes, not text (`BrandLogo.vue`).
 
 The woff2 files (Latin and Latin Extended) live in `resources/fonts/` and the
 `@font-face` rules in `resources/css/fonts.css`. Do not load fonts from Google

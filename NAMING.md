@@ -1,47 +1,58 @@
 # Naming
 
-The owner picked **Sudo Jobs** on 2 November 2026 and the site was renamed the same day. Later that day the owner decided to choose another name, so the name and the logo were each moved to one place first. On 4 November 2026 the owner chose **Openworld Jobs**; the rename is planned below and not done yet, so the site still says Sudo Jobs.
+The product is **Anywhere Jobs**, chosen by the owner on 6 November 2026 and renamed the same day. It was Sudo Jobs before (2 November); Openworld Jobs was picked on 4 November and dropped before any rename. The sections after "Changing the name" are kept as history.
 
-## Plan: rename to Openworld Jobs
+## Anywhere Jobs
 
-**Why:** it says global at once, echoes the site's "Open worldwide" filter, works for students and professionals, internships and jobs, and reads the same in French.
+**Why:** it says at once that people anywhere can find work, it matches the listings people in any country can apply to (`applicant_scope` `anywhere`) and the Open worldwide filter, it fits students and professionals, internships and jobs, and French speakers read it easily.
 
-**Domains** (registry lookups on 2 November 2026; check again before buying): openworldjobs.com, openworldjobs.dev, openworldjobs.app and openworldjobs.io were all unregistered. Buy the .com first, and the .dev or .app if you want a backup.
+- **Written form:** "Anywhere Jobs" in copy and titles; `anywherejobs` in domains, handles and the few ids that follow the name (the importer's `AnywhereJobsBot/1.0`, the reserved username `anywherejobs`).
+- **Logo:** the name in a baseball-style script with a swoosh, and a script A icon (`public/brand/README.md`).
+- **Sender:** `anywherejobs@alabaganne.com` until an Anywhere Jobs domain is verified in Resend.
 
-**Similar names:** no job board called Openworld or Open World Jobs turned up. Others using the words: the Open World Program (a US congressional exchange programme), a small "open world" company listed on Indeed India, and Open World School. That search covered US results only; run a trademark search in the EU and the US before spending on the brand.
+**Domains** (registry lookups on 6 November 2026; a check is not a hold, so register the ones you want soon):
 
-**Watch out for:** "open world" is a common video game term, and the full name is long, so plan a short form for tight spaces.
+| Domain | Status | Note |
+|---|---|---|
+| anywherejobs.io | Unregistered | |
+| anywherejobs.dev | Unregistered | Browsers always load .dev over HTTPS |
+| anywherejobs.app | Unregistered | |
+| anywherejobs.net | Unregistered | |
+| anywherejobs.com | Registered | Live site of AnywhereJobs, a recruiting firm in India that trains workers for jobs abroad; held since 2014, renewed to 2029 |
+| getanywherejobs.com, anywhere-jobs.com, anywherejobshq.com | Unregistered | .com options |
+| anywhere.jobs, anywherejobs.co, .ai, .tech, .careers | No DNS records | Registry not checked |
 
-### Decide first
+**Watch out for:** the AnywhereJobs firm above uses the same name for hiring abroad (trades and healthcare, not IT). Run a trademark search in the EU, the US and India before spending on the brand. "Anywhere" is common in remote job board names, so search traffic has to come from "IT jobs" words, not the name alone.
 
-1. **Written form:** "Openworld Jobs" (one word, as chosen), "OpenWorld Jobs" or "Open World Jobs". The domain and handles are `openworldjobs` either way.
-2. **Logo:** keep the `>_` terminal tile (it says IT, not "world"), or draw a new one that hints at the world, like a globe or a prompt over a globe.
-3. **Sender address:** `openworldjobs@alabaganne.com` until the new domain is verified in Resend, then an address on the new domain.
+## Rename to Anywhere Jobs (done)
 
-### Steps in the code
+Done on 6 November 2026:
 
-1. Set `'name' => env('APP_NAME', 'Openworld Jobs')` in `config/app.php`. Pages, titles, emails, the manifest, structured data, AI prompts and blog posts follow it; the bot name and the reserved username follow it too.
-2. If the logo changes, replace `public/brand/logo.svg`. Then run `php artisan brand:images` to rebuild the icons and the share image.
-3. Change `MAIL_FROM_ADDRESS` in `.env.example`, your `.env` and the docs.
-4. Replace "Sudo Jobs" in the docs: `AGENTS.md` (Name, Logo and Email rules), `README.md`, `design/`, `LANDING_PAGE_DESIGN.md`, `SEO.md`, `DEPLOY.md` and `VPS_DEPLOYMENT.md` (including the `sudojobs` service user, paths and Supervisor names), `FUTURE_PLANS.md`, `TODOS.md` and the business notes. Leave the history parts of this file as they are.
-5. Run `php artisan test` and `npm run build`, then check the home page, a listing, sign-in, the workspace sidebar and one email.
+- `config/app.php` holds the new name, so pages, titles, emails, the manifest, structured data, AI prompts, the bot name and the reserved username follow it.
+- New logo files in `public/brand`. `BrandLogo.vue` has a `wordmark` option, and the header, footer, sidebar, sign-in pages, error page, unsubscribe page, email header and share image show the wordmark instead of the icon and the name as text. `brand:images` now also writes `wordmark.png` for emails and `public/favicon.ico`.
+- Sender `anywherejobs@alabaganne.com` in `.env.example` and the docs.
+- Docs: "Sudo Jobs" and `sudojobs` are replaced everywhere except the history parts of this file; the VPS guides use the `anywherejobs` service user, paths and Supervisor names.
+- On a machine set up earlier, remove `APP_NAME` and `MAIL_FROM_NAME` from `.env`, because they override the name.
 
-Nothing else in the code spells the name out, and the session cookie and cache prefix don't follow it, so nobody is signed out.
+### Still to do (owner)
 
-### Outside the code (owner)
-
-- Buy the domain, point DNS at the server, set `APP_URL`, nginx `server_name` and the TLS certificate.
+- Buy the domain (anywherejobs.io or .dev as the main one, the others as backups), point DNS at the server, set `APP_URL`, nginx `server_name` and the TLS certificate.
 - Verify the domain in Resend and switch `MAIL_FROM_ADDRESS`.
 - Google sign-in and Gmail: rename the app on the OAuth consent screen and add the new redirect URIs.
 - Payments: set the store name and webhook URLs in Lemon Squeezy, Konnect and Flouci.
 - Add the domain to Google Search Console and submit the sitemap.
-- Claim `openworldjobs` handles where you plan to post (LinkedIn, X, GitHub).
+- Claim `anywherejobs` handles where you plan to post (LinkedIn, X, GitHub).
+- Run a trademark search in the EU, the US and India.
 - Optional: rename the project folder and the GitHub repository.
+
+## Openworld Jobs (dropped)
+
+Picked on 4 November 2026 because it says global at once and echoes the "Open worldwide" filter; openworldjobs.com, .dev, .app, .io and .net were unregistered (.net checked on 6 November). No job board used the name. Dropped on 6 November for Anywhere Jobs, before any rename: "open world" is a common video game term and the name is long.
 
 ## Changing the name
 
 1. Set the new name in `config/app.php` (`'name' => env('APP_NAME', '...')`).
-2. Run `php artisan brand:images` so the share image shows it.
+2. Redraw `public/brand/wordmark.svg` and `wordmark-white.svg`, which spell the name, then run `php artisan brand:images`.
 3. Update the docs that name the product (`AGENTS.md`, `README.md` and the others in the docs table).
 4. Outside the code: the domain and `APP_URL`, the sender address (`MAIL_FROM_ADDRESS`), the Google sign-in app name, the payment store names, and social handles.
 
@@ -118,13 +129,48 @@ After Sudo Jobs was set aside. Clashes come from a web search of US results; no 
 | Await Jobs | `async/await`, and "your next role awaits" | awaitjobs.com, .dev, .app, .io | only developers get the joke; an AWAIT.AI trademark exists for AI software |
 | Tilde | `~`, the home folder in every terminal prompt | tildehq.com, .dev, .app, .io; tildejobs.dev | many companies already use "Tilde"; says nothing about jobs |
 | Trova | from "find" in Italian, close to French "trouver" | trova.dev; trovajobs.dev | no IT feel; trova.com is taken |
-| Openworld Jobs | global, echoes the "Open worldwide" filter | openworldjobs.com, .dev, .app, .io | chosen, see the plan above |
+| Openworld Jobs | global, echoes the "Open worldwide" filter | openworldjobs.com, .dev, .app, .io | picked on 4 November, then dropped (see above) |
 | Caret Jobs | the text cursor mark | caretjobs.com, .dev, .app, .io | crowded name, easy to misspell |
 | Ping Jobs | `ping`, and "ping me" | pingjobs.dev, .app, .io | PingITJobs, a UK IT job board, exists |
 | Init Jobs | `init`, the first process that starts a computer | initjobs.dev, .app, .io | INIT SE and ]init[ AG hire a lot under that name |
 | Tera Jobs | terabyte, close to "terra" | terajobs.dev, .app, .io | sounds like TERRAJOBS, an HR brand |
 
 Dropped: Grep Jobs (GrepJob.com is a job board for software engineers), Lynx Jobs (many recruiters use it), Metier (a French staffing agency), Async Jobs (remote-only job boards with that name exist), Batch Jobs (close to Batch, a Paris software company), Byte Jobs (generic), CLI Jobs (hard to say), and Cronjobs, Devboard, Stackjobs and Firstcommit (every domain taken).
+
+### Round 4
+
+Checked on 6 November 2026. .com, .net and .io come from registry lookups; "no DNS" means a .dev or .app with no DNS records, which is likely but not sure to be free.
+
+| Name | Idea | Free | Notes |
+|---|---|---|---|
+| Packet Jobs | data packets reach any place on a network | packetjobs.com, .io, .net; .dev and .app no DNS | Packet was a cloud company Equinix bought |
+| Hello World Jobs | every coder's first program, and "world" says global | helloworldjobs.io; .dev and .app no DNS | .com and .net taken; the phrase is too common to rank on |
+| Next Hop | the next hop is where a packet goes next | nexthopjobs.com, .net; .dev no DNS | nexthop.dev, .app and .net taken; a networking startup is called Nexthop AI |
+| Polyglot Jobs | a developer who knows many languages, on a site in two | polyglotjobs.com, .io, .net; .dev and .app no DNS | may sound like translator jobs |
+| Exit Zero | `exit 0` means a command worked | exitzerojobs.com, .net | exitzero.dev, .app and .net taken; "exit" can sound like quitting |
+| Root Jobs | root access, and roots that grow | rootjobs.net; .dev and .app no DNS | .com taken; "root" is rude slang in Australia |
+| Fork Jobs | fork a repo to take your own path | forkjobs.net; .dev and .app no DNS | .com taken |
+| Worldcode Jobs | code for the whole world | worldcodejobs.com, .net | worldcode.dev taken; flat |
+
+Dropped: Prompt Jobs, Relocode, Devpassport, Hop Jobs and Boot Jobs (.com taken, or the wrong idea).
+
+### Round 5
+
+Checked the same way on 6 November 2026.
+
+| Name | Idea | Free | Notes |
+|---|---|---|---|
+| Anywhere Jobs | people in any country can apply | see above | chosen |
+| Jobyte | job + byte | jobyte.io, .net, getjobyte.com, joinjobyte.com; .dev and .app no DNS | jobyte.com is for sale on Afternic |
+| Tern Jobs | the Arctic tern flies farther than any animal; "your turn" | ternjobs.com, .io, .net; .dev no DNS | tern.dev taken; few people know the bird; Tern is a bike brand |
+| Next Stage Jobs | "stage" is an internship in French and a career step in English | nextstagejobs.com, .net; .dev no DNS | long |
+| Alt Tab Jobs | Alt+Tab switches windows, like switching jobs | alttabjobs.com, .net; .dev no DNS | alttab.dev taken; AltTab is a known Mac app |
+| Terminal Jobs | the terminal logo, and the airport terminal you leave from | terminaljobs.io, .net; .dev no DNS | .com taken; Terminal is a remote hiring company |
+| Git Hired | "get hired" | githired.io | .com, .dev, .app and .net taken |
+| Globyte | globe + byte | globyte.io, .net; .app no DNS | .com and .dev taken |
+| Upstream Jobs | the main open source project, and moving up | upstreamjobs.io, .net; .dev no DNS | .com taken; common word |
+
+Dropped: Pivot Jobs and Hexa Jobs (.com taken, weak idea).
 
 ## Rename to Sudo Jobs (done)
 

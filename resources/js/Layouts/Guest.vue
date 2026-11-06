@@ -5,7 +5,7 @@
 
 		<div class="grid min-h-svh grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] max-[900px]:block">
 			<aside class="line-art sticky top-0 flex h-svh flex-col justify-between gap-8 overflow-hidden bg-navy px-[clamp(28px,4.5vw,72px)] py-8 text-white short-screen:gap-5 short-screen:py-6 max-[1024px]:px-8 max-[900px]:hidden" :aria-label="text('Your next chapter', 'Votre prochaine étape')">
-				<Link :href="prefix || '/'" :class="brand" class="inline-flex self-start focus-visible:outline-white"><brand-logo size="sm" /><span>{{ appName }}</span></Link>
+				<Link :href="prefix || '/'" :class="brand" class="inline-flex self-start focus-visible:outline-white"><brand-logo wordmark dark size="sm" /></Link>
 				<div class="mx-auto w-full max-w-[440px]">
 					<p class="landing-label text-white/85">{{ text('Your next chapter', 'Votre prochaine étape') }}</p>
 					<h2 class="mt-4 text-[length:clamp(40px,4vw,58px)] leading-[1.12] font-medium max-[1024px]:text-[44px] lg:short-screen:text-[length:clamp(36px,3.4vw,48px)] [&_span]:text-blue-500">
@@ -24,7 +24,7 @@
 
 			<div class="flex min-h-svh min-w-0 flex-col">
 				<header class="flex h-[88px] items-center justify-end gap-6 px-[clamp(24px,4.5vw,72px)] max-[1024px]:px-8 max-[900px]:justify-between max-[900px]:bg-navy max-[900px]:text-white max-[540px]:h-[72px] max-[540px]:gap-4 max-[540px]:px-6">
-					<Link :href="prefix || '/'" :class="brand" class="hidden self-center max-[900px]:inline-flex max-[900px]:focus-visible:outline-white"><brand-logo size="sm" /><span>{{ appName }}</span></Link>
+					<Link :href="prefix || '/'" :class="brand" class="hidden self-center max-[900px]:inline-flex max-[900px]:focus-visible:outline-white"><brand-logo wordmark dark size="sm" /></Link>
 					<div class="flex items-center gap-4 sm:gap-6">
 						<a v-if="languageHref" :href="languageHref" :hreflang="fr ? 'en' : 'fr'" :lang="fr ? 'en' : 'fr'" :class="back">{{ fr ? 'English' : 'Français' }}</a>
 						<Link :href="prefix || '/'" :class="back"><icon name="arrow-left" class="size-4" /><span>{{ text('Back to home', 'Retour à l’accueil') }}</span></Link>
@@ -64,7 +64,7 @@ export default {
 	components: { Head },
 	data() {
 		return {
-			brand: 'focus-ring items-center gap-2.5 rounded-lg text-[21px] font-semibold [&_img]:!size-9',
+			brand: 'focus-ring items-center rounded-lg',
 			back: 'focus-ring inline-flex items-center gap-2.5 rounded-[3px] py-2 text-[14px] text-subtle transition-colors duration-180 hover:text-brand max-[900px]:text-mist max-[900px]:hover:text-white max-[900px]:focus-visible:outline-white max-[540px]:gap-[7px] max-[540px]:text-[12px]',
 			footerLink: 'focus-ring rounded-[2px] font-medium text-subtle hover:text-brand',
 		};

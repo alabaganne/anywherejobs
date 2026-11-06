@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
         JsonResource::withoutWrapping();
 
         // Shared here, not in the Inertia middleware, so error pages get them too.
-        \Inertia\Inertia::share('brand', fn () => ['name' => config('app.name'), 'logo' => config('site.brand.logo')]);
+        \Inertia\Inertia::share('brand', fn () => ['name' => config('app.name'), 'logo' => config('site.brand.logo'), 'wordmark' => config('site.brand.wordmark'), 'wordmark_white' => config('site.brand.wordmark_white')]);
 
         Relation::morphMap([
             'candidate' => \App\Models\Candidate::class,

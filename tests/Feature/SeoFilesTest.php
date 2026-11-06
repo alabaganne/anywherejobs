@@ -21,7 +21,7 @@ class SeoFilesTest extends TestCase
         $this->get('/about')->assertOk()
             ->assertInertia(fn ($page) => $page->where('brand.name', 'Renamed Site')->where('brand.logo', '/brand/other.svg'))
             ->assertSee('Renamed Site', false)
-            ->assertDontSee('Sudo Jobs', false);
+            ->assertDontSee('Anywhere Jobs', false);
     }
 
     public function test_robots_allows_public_pages_and_blocks_private_areas()

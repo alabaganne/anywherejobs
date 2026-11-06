@@ -25,7 +25,7 @@ const copy = computed(() => ({
 	<Head :title="`${copy.title} | ${appName}`" />
 	<main class="min-h-dvh grid place-items-center bg-paper-2 px-5 font-body text-ink" :lang="fr ? 'fr' : 'en'">
 		<div class="max-w-[440px] text-center">
-			<BrandLogo size="lg" :label="appName" class="mx-auto mb-6" />
+			<BrandLogo wordmark size="lg" class="mx-auto mb-6" />
 			<p class="text-sm font-semibold text-blue-700">{{ text('Error', 'Erreur') }} {{ status }}</p>
 			<h1 class="text-[28px] font-medium leading-tight mt-2">{{ copy.title }}</h1>
 			<p class="text-muted text-[15px] mt-3">{{ copy.text }}</p>

@@ -16,7 +16,7 @@ To do:
 The app now uses the Hired 128 Plus look (`LANDING_PAGE_DESIGN.md`). Done (27 October 2026): fonts and colours, header (one "Get started" button), footer, hero, closing card, role and guide cards, pagination, every public page (home, roles, companies, talent, blog and articles, about, contact, privacy, terms), the sign-in pages, the emails and the unsubscribe page, and the workspace (sidebar, top bar, shared panels and every signed-in page, with lighter text, borderless cards, filled ice fields and a navy dashboard header, checked in the browser). Copy now says "roles" instead of "opportunities". The old `Sparkle` hero and its CSS are gone.
 
 Still to do:
-- The logo is now the `>_` tile shown through `BrandLogo.vue`. Check it on the navy header, the ice footer and the sidebar.
+- The logo is now the Anywhere Jobs script wordmark (6 November 2026). Check the email header in Gmail and Outlook, and the new favicon in Safari.
 
 ## Match imports to the owner's job search (done 25 October 2026)
 

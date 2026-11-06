@@ -1,10 +1,10 @@
-# Public pages design — Sudo Jobs
+# Public pages design — Anywhere Jobs
 
 > Updated 27 October 2026. The whole app follows the Hired 128 Plus Webflow template (https://hired-128-plus.webflow.io/). Every public page, the sign-in pages, the emails, the alert unsubscribe page and the signed-in workspace use it (see `TODOS.md` for what is left).
 
 ## Direction
 
-A bright, friendly site about the next step in a career, for students and professionals, covering IT internships and jobs around the world. The logo is the `>_` terminal tile (`public/brand/logo.svg`), shown through `BrandLogo.vue`.
+A bright, friendly site about the next step in a career, for students and professionals, covering IT internships and jobs around the world. The logo is the Anywhere Jobs script wordmark with a swoosh (white on the navy header, cobalt in the ice footer), shown through `BrandLogo.vue`.
 
 - **Font:** Poppins 400, 500 and 600, self-hosted. Hero titles 500 at `clamp(40px, 5.6vw, 72px)`, line height 1.1. Section titles 400 at `clamp(30px, 3.4vw, 46px)`, line height 1.2. Card titles 19–22px 500. Body 16–18px, line height 1.7.
 - **Colours:** cobalt `#0047FF` (`brand`) for actions and links, navy `#001F6D` (`navy`) for headings, the hero and dark bands, ice `#F2F6FF` (`pale`) for light bands and the footer, body text `#656D80` (`subtle`), hairlines `#E6E9F0` (`line`). One word or phrase in a heading can be cobalt (`.accent`); on navy it is the lighter `#2F6BFF`. No cream, beige or ivory.

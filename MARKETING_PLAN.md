@@ -2,7 +2,7 @@
 
 *Rewritten 18 October 2026.* The old version was written for an internships-only platform sold to universities, with a $8,500 a month budget and market numbers nobody checked. It is replaced by this plan: one person, little or no money, and the product as it is today.
 
-## Where Sudo Jobs stands
+## Where Anywhere Jobs stands
 
 - Free job board for **students and professionals**: internships, PFE projects, graduate roles and jobs, in **Tunisia and worldwide** (remote from Tunisia, relocation).
 - English and French. Listings are imported every day from Tunisian boards and company career pages, plus roles companies post themselves.
@@ -73,7 +73,7 @@ Reddit rewards people who help and punishes people who advertise. The plan is to
 
 ### 5. Companies
 
-- During PFE season, contact companies that already post PFE offers elsewhere and invite them to post on Sudo Jobs for free. Keep it personal: one email or message per company, never a mass mailing.
+- During PFE season, contact companies that already post PFE offers elsewhere and invite them to post on Anywhere Jobs for free. Keep it personal: one email or message per company, never a mass mailing.
 
 ### 6. Email alerts (keeps people coming back)
 
@@ -83,7 +83,7 @@ Reddit rewards people who help and punishes people who advertise. The plan is to
 
 ### Ground rules
 
-1. **One real account**, the founder's, with the same name everywhere. Say "I built this" every time a link to Sudo Jobs appears.
+1. **One real account**, the founder's, with the same name everywhere. Say "I built this" every time a link to Anywhere Jobs appears.
 2. **Help first.** For the first two weeks, only comment: answer questions about PFE, CVs, remote work from Tunisia, with no links.
 3. **Read each subreddit's rules** before posting. Many ban self-promotion or only allow it in a weekly thread.
 4. **Never** ask for upvotes, use a second account, or ask friends to vote. Reddit bans for vote manipulation, and the whole account is lost.
@@ -110,7 +110,7 @@ Members and rules checked on 18 October 2026. Rules change: read the sidebar aga
 
 | Subreddit | Members | Self-promotion | How to use it |
 | --- | --- | --- | --- |
-| r/developpeurs | 81.5k | Not for job hunting | Its wiki lists job sites: ask the mods by modmail to add Sudo Jobs. |
+| r/developpeurs | 81.5k | Not for job hunting | Its wiki lists job sites: ask the mods by modmail to add Anywhere Jobs. |
 | r/etudiants | 86.8k | Rules not checked | Answer PFE and internship questions; link guides when asked. |
 | r/emploi | 31.1k | Rules not checked | Same; Tunisian students post there. |
 
@@ -118,7 +118,7 @@ Members and rules checked on 18 October 2026. Rules change: read the sidebar aga
 
 | Subreddit | Members | Self-promotion | How to use it |
 | --- | --- | --- | --- |
-| r/internships | 149k | Allowed in the pinned "Tools & Lists" megalist, if you say it's yours | Add Sudo Jobs to the megalist with disclosure. |
+| r/internships | 149k | Allowed in the pinned "Tools & Lists" megalist, if you say it's yours | Add Anywhere Jobs to the megalist with disclosure. |
 | r/remotework | 639k | Not a job board; job posts go in the megathread | Comment in job-board threads when people ask for sites. |
 | r/IWantOut | 2.1m | No ads; links OK as comments on relevant posts | Answer "moving from Tunisia" questions; link the relocation category. |
 | r/cscareerquestions, r/csMajors | 2.4m, 465k | Strict; rules on promotion not checked | Comments only. |
@@ -150,7 +150,7 @@ Fill every `[N]` from the database on the day. Never round up.
 
 > **Title:** I made a free site that collects PFE, internships and jobs in Tunisia every day. What should it do better?
 >
-> I'm a developer from Tunisia. Finding a PFE meant checking a dozen Facebook groups and job sites, half of them with offers that had already closed. So I built Sudo Jobs: it pulls open internships, PFE projects and jobs from Tunisian boards and company career pages every day, in French and English, and you can get an email when something new matches your search.
+> I'm a developer from Tunisia. Finding a PFE meant checking a dozen Facebook groups and job sites, half of them with offers that had already closed. So I built Anywhere Jobs: it pulls open internships, PFE projects and jobs from Tunisian boards and company career pages every day, in French and English, and you can get an email when something new matches your search.
 >
 > It's free, there are no ads, and I don't track you. I'd really like to know what's missing or broken. There's a feedback page on the site, or just reply here.
 >
@@ -160,7 +160,7 @@ A French version for French-speaking subs and Facebook groups:
 
 > **Titre :** J'ai créé un site gratuit qui regroupe chaque jour les PFE, stages et emplois en Tunisie. Qu'est-ce qui manque ?
 >
-> Je suis développeur en Tunisie. Pour trouver un PFE, il fallait fouiller une dizaine de groupes Facebook et de sites, souvent avec des offres déjà fermées. J'ai donc créé Sudo Jobs : il récupère chaque jour les stages, PFE et emplois ouverts sur les sites tunisiens et les pages carrières des entreprises, en français et en anglais, et vous pouvez recevoir un e-mail quand une nouvelle offre correspond à votre recherche.
+> Je suis développeur en Tunisie. Pour trouver un PFE, il fallait fouiller une dizaine de groupes Facebook et de sites, souvent avec des offres déjà fermées. J'ai donc créé Anywhere Jobs : il récupère chaque jour les stages, PFE et emplois ouverts sur les sites tunisiens et les pages carrières des entreprises, en français et en anglais, et vous pouvez recevoir un e-mail quand une nouvelle offre correspond à votre recherche.
 >
 > C'est gratuit, sans pub et sans pistage. J'aimerais savoir ce qui manque ou ce qui ne marche pas : il y a une page pour ça sur le site, ou répondez ici.
 >
@@ -171,7 +171,7 @@ A French version for French-speaking subs and Facebook groups:
 | Week | Reddit | Other channels | Notes |
 | --- | --- | --- | --- |
 | 1 (20 Oct) | Set up the account, read rules, comment only | Add `?ref=` links (see below); list 20 Facebook groups and 20 student clubs | Contact page live for feedback |
-| 2 | Comment only, 3 to 5 helpful answers a day | First LinkedIn post: why Sudo Jobs exists | |
+| 2 | Comment only, 3 to 5 helpful answers a day | First LinkedIn post: why Anywhere Jobs exists | |
 | 3 | First feedback post on r/Tunisiajobs; modmail r/Tunisia and r/developpeurs; add to the r/internships megalist | Message 10 student clubs | Fix what people report within the week |
 | 4 | Build story on r/TunisiaTech; Showoff Saturday on r/webdev | First Facebook group posts (with admin OK) | Review numbers, adjust goals |
 | 5 | Data post: remote jobs open to Tunisia | Blog: the matching guide | |

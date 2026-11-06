@@ -9,8 +9,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 1200px; height: 630px; overflow: hidden; background: #001f6d; }
 .page { position: relative; width: 1200px; height: 630px; padding: 64px 72px; font-family: 'Body', sans-serif; color: #fff; }
-.brand { display: flex; align-items: center; gap: 16px; font-family: 'Display'; font-weight: 600; font-size: 32px; letter-spacing: -0.01em; }
-.brand img { width: 56px; height: 56px; }
+.brand img { display: block; width: auto; height: 64px; }
 h1 { margin-top: 58px; width: 640px; font-family: 'Display'; font-weight: 600; font-size: 60px; line-height: 1.08; letter-spacing: -0.02em; }
 h1 span { color: #96b3ff; }
 p { margin-top: 26px; font-size: 24px; color: #d6def5; }
@@ -24,7 +23,7 @@ p { margin-top: 26px; font-size: 24px; color: #d6def5; }
 </head>
 <body>
 <div class="page">
-    <div class="brand"><img src="{{ $logo }}" alt="">{{ $name }}</div>
+    <div class="brand"><img src="{{ $wordmark }}" alt="{{ $name }}"></div>
     <h1>IT internships and jobs <span>worldwide</span></h1>
     <p>Stages et emplois IT dans le monde entier</p>
     <div class="chips"><span>Software</span><span>Data and AI</span><span>DevOps and cloud</span><span>Security</span></div>

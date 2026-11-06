@@ -94,8 +94,7 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-md bg-white p
 	>
 		<div class="flex items-center justify-between px-2.5 pb-6">
 			<Link :href="route('dashboard')" class="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-white">
-				<BrandLogo size="xs" dark />
-				<span class="text-white text-[20px] font-semibold">{{ appName }}</span>
+				<BrandLogo wordmark dark size="xs" />
 			</Link>
 			<button class="hidden max-[900px]:grid place-items-center size-8 rounded-lg text-mist-2 hover:bg-white/10 hover:text-white" type="button" aria-label="Close navigation" @click="$emit('close')">
 				<X class="size-5" />

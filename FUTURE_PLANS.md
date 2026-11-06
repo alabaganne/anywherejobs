@@ -1,6 +1,6 @@
 # Future plans
 
-Sudo Jobs now supports students and professionals, internships and jobs, Tunisia and worldwide locations, public SSR pages, approved-source imports, external application tracking and optional saved-search digests. The implementation does not establish live source agreements or activate production email and indexing services.
+Anywhere Jobs now supports students and professionals, internships and jobs, Tunisia and worldwide locations, public SSR pages, approved-source imports, external application tracking and optional saved-search digests. The implementation does not establish live source agreements or activate production email and indexing services.
 
 ## Rollout work
 
@@ -10,7 +10,7 @@ Sudo Jobs now supports students and professionals, internships and jobs, Tunisia
 - [ ] Start approved sources in review mode, check field quality and attribution, then allow automatic publication source by source.
 - [ ] Measure real inventory coverage, freshness, duplicate rates and source failures before expanding the catalogue or making coverage claims.
 - [ ] Verify the production domain and sitemaps in Search Console. Review detail-page structured data, canonical URLs and indexing coverage.
-- [ ] Mail goes through Resend (sender `sudojobs@alabaganne.com`). Add `RESEND_API_KEY`, send a test of each email to controlled accounts, then enable consent-based digests. Move the sender to a Sudo Jobs domain once one is verified in Resend.
+- [ ] Mail goes through Resend (sender `anywherejobs@alabaganne.com`). Add `RESEND_API_KEY`, send a test of each email to controlled accounts, then enable consent-based digests. Move the sender to an Anywhere Jobs domain once one is verified in Resend.
 - [ ] Optionally configure the Google Indexing API service account, ownership and quota; monitor the outbox after enabling it.
 - [x] Update inherited test expectations for the new routes, optional worldwide profile fields, live homepage, sitemap index and migration order. The authorized updates passed the full suite: 59 tests and 726 assertions.
 
@@ -32,10 +32,10 @@ Operational commands, environment switches and deployment steps are documented i
 ## Founder introduction and product walkthrough
 
 - [ ] Create a walkthrough video with Claude, with voice work through ElevenLabs.
-- [ ] Open with Ala Baganne introducing himself and explaining why he built Sudo Jobs.
+- [ ] Open with Ala Baganne introducing himself and explaining why he built Anywhere Jobs.
 - [ ] Show the student journey: internships, PFE or graduate opportunities, saved roles and application tracking.
 - [ ] Show the professional journey: experience and location filters, worldwide remote eligibility, jobs and saved searches.
-- [ ] Explain applying on an employer's website and then confirming the application in Sudo Jobs.
+- [ ] Explain applying on an employer's website and then confirming the application in Anywhere Jobs.
 - [ ] Show employers posting an internship or job, reviewing internal applications and replying.
 - [ ] Add captions, a poster image and user-controlled playback before publishing the video on the landing page.
 

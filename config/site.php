@@ -3,13 +3,16 @@
 $name = config('app.name');
 
 return [
-    // The site name is APP_NAME (config('app.name')). To change the logo, replace public/brand/logo.svg and run `php artisan brand:images`.
+    // The site name is APP_NAME (config('app.name')). To change the logo, replace the SVGs in public/brand and run `php artisan brand:images`.
     'brand' => [
         'description' => $name.' is a job and internship platform for students and professionals around the world. It lists internships (PFE, summer), graduate programmes, first jobs and experienced roles, on site and remote, from employers and approved public sources, and says who can apply to each one.',
         'email' => 'alabaganne9@gmail.com',
-        // Shown on pages by BrandLogo.vue.
+        // Shown on pages by BrandLogo.vue: the square icon, and the name drawn in script for light and dark backgrounds.
         'logo' => '/brand/logo.svg',
-        // PNG copies of the logo made by brand:images: browser and app icons, Google, and emails (which can't show SVG).
+        'wordmark' => '/brand/wordmark.svg',
+        'wordmark_white' => '/brand/wordmark-white.svg',
+        // PNG copies made by brand:images: browser and app icons, Google, and emails (which can't show SVG).
+        'wordmark_png' => '/brand/wordmark.png',
         'icon' => '/brand/symbol.png',
         'icon_small' => '/brand/symbol-192.png',
         'apple_touch_icon' => '/brand/apple-touch-icon.png',

@@ -1,6 +1,6 @@
-# Sudo Jobs VPS deployment
+# Anywhere Jobs VPS deployment
 
-This is a configuration guide for a future deployment, not a report that a VPS has been configured. No remote server changes are needed to use this document. Replace `sudojobs.example.com`, certificate paths, database credentials and binary paths with the values on your server.
+This is a configuration guide for a future deployment, not a report that a VPS has been configured. No remote server changes are needed to use this document. Replace `anywherejobs.example.com`, certificate paths, database credentials and binary paths with the values on your server.
 
 ## Runtime and directory layout
 
@@ -8,28 +8,28 @@ Use Nginx, PHP-FPM 8.3 or later, Composer, Node.js 24, a production database, Su
 
 Keep database and SSR ports off the public network. Permit HTTPS and the SSH access you need; permit HTTP for HTTPS redirects and certificate validation. Configure automatic certificate renewal and monitor it. Size PHP workers, database memory and queue concurrency for the actual VPS; start with one queue worker.
 
-The examples use an application user named `sudojobs` and Nginx's group `www-data`:
+The examples use an application user named `anywherejobs` and Nginx's group `www-data`:
 
 ```text
-/srv/sudojobs/current                     -> selected release directory
-/srv/sudojobs/releases/<release-id>/       code, vendor, node_modules and built bundles
-/srv/sudojobs/shared/.env                  private production configuration
-/srv/sudojobs/shared/storage/              persistent Laravel storage
-/srv/sudojobs/shared/secrets/              optional mail/API credential files
+/srv/anywherejobs/current                     -> selected release directory
+/srv/anywherejobs/releases/<release-id>/       code, vendor, node_modules and built bundles
+/srv/anywherejobs/shared/.env                  private production configuration
+/srv/anywherejobs/shared/storage/              persistent Laravel storage
+/srv/anywherejobs/shared/secrets/              optional mail/API credential files
 ```
 
 In each release, `.env` points to `shared/.env` and `storage` points to `shared/storage`. Create these links before Artisan commands. Keep `bootstrap/cache` release-specific. Preserve `storage/app/private`, `storage/app/public`, `storage/framework` and `storage/logs` across releases. Nginx serves only `current/public`.
 
-Code and dependencies should be readable by the service users and writable only by your deployment account. PHP-FPM, cron and workers run as `sudojobs`; they need write access to `storage` and `bootstrap/cache`. For those two directories only, set ownership and permissions after placing a release:
+Code and dependencies should be readable by the service users and writable only by your deployment account. PHP-FPM, cron and workers run as `anywherejobs`; they need write access to `storage` and `bootstrap/cache`. For those two directories only, set ownership and permissions after placing a release:
 
 ```bash
-sudo chown -R sudojobs:www-data /srv/sudojobs/shared/storage /srv/sudojobs/current/bootstrap/cache
-sudo find /srv/sudojobs/shared/storage /srv/sudojobs/current/bootstrap/cache -type d -exec chmod 2770 {} \;
-sudo find /srv/sudojobs/shared/storage /srv/sudojobs/current/bootstrap/cache -type f -exec chmod 660 {} \;
-sudo chmod 600 /srv/sudojobs/shared/.env
+sudo chown -R anywherejobs:www-data /srv/anywherejobs/shared/storage /srv/anywherejobs/current/bootstrap/cache
+sudo find /srv/anywherejobs/shared/storage /srv/anywherejobs/current/bootstrap/cache -type d -exec chmod 2770 {} \;
+sudo find /srv/anywherejobs/shared/storage /srv/anywherejobs/current/bootstrap/cache -type f -exec chmod 660 {} \;
+sudo chmod 600 /srv/anywherejobs/shared/.env
 ```
 
-The `.env` owner must be `sudojobs`. Its parent directories need appropriate traversal permissions. Public uploads under `storage/app/public` must be readable by Nginx. Never link `storage/app/private` or `shared/secrets` into `public`, and never use `chmod 777`.
+The `.env` owner must be `anywherejobs`. Its parent directories need appropriate traversal permissions. Public uploads under `storage/app/public` must be readable by Nginx. Never link `storage/app/private` or `shared/secrets` into `public`, and never use `chmod 777`.
 
 ### Chrome for PDFs
 
@@ -49,7 +49,7 @@ Start from `.env.example`, then configure at least:
 ```dotenv
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://sudojobs.example.com
+APP_URL=https://anywherejobs.example.com
 APP_KEY=<existing-key-or-new-install-key>
 
 DB_CONNECTION=mysql
@@ -90,7 +90,7 @@ BILLING_BETA_CREDITS=100
 
 MAIL_MAILER=<your-configured-provider>
 MAIL_FROM_ADDRESS=<verified-sender-address>
-MAIL_FROM_NAME=Sudo Jobs
+MAIL_FROM_NAME=Anywhere Jobs
 ```
 
 Use the provider's required mail settings. `mailhog` from the local example is not a production mail service. Configure and test password resets and account notifications as well as digests. Leave digest sending and the optional Google Indexing API off until separately verified with controlled accounts and credentials. An indexing service-account file belongs outside the public tree, with mode `600`; `GOOGLE_INDEXING_CREDENTIALS` takes its absolute path.
@@ -107,13 +107,13 @@ The file cache and file sessions are suitable for this one-VPS layout because PH
 
 ## PHP-FPM
 
-Use a dedicated pool, for example `/etc/php/8.4/fpm/pool.d/sudojobs.conf`. Adjust the version path to the PHP installation:
+Use a dedicated pool, for example `/etc/php/8.4/fpm/pool.d/anywherejobs.conf`. Adjust the version path to the PHP installation:
 
 ```ini
-[sudojobs]
-user = sudojobs
+[anywherejobs]
+user = anywherejobs
 group = www-data
-listen = /run/php/sudojobs.sock
+listen = /run/php/anywherejobs.sock
 listen.owner = www-data
 listen.group = www-data
 listen.mode = 0660
@@ -140,18 +140,18 @@ Use the actual certificate paths and domain. Configure the machine's default vir
 ```nginx
 server {
     listen 80;
-    server_name sudojobs.example.com;
-    return 301 https://sudojobs.example.com$request_uri;
+    server_name anywherejobs.example.com;
+    return 301 https://anywherejobs.example.com$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name sudojobs.example.com;
-    root /srv/sudojobs/current/public;
+    server_name anywherejobs.example.com;
+    root /srv/anywherejobs/current/public;
     index index.php;
 
-    ssl_certificate /etc/letsencrypt/live/sudojobs.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/sudojobs.example.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/anywherejobs.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/anywherejobs.example.com/privkey.pem;
     client_max_body_size 32m;
     add_header X-Content-Type-Options nosniff always;
     add_header Referrer-Policy strict-origin-when-cross-origin always;
@@ -164,7 +164,7 @@ server {
 
     location = /index.php {
         include fastcgi_params;
-        fastcgi_pass unix:/run/php/sudojobs.sock;
+        fastcgi_pass unix:/run/php/anywherejobs.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root/index.php;
         fastcgi_param DOCUMENT_ROOT $realpath_root;
         # Laravel currently trusts proxies. Replace client-supplied forwarding headers.
@@ -186,13 +186,13 @@ If using a CDN or load balancer, define the trusted proxy addresses and trusted 
 
 ## Queue worker and SSR
 
-Install one Supervisor configuration, for example `/etc/supervisor/conf.d/sudojobs.conf`. Verify `/usr/bin/php` and `/usr/bin/node` point to the required versions as the `sudojobs` user. Do not rely on an interactive shell's Node version manager.
+Install one Supervisor configuration, for example `/etc/supervisor/conf.d/anywherejobs.conf`. Verify `/usr/bin/php` and `/usr/bin/node` point to the required versions as the `anywherejobs` user. Do not rely on an interactive shell's Node version manager.
 
 ```ini
-[program:sudojobs-queue]
-directory=/srv/sudojobs/current
-command=/usr/bin/php /srv/sudojobs/current/artisan queue:work database --queue=default --sleep=3 --timeout=300 --tries=3 --max-time=3600
-user=sudojobs
+[program:anywherejobs-queue]
+directory=/srv/anywherejobs/current
+command=/usr/bin/php /srv/anywherejobs/current/artisan queue:work database --queue=default --sleep=3 --timeout=300 --tries=3 --max-time=3600
+user=anywherejobs
 numprocs=1
 autostart=true
 autorestart=true
@@ -200,14 +200,14 @@ stopasgroup=true
 killasgroup=true
 stopwaitsecs=360
 redirect_stderr=true
-stdout_logfile=/srv/sudojobs/shared/storage/logs/queue-worker.log
+stdout_logfile=/srv/anywherejobs/shared/storage/logs/queue-worker.log
 stdout_logfile_maxbytes=20MB
 stdout_logfile_backups=5
 
-[program:sudojobs-ssr]
-directory=/srv/sudojobs/current
-command=/usr/bin/php /srv/sudojobs/current/artisan inertia:start-ssr --runtime=/usr/bin/node
-user=sudojobs
+[program:anywherejobs-ssr]
+directory=/srv/anywherejobs/current
+command=/usr/bin/php /srv/anywherejobs/current/artisan inertia:start-ssr --runtime=/usr/bin/node
+user=anywherejobs
 numprocs=1
 autostart=true
 autorestart=true
@@ -215,7 +215,7 @@ stopasgroup=true
 killasgroup=true
 stopwaitsecs=30
 redirect_stderr=true
-stdout_logfile=/srv/sudojobs/shared/storage/logs/ssr.log
+stdout_logfile=/srv/anywherejobs/shared/storage/logs/ssr.log
 stdout_logfile_maxbytes=20MB
 stdout_logfile_backups=5
 environment=PATH="/usr/local/bin:/usr/bin:/bin",NODE_ENV="production"
@@ -237,15 +237,15 @@ Inertia can fall back to browser rendering after SSR errors. A healthy Node proc
 
 ## Cron and actual schedules
 
-Create `/etc/cron.d/sudojobs`, owned by root with mode `644` and a final newline:
+Create `/etc/cron.d/anywherejobs`, owned by root with mode `644` and a final newline:
 
 ```cron
 SHELL=/bin/sh
 PATH=/usr/local/bin:/usr/bin:/bin
-* * * * * sudojobs cd /srv/sudojobs/current && /usr/bin/php artisan schedule:run >> /srv/sudojobs/shared/storage/logs/scheduler.log 2>&1
+* * * * * anywherejobs cd /srv/anywherejobs/current && /usr/bin/php artisan schedule:run >> /srv/anywherejobs/shared/storage/logs/scheduler.log 2>&1
 ```
 
-This is a system cron file with a username column. If using `crontab -u sudojobs -e` instead, omit that column. Install only one of these approaches and do not also run `schedule:work`. Enable the host's cron service and configure rotation for `scheduler.log`.
+This is a system cron file with a username column. If using `crontab -u anywherejobs -e` instead, omit that column. Install only one of these approaches and do not also run `schedule:work`. Enable the host's cron service and configure rotation for `scheduler.log`.
 
 `routes/console.php` defines:
 
@@ -263,8 +263,8 @@ For a source with a 24-hour cadence, a completed full run sets its next full run
 Cron dispatches jobs; it does not replace the queue worker. Verify the configured schedule as the same application user:
 
 ```bash
-cd /srv/sudojobs/current
-sudo -u sudojobs /usr/bin/php artisan schedule:list
+cd /srv/anywherejobs/current
+sudo -u anywherejobs /usr/bin/php artisan schedule:list
 ```
 
 Read `schedule:list` in its displayed timezone; source timing is handled separately in application code. Do not run `schedule:run` manually against live data unless you intend to dispatch the work that is due.
@@ -283,10 +283,10 @@ Read `schedule:list` in its displayed timezone; source timing is handled separat
    php artisan storage:link
    ```
 
-4. Pause deployment-time scheduler dispatch by temporarily disabling the single cron entry. Put the old application into maintenance with `php artisan down`. Gracefully stop `sudojobs-queue` and wait for active jobs before migrations. Stop `sudojobs-ssr` before switching releases. Take a final consistent backup if application writes continued after the earlier backup.
+4. Pause deployment-time scheduler dispatch by temporarily disabling the single cron entry. Put the old application into maintenance with `php artisan down`. Gracefully stop `anywherejobs-queue` and wait for active jobs before migrations. Stop `anywherejobs-ssr` before switching releases. Take a final consistent backup if application writes continued after the earlier backup.
 5. From the new release, run `php artisan migrate --force`. Never run `migrate:fresh` against existing data. For a clean installation, `php artisan db:seed --force` adds reference catalogues, six real opportunities and the daily import sources without deleting data or creating demo accounts. Read [the source and freshness notes](database/seeders/data/SOURCES.md) and recheck the listings before launch: snapshots older than 14 days are inserted as drafts. This seed does not remove demo data from an old database. For reference data only, use `php artisan db:seed --class=CitySeeder --force` and `php artisan db:seed --class=FieldSeeder --force`.
 6. For a legacy installation, preview `php artisan applications:privatize-attachments`. After rehearsing the migration and verifying the database/storage backup, use its `--execute` option to copy and verify private attachments, update references and remove old public files. Resolve any failures before considering the old public attachments protected.
-7. Build release caches with `php artisan config:cache` and `php artisan view:cache`. Switch `current` to the new release, reload PHP-FPM to refresh its OPcache, and start/restart `sudojobs-ssr` and `sudojobs-queue`. On an in-place deployment, use `php artisan queue:restart` and let Supervisor replace workers. Do not clear the shared application cache just to deploy: it also stores locks and indexing quotas.
+7. Build release caches with `php artisan config:cache` and `php artisan view:cache`. Switch `current` to the new release, reload PHP-FPM to refresh its OPcache, and start/restart `anywherejobs-ssr` and `anywherejobs-queue`. On an in-place deployment, use `php artisan queue:restart` and let Supervisor replace workers. Do not clear the shared application cache just to deploy: it also stores locks and indexing quotas.
 8. Check migrations, processes and SSR, then run `php artisan up` and restore the one cron entry. Allow a minute for its heartbeat. Run the checks below, including an authenticated application flow. Keep the previous release until the checks pass.
 
 Keep maintenance active if migrations or health checks fail. The above pause is intentional for these schema changes; it is not a claim of zero-downtime deployment.
@@ -294,17 +294,17 @@ Keep maintenance active if migrations or health checks fail. The above pause is 
 ## Checks, monitoring and recovery
 
 ```bash
-cd /srv/sudojobs/current
+cd /srv/anywherejobs/current
 php artisan migrate:status
 php artisan inertia:check-ssr
 php artisan queue:failed
 php artisan opportunities:health --public
-curl --fail --silent --show-error https://sudojobs.example.com/up
-curl --fail --silent --show-error https://sudojobs.example.com/opportunities
-curl --fail --silent --show-error https://sudojobs.example.com/sitemap.xml
+curl --fail --silent --show-error https://anywherejobs.example.com/up
+curl --fail --silent --show-error https://anywherejobs.example.com/opportunities
+curl --fail --silent --show-error https://anywherejobs.example.com/sitemap.xml
 ```
 
-Run Artisan as `sudojobs` using the production PHP binary. Inspect the initial HTML for real opportunity text, a canonical URL and valid structured data on an eligible detail page. Verify public and private attachment access, candidate/employer login, native applications, external tracking, saving and unsubscribe behavior. Verify the domain in Search Console and submit `/sitemap.xml`; API acknowledgement does not guarantee indexing.
+Run Artisan as `anywherejobs` using the production PHP binary. Inspect the initial HTML for real opportunity text, a canonical URL and valid structured data on an eligible detail page. Verify public and private attachment access, candidate/employer login, native applications, external tracking, saving and unsubscribe behavior. Verify the domain in Search Console and submit `/sitemap.xml`; API acknowledgement does not guarantee indexing.
 
 `opportunities:health --public` returns exit code 1 when it finds an old/missing scheduler heartbeat, delayed queue work, failed jobs, overdue/erroring sources, stale imported content, uncertain digest deliveries, failed indexing notifications or broken SSR/public HTML. It logs warnings. Configure a monitor outside this cron process to alert on failures; a stopped cron daemon cannot report its own failure. Also monitor disk space, database backups, certificate expiry, PHP/Nginx errors and Supervisor restarts. `/up` alone does not verify queues, sources or SSR content.
 

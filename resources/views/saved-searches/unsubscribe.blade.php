@@ -11,7 +11,7 @@
 <body class="flex min-h-screen flex-col bg-pale font-sans text-navy antialiased">
 <header class="line-art bg-navy">
     <div class="public-container flex h-[84px] items-center">
-        <a class="focus-ring inline-flex items-center gap-2.5 rounded-lg text-[21px] font-semibold text-white focus-visible:outline-white" href="{{ url('/') }}"><img src="{{ config('site.brand.logo') }}" alt="" width="36" height="36" class="size-9">{{ config('app.name') }}</a>
+        <a class="focus-ring inline-flex items-center rounded-lg focus-visible:outline-white" href="{{ url('/') }}"><img src="{{ config('site.brand.wordmark_white') }}" alt="{{ config('app.name') }}" width="191" height="40" class="h-10 w-auto"></a>
     </div>
 </header>
 <main class="public-container flex flex-1 items-start justify-center py-20 max-[768px]:py-12">

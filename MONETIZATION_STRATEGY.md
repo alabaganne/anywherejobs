@@ -1,4 +1,4 @@
-# Monetization Strategy for Sudo Jobs
+# Monetization Strategy for Anywhere Jobs
 
 > **Current decision (October 2026):** finding and applying stay free for everyone. The first paid feature is for candidates: tailored CV and cover letter "kits", sold as credit packs (Konnect and Flouci in TND, Lemon Squeezy in USD), with one free credit per candidate. It is built but switched off until prices are set. The plans below are older ideas, kept for reference.
 ## Revenue Model & Profitability Plan
@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-This document outlines the comprehensive monetization strategy for Sudo Jobs, transforming it from a free platform into a profitable business while maintaining value for all stakeholders. The strategy focuses on a multi-sided revenue model targeting companies, universities, and value-added services.
+This document outlines the comprehensive monetization strategy for Anywhere Jobs, transforming it from a free platform into a profitable business while maintaining value for all stakeholders. The strategy focuses on a multi-sided revenue model targeting companies, universities, and value-added services.
 
 **Target Revenue (Year 1)**: $150,000 - $250,000
 **Target Revenue (Year 3)**: $1,000,000+
@@ -67,7 +67,7 @@ This document outlines the comprehensive monetization strategy for Sudo Jobs, tr
 - Interview scheduling tools
 - Analytics dashboard (views, applications, conversion)
 - Priority email support
-- Remove "Powered by Sudo Jobs" branding
+- Remove "Powered by Anywhere Jobs" branding
 - Export applicant data (CSV)
 - 5 supervisor accounts
 
@@ -139,7 +139,7 @@ This document outlines the comprehensive monetization strategy for Sudo Jobs, tr
 ### 2.3 Recruitment Services (White-Glove)
 
 #### Full-Service Recruitment
-**Service**: Sudo Jobs handles the entire recruitment process
+**Service**: Anywhere Jobs handles the entire recruitment process
 **Pricing**: 15-20% of intern's salary OR flat fee of 1,500-3,000 TND (~$500-$1,000)
 
 **Includes**:
@@ -527,7 +527,7 @@ This document outlines the comprehensive monetization strategy for Sudo Jobs, tr
 | Glassdoor | Subscription | $300-800/month |
 | Handshake (US) | University-based | Free for students, paid for companies |
 
-**Sudo Jobs Positioning**:
+**Anywhere Jobs Positioning**:
 - 70-90% cheaper than global platforms
 - Better suited for Tunisian market
 - Internship-specific features
@@ -536,7 +536,7 @@ This document outlines the comprehensive monetization strategy for Sudo Jobs, tr
 ### Local Competitors
 - **Traditional Methods**: Newspaper ads (500-2,000 TND), recruitment agencies (15-30% of salary)
 - **DIY Approach**: Free but time-consuming, limited reach
-- **Sudo Jobs Value**: Lower cost than agencies, better than DIY, targeted reach
+- **Anywhere Jobs Value**: Lower cost than agencies, better than DIY, targeted reach
 
 ---
 
@@ -800,7 +800,7 @@ This document outlines the comprehensive monetization strategy for Sudo Jobs, tr
 
 ## Conclusion
 
-Sudo Jobs has strong monetization potential through a multi-sided revenue model. The key to profitability is:
+Anywhere Jobs has strong monetization potential through a multi-sided revenue model. The key to profitability is:
 
 1. **Free Students, Paid Companies**: This model maximizes network effects while capturing value from those who benefit most
 2. **Multiple Revenue Streams**: Diversification reduces risk and maximizes revenue
@@ -814,7 +814,7 @@ Sudo Jobs has strong monetization potential through a multi-sided revenue model.
 - Year 2: Scale paid customers and revenue streams (~$520K revenue)
 - Year 3: Expand geographically and vertically (~$1M+ revenue)
 
-With disciplined execution, Sudo Jobs can become a profitable, sustainable business while creating massive value for the Tunisian internship ecosystem.
+With disciplined execution, Anywhere Jobs can become a profitable, sustainable business while creating massive value for the Tunisian internship ecosystem.
 
 ---
 

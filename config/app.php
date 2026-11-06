@@ -14,7 +14,7 @@ return [
     */
 
     // The site name, shown in titles, emails, the AI instructions and the copy. Change it here.
-    'name' => env('APP_NAME', 'Sudo Jobs'),
+    'name' => env('APP_NAME', 'Anywhere Jobs'),
 
     /*
     |--------------------------------------------------------------------------
