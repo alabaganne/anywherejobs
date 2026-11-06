@@ -43,7 +43,7 @@ Done on 6 November 2026:
 - Add the domain to Google Search Console and submit the sitemap.
 - Claim `anywherejobs` handles where you plan to post (LinkedIn, X, GitHub).
 - Run a trademark search in the EU, the US and India.
-- Optional: rename the project folder and the GitHub repository.
+- Optional: rename the project folder. The GitHub repository is already `alabaganne/anywherejobs` (renamed 6 November 2026; GitHub redirects the old `Nextward` links).
 
 ## Openworld Jobs (dropped)
 

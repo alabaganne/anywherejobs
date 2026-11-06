@@ -1,6 +1,6 @@
 # Deploy Anywhere Jobs to a VPS
 
-Follow this guide for a single Linux VPS. It describes deployment steps; it does not mean the VPS has already been configured. Application code comes from the `main` branch of [alabaganne/Nextward](https://github.com/alabaganne/Nextward).
+Follow this guide for a single Linux VPS. It describes deployment steps; it does not mean the VPS has already been configured. Application code comes from the `main` branch of [alabaganne/anywherejobs](https://github.com/alabaganne/anywherejobs).
 
 Use [VPS_DEPLOYMENT.md](VPS_DEPLOYMENT.md) for the complete environment, PHP-FPM, Nginx, Supervisor, cron, permission and monitoring configurations. Replace example domains, service names and binary paths with your server's values. Run each phase separately and stop if a command fails.
 
@@ -36,7 +36,7 @@ Use a new directory for each deployment, including updates:
 ```bash
 umask 022
 release_dir="/srv/anywherejobs/releases/$(date -u +%Y%m%dT%H%M%SZ)"
-git clone --branch main --single-branch https://github.com/alabaganne/Nextward.git "$release_dir"
+git clone --branch main --single-branch https://github.com/alabaganne/anywherejobs.git "$release_dir"
 cd "$release_dir"
 git rev-parse HEAD
 
