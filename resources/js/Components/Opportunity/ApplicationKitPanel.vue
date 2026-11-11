@@ -1,15 +1,17 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Copy, Download, PenLine, RefreshCw, Sparkles } from '@lucide/vue';
+import { ArrowUpRight, Copy, Download, FileText, Mail, PenLine, RefreshCw } from '@lucide/vue';
 import axios from 'axios';
 import CvPreview from '@/Components/Cv/CvPreview.vue';
 import { downloadLetterDocx, letterFileName } from '@/utils/letterDocx';
 
+// The tailored CV and cover letter for this role: each one is written on its own, from the profile and main resume.
 const props = defineProps({
     opportunity: { type: Object, required: true },
     kits: { type: Array, default: () => [] },
     kitLocales: { type: Array, default: () => [] },
+    themes: { type: Array, default: () => [] },
 });
 const page = usePage();
 const fr = computed(() => page.props.locale === 'fr');
@@ -24,7 +26,7 @@ const billing = computed(() => page.props.billing || {});
 const credits = computed(() => page.props.auth?.user?.credits ?? 0);
 const free = computed(() => !billing.value.enabled || billing.value.free);
 const tab = ref('cv');
-const busy = ref(false);
+const busy = ref(null);
 const error = ref('');
 const billingUrl = ref('');
 const letter = ref('');
@@ -32,6 +34,15 @@ const savedLetter = ref('');
 const saveState = ref('');
 const copied = ref(false);
 const exporting = ref(false);
+
+const parts = computed(() => ({
+    cv: { title: text('CV', 'CV'), name: text('your CV', 'votre CV'), icon: FileText, write: text('Write my CV', 'Rédiger mon CV') },
+    letter: { title: text('Cover letter', 'Lettre'), name: text('your cover letter', 'votre lettre'), icon: Mail, write: text('Write my cover letter', 'Rédiger ma lettre') },
+}));
+const writing = (part) => kit.value?.status === 'queued' && [part, 'both'].includes(kit.value.writing || 'both');
+const written = (part) => part === 'cv' ? !!kit.value?.cv : !!letter.value.trim() || !!kit.value?.cover_letter;
+const queued = computed(() => kit.value?.status === 'queued');
+const started = computed(() => !!kit.value);
 
 const failed = (failure) => {
     const status = failure.response?.status;
@@ -43,7 +54,7 @@ const failed = (failure) => {
 
 const take = (data) => {
     kits.value = { ...kits.value, [data.locale]: { ...kits.value[data.locale], ...data } };
-    if (data.locale === locale.value && data.status !== 'queued') {
+    if (data.locale === locale.value && data.status !== 'queued' && 'cover_letter' in data && letter.value === savedLetter.value) {
         letter.value = savedLetter.value = data.cover_letter || '';
     }
 };
@@ -59,28 +70,54 @@ const load = async () => {
     if (kit.value?.status === 'queued') timer = setTimeout(load, 3000);
 };
 watch(locale, () => { error.value = ''; letter.value = savedLetter.value = ''; load(); }, { immediate: true });
-onBeforeUnmount(() => { clearTimeout(timer); clearTimeout(saveTimer); });
+// The full editor opens in another tab; what is saved there shows here when you come back.
+const refresh = () => { if (document.visibilityState === 'visible') load(); };
+onMounted(() => document.addEventListener('visibilitychange', refresh));
+onBeforeUnmount(() => { clearTimeout(timer); clearTimeout(saveTimer); document.removeEventListener('visibilitychange', refresh); });
 
-const start = async () => {
-    busy.value = true;
+const themeSaving = ref(false);
+const setTheme = async (template) => {
+    const current = kit.value;
+    if (!current?.style || current.style.template === template) return;
+    const keep = (style) => { kits.value = { ...kits.value, [current.locale]: { ...kits.value[current.locale], style } }; };
+    keep({ ...current.style, template });
+    themeSaving.value = true;
+    try {
+        await axios.put(route('kits.update', current.id), { style: { template } }, { headers: { Accept: 'application/json' } });
+    } catch {
+        keep(current.style);
+        error.value = text('We could not change the theme. Please try again.', 'Impossible de changer le thème. Réessayez.');
+    } finally {
+        themeSaving.value = false;
+    }
+};
+
+const start = async (part) => {
+    busy.value = part;
+    tab.value = part;
     error.value = '';
     billingUrl.value = '';
     try {
-        const { data } = await axios.post(route('opportunities.kit', props.opportunity.id), { locale: locale.value });
+        const { data } = await axios.post(route('opportunities.kit', props.opportunity.id), { locale: locale.value, part });
         take(data.kit);
         load();
     } catch (failure) {
         failed(failure);
     } finally {
-        busy.value = false;
+        busy.value = null;
     }
 };
 
-const rewrite = async () => {
-    if (!window.confirm(text('Write a new CV and letter for this role? Your edits will be replaced.', 'Rédiger un nouveau CV et une nouvelle lettre pour cette offre ? Vos modifications seront remplacées.'))) return;
+const rewrite = async (part) => {
+    const question = part === 'cv'
+        ? text('Write a new CV for this role? Your edits to the CV will be replaced.', 'Rédiger un nouveau CV pour cette offre ? Vos modifications du CV seront remplacées.')
+        : text('Write a new letter for this role? Your edits to the letter will be replaced.', 'Rédiger une nouvelle lettre pour cette offre ? Vos modifications de la lettre seront remplacées.');
+    if (!window.confirm(question)) return;
     error.value = '';
     try {
-        const { data } = await axios.post(route('kits.regenerate', kit.value.id));
+        await save();
+        const { data } = await axios.post(route('kits.regenerate', kit.value.id), { part });
+        if (part === 'letter') letter.value = savedLetter.value;
         take(data.kit);
         load();
     } catch (failure) {
@@ -91,6 +128,7 @@ const rewrite = async () => {
 // Edits save on their own a moment after typing stops.
 let saveTimer = null;
 const save = async () => {
+    clearTimeout(saveTimer);
     if (!kit.value || letter.value === savedLetter.value) return;
     const value = letter.value;
     saveState.value = 'saving';
@@ -121,8 +159,8 @@ const copy = async () => {
 const exportDocx = async () => {
     exporting.value = true;
     try {
-        const cv = kit.value.cv || {};
-        await downloadLetterDocx({ letter: letter.value, name: cv.name, contact: cv.contact || [], locale: kit.value.locale, fileName: letterFileName(cv.name, props.opportunity.company?.name, kit.value.locale) });
+        const sender = kit.value.sender || kit.value.cv || {};
+        await downloadLetterDocx({ letter: letter.value, name: sender.name, contact: sender.contact || [], locale: kit.value.locale, fileName: letterFileName(sender.name, props.opportunity.company?.name, kit.value.locale) });
     } catch {
         error.value = text('We could not make the Word file. Please try again.', 'Impossible de créer le fichier Word. Réessayez.');
     } finally {
@@ -135,20 +173,23 @@ const applyHere = computed(() => props.opportunity.application_mode === 'interna
 const useToApply = async () => {
     await save();
     try {
-        sessionStorage.setItem(`site.cover-letter.${props.opportunity.id}`, letter.value);
-        sessionStorage.setItem(`site.kit-cv.${props.opportunity.id}`, String(kit.value.id));
+        if (letter.value.trim()) sessionStorage.setItem(`site.cover-letter.${props.opportunity.id}`, letter.value);
+        if (kit.value.cv) sessionStorage.setItem(`site.kit-cv.${props.opportunity.id}`, String(kit.value.id));
     } catch { /* storage may be off */ }
     router.visit(route('applications.create', props.opportunity.id));
 };
-const tabs = computed(() => [{ id: 'cv', label: text('CV', 'CV') }, { id: 'letter', label: text('Cover letter', 'Lettre') }]);
+const applyLabel = computed(() => written('cv') && written('letter') ? text('Use them to apply', 'Les utiliser pour postuler') : text('Use it to apply', 'L’utiliser pour postuler'));
+const waitNote = (part) => part === 'cv'
+    ? text('Your letter is being written. You can write the CV once it is done.', 'Votre lettre est en cours de rédaction. Vous pourrez rédiger le CV ensuite.')
+    : text('Your CV is being written. You can write the letter once it is done.', 'Votre CV est en cours de rédaction. Vous pourrez rédiger la lettre ensuite.');
 </script>
 
 <template>
     <section id="tailored-cv" class="bg-white border border-line rounded-card p-6 sm:p-8 scroll-mt-24" aria-labelledby="kit-title">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="max-w-xl">
-                <h2 id="kit-title" class="text-[22px] font-medium flex items-center gap-2"><Sparkles :size="19" class="text-blue-700" aria-hidden="true" />{{ text('Tailored CV and cover letter', 'CV et lettre sur mesure') }}</h2>
-                <p class="text-sm text-slate-600 leading-6 mt-2">{{ text('Made for this role from your profile and main resume. Check them, then download them or use them to apply.', 'Rédigés pour cette offre à partir de votre profil et de votre CV principal. Relisez-les, puis téléchargez-les ou utilisez-les pour postuler.') }}</p>
+                <h2 id="kit-title" class="text-[22px] font-medium text-navy">{{ text('Tailored CV and cover letter', 'CV et lettre sur mesure') }}</h2>
+                <p class="text-sm text-slate-600 leading-6 mt-2">{{ text('Written for this role from your profile and main resume. Write one or both, check them, then download them or use them to apply.', 'Rédigés pour cette offre à partir de votre profil et de votre CV principal. Rédigez l’un ou les deux, relisez-les, puis téléchargez-les ou utilisez-les pour postuler.') }}</p>
             </div>
             <fieldset class="flex rounded-card bg-paper-2 p-1 text-sm font-medium">
                 <legend class="sr-only">{{ text('Language of the CV and letter', 'Langue du CV et de la lettre') }}</legend>
@@ -158,57 +199,72 @@ const tabs = computed(() => [{ id: 'cv', label: text('CV', 'CV') }, { id: 'lette
             </fieldset>
         </div>
 
-        <div v-if="!kit" class="mt-6">
-            <button type="button" class="cta cta-primary" :disabled="busy" @click="start"><Sparkles :size="17" aria-hidden="true" />{{ busy ? text('Starting…', 'Démarrage…') : text('Write my CV and cover letter', 'Rédiger mon CV et ma lettre') }}</button>
+        <!-- Nothing written yet: one button for each. -->
+        <div v-if="!started" class="mt-6">
+            <div class="flex flex-wrap gap-3">
+                <button v-for="(part, id) in parts" :key="id" type="button" class="cta" :class="id === 'cv' ? 'cta-primary' : 'cta-secondary'" :disabled="!!busy" @click="start(id)"><component :is="part.icon" :size="17" aria-hidden="true" />{{ busy === id ? text('Starting…', 'Démarrage…') : part.write }}</button>
+            </div>
             <p class="text-xs text-slate-500 leading-5 mt-3">
-                <template v-if="!free">{{ text(`Uses 1 credit for both, with 3 rewrites included. You have ${credits}.`, `Utilise 1 crédit pour les deux, 3 réécritures incluses. Il vous en reste ${credits}.`) }}</template>
+                <template v-if="!free">{{ text(`1 credit covers your CV and letter for this role, with a few rewrites. You have ${credits}.`, `1 crédit couvre votre CV et votre lettre pour cette offre, avec quelques réécritures. Il vous en reste ${credits}.`) }}</template>
                 {{ text('Better results with a main resume and your experience filled in on', 'Meilleur résultat avec un CV principal et vos expériences remplies sur') }} <Link :href="`${route('profile.show')}#resumes`" class="text-blue-700 underline">{{ text('your profile', 'votre profil') }}</Link>.
             </p>
         </div>
 
-        <div v-else-if="kit.status === 'queued'" class="mt-6 rounded-card bg-paper-2 px-5 py-8 text-center" role="status">
-            <RefreshCw class="w-7 h-7 text-blue-700 mx-auto animate-spin" aria-hidden="true" />
-            <p class="font-semibold mt-3">{{ text('Writing your CV and cover letter…', 'Rédaction de votre CV et de votre lettre…') }}</p>
-            <p class="text-sm text-slate-600 mt-1">{{ text('This usually takes under a minute.', 'Cela prend en général moins d’une minute.') }}</p>
-        </div>
-
-        <div v-else-if="kit.status === 'failed' && !kit.cv && !letter" class="mt-6 rounded-card bg-paper-2 px-5 py-8 text-center">
-            <p class="font-semibold">{{ kit.error || text('Something went wrong.', 'Une erreur est survenue.') }}</p>
-            <button type="button" class="cta cta-primary mt-4" @click="rewrite">{{ text('Try again', 'Réessayer') }}</button>
-        </div>
-
         <div v-else class="mt-6">
-            <p class="rounded-card bg-blue-50 px-4 py-3 text-sm text-blue-900">{{ text('Read them through and fix anything that is not exactly right before you send them.', 'Relisez-les et corrigez ce qui n’est pas tout à fait juste avant de les envoyer.') }}</p>
-            <div class="mt-5 inline-flex rounded-card bg-paper-2 p-1 text-sm font-medium" role="tablist">
-                <button v-for="item in tabs" :key="item.id" type="button" role="tab" :aria-selected="tab === item.id" class="rounded-md px-4 py-1.5 focus-ring" :class="tab === item.id ? 'bg-white text-navy' : 'text-slate-600'" @click="tab = item.id">{{ item.label }}</button>
+            <div class="inline-flex rounded-card bg-paper-2 p-1 text-sm font-medium" role="tablist">
+                <button v-for="(part, id) in parts" :key="id" type="button" role="tab" :aria-selected="tab === id" class="inline-flex items-center gap-2 rounded-md px-4 py-1.5 focus-ring" :class="tab === id ? 'bg-white text-navy' : 'text-slate-600'" @click="tab = id">
+                    {{ part.title }}<RefreshCw v-if="writing(id)" :size="13" class="animate-spin text-blue-700" aria-hidden="true" />
+                </button>
             </div>
 
-            <div v-show="tab === 'cv'" role="tabpanel" class="mt-4">
-                <div v-if="kit.cv && kit.style" class="max-h-[640px] overflow-y-auto rounded-card bg-paper-2 p-4 [scrollbar-width:thin]">
-                    <CvPreview :cv="kit.cv" :style-options="kit.style" :locale="kit.locale" />
+            <div v-for="(part, id) in parts" v-show="tab === id" :key="id" role="tabpanel" class="mt-4">
+                <div v-if="writing(id)" class="rounded-card bg-paper-2 px-5 py-8 text-center" role="status">
+                    <RefreshCw class="w-7 h-7 text-blue-700 mx-auto animate-spin" aria-hidden="true" />
+                    <p class="font-semibold mt-3">{{ id === 'cv' ? text('Writing your CV…', 'Rédaction de votre CV…') : text('Writing your cover letter…', 'Rédaction de votre lettre…') }}</p>
+                    <p class="text-sm text-slate-600 mt-1">{{ text('This usually takes under a minute.', 'Cela prend en général moins d’une minute.') }}</p>
                 </div>
-                <p v-else class="rounded-card bg-paper-2 px-5 py-8 text-center text-sm text-slate-600">{{ text('Loading your CV…', 'Chargement de votre CV…') }}</p>
-                <div class="mt-3 flex flex-wrap items-center gap-3">
-                    <Link :href="route('kits.show', kit.id)" class="cta cta-primary !py-2.5"><PenLine :size="17" aria-hidden="true" />{{ text('Edit CV', 'Modifier le CV') }}</Link>
-                    <a v-if="kit.cv" :href="route('kits.cv', kit.id)" class="cta cta-secondary !py-2.5"><Download :size="17" aria-hidden="true" />PDF</a>
-                    <button v-if="applyHere" type="button" class="cta cta-secondary !py-2.5" @click="useToApply">{{ text('Use them to apply', 'Les utiliser pour postuler') }}</button>
-                </div>
-            </div>
 
-            <div v-show="tab === 'letter'" role="tabpanel" class="mt-4">
-                <label class="sr-only" for="cover-letter-text">{{ text('Cover letter', 'Lettre de motivation') }}</label>
-                <textarea id="cover-letter-text" v-model="letter" :lang="kit.locale" dir="auto" rows="16" maxlength="20000" class="w-full rounded-card border-line p-4 text-[15px] leading-7 text-slate-800 focus:border-brand focus:ring-brand" @input="edited" @blur="save" />
-                <div class="mt-3 flex flex-wrap items-center gap-3">
-                    <button type="button" class="cta cta-primary !py-2.5" @click="copy"><Copy :size="17" aria-hidden="true" />{{ copied ? text('Copied', 'Copiée') : text('Copy', 'Copier') }}</button>
-                    <button type="button" class="cta cta-secondary !py-2.5" :disabled="exporting || !letter.trim()" @click="exportDocx"><Download :size="17" aria-hidden="true" />{{ text('Word (.docx)', 'Word (.docx)') }}</button>
-                    <button v-if="applyHere" type="button" class="cta cta-secondary !py-2.5" @click="useToApply">{{ text('Use them to apply', 'Les utiliser pour postuler') }}</button>
-                    <span class="text-sm text-slate-500" role="status">{{ { saving: text('Saving…', 'Enregistrement…'), saved: text('Saved', 'Enregistrée'), error: text('Not saved. Check your connection.', 'Non enregistrée. Vérifiez votre connexion.') }[saveState] }}</span>
+                <div v-else-if="!written(id)" class="rounded-card bg-paper-2 px-5 py-8 text-center">
+                    <p v-if="kit.error" class="text-sm font-medium text-red-700 mb-3" role="alert">{{ kit.error }}</p>
+                    <p class="text-sm text-slate-600">{{ id === 'cv' ? text('No CV for this role yet.', 'Pas encore de CV pour cette offre.') : text('No cover letter for this role yet.', 'Pas encore de lettre pour cette offre.') }}</p>
+                    <button type="button" class="cta cta-primary mt-4" :disabled="!!busy || queued" @click="start(id)"><component :is="part.icon" :size="17" aria-hidden="true" />{{ busy === id ? text('Starting…', 'Démarrage…') : part.write }}</button>
+                    <p v-if="queued" class="text-xs text-slate-500 mt-3">{{ waitNote(id) }}</p>
                 </div>
-            </div>
 
-            <div class="mt-5 border-t border-line pt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
-                <button type="button" class="inline-flex items-center gap-1.5 text-blue-700" @click="rewrite"><RefreshCw :size="15" aria-hidden="true" />{{ text('Write them again', 'Les réécrire') }}</button>
-                <span v-if="kit.rewrites_left !== null && kit.rewrites_left !== undefined" class="font-normal text-slate-500">{{ text(`${kit.rewrites_left} rewrite(s) left`, `${kit.rewrites_left} réécriture(s) restante(s)`) }}</span>
+                <template v-else-if="id === 'cv'">
+                    <label v-if="themes.length && kit.style" class="mb-3 flex flex-wrap items-center gap-2 text-sm font-medium text-navy">{{ text('Theme', 'Thème') }}
+                        <select :value="kit.style.template" class="rounded-card border-0 bg-paper-2 py-1.5 ps-3 pe-9 text-sm text-navy focus:ring-2 focus:ring-brand" :disabled="themeSaving" @change="setTheme($event.target.value)">
+                            <option v-for="theme in themes" :key="theme.id" :value="theme.id">{{ theme.name }} · {{ theme.family }}</option>
+                        </select>
+                        <span v-if="themeSaving" class="font-normal text-slate-500" role="status">{{ text('Saving…', 'Enregistrement…') }}</span>
+                    </label>
+                    <div v-if="kit.cv && kit.style" class="max-h-[640px] overflow-y-auto rounded-card bg-paper-2 p-4 [scrollbar-width:thin]">
+                        <CvPreview :cv="kit.cv" :style-options="kit.style" :locale="kit.locale" />
+                    </div>
+                    <p v-else class="rounded-card bg-paper-2 px-5 py-8 text-center text-sm text-slate-600">{{ text('Loading your CV…', 'Chargement de votre CV…') }}</p>
+                    <div class="mt-3 flex flex-wrap items-center gap-3">
+                        <a :href="route('kits.show', kit.id)" target="_blank" rel="noopener" class="cta cta-primary !py-2.5"><PenLine :size="17" aria-hidden="true" />{{ text('More edits', 'Plus de modifications') }}<ArrowUpRight :size="16" aria-hidden="true" /><span class="sr-only">{{ text('(opens in a new tab)', '(s’ouvre dans un nouvel onglet)') }}</span></a>
+                        <a :href="route('kits.cv', kit.id)" class="cta cta-secondary !py-2.5" :class="themeSaving && 'pointer-events-none opacity-60'"><Download :size="17" aria-hidden="true" />PDF</a>
+                        <button v-if="applyHere" type="button" class="cta cta-secondary !py-2.5" @click="useToApply">{{ applyLabel }}</button>
+                    </div>
+                </template>
+
+                <template v-else>
+                    <label class="sr-only" for="cover-letter-text">{{ text('Cover letter', 'Lettre de motivation') }}</label>
+                    <textarea id="cover-letter-text" v-model="letter" :lang="kit.locale" dir="auto" rows="16" maxlength="20000" class="w-full rounded-card border-line p-4 text-[15px] leading-7 text-slate-800 focus:border-brand focus:ring-brand" @input="edited" @blur="save" />
+                    <div class="mt-3 flex flex-wrap items-center gap-3">
+                        <button type="button" class="cta cta-primary !py-2.5" @click="copy"><Copy :size="17" aria-hidden="true" />{{ copied ? text('Copied', 'Copiée') : text('Copy', 'Copier') }}</button>
+                        <button type="button" class="cta cta-secondary !py-2.5" :disabled="exporting || !letter.trim()" @click="exportDocx"><Download :size="17" aria-hidden="true" />{{ text('Word (.docx)', 'Word (.docx)') }}</button>
+                        <button v-if="applyHere" type="button" class="cta cta-secondary !py-2.5" @click="useToApply">{{ applyLabel }}</button>
+                        <span class="text-sm text-slate-500" role="status">{{ { saving: text('Saving…', 'Enregistrement…'), saved: text('Saved', 'Enregistrée'), error: text('Not saved. Check your connection.', 'Non enregistrée. Vérifiez votre connexion.') }[saveState] }}</span>
+                    </div>
+                </template>
+
+                <div v-if="written(id) && !writing(id)" class="mt-5 border-t border-line pt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                    <p class="text-slate-600">{{ text('Read it through and fix anything that is not exactly right before you send it.', 'Relisez-le et corrigez ce qui n’est pas tout à fait juste avant de l’envoyer.') }}</p>
+                    <button type="button" class="inline-flex items-center gap-1.5 font-semibold text-blue-700 disabled:opacity-50" :disabled="queued" @click="rewrite(id)"><RefreshCw :size="15" aria-hidden="true" />{{ text('Write it again', 'Le réécrire') }}</button>
+                    <span v-if="kit.rewrites_left !== null && kit.rewrites_left !== undefined" class="text-slate-500">{{ text(`${kit.rewrites_left} rewrite(s) left`, `${kit.rewrites_left} réécriture(s) restante(s)`) }}</span>
+                </div>
             </div>
         </div>
 

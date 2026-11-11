@@ -45,7 +45,7 @@ class CvRenderTest extends TestCase
         $this->assertSame('en', CvTemplates::locale('he'));
 
         $html = app(CvPdf::class)->html($this->cv(), null, 'he');
-        $this->assertStringContainsString('tpl-halden', $html);
+        $this->assertStringContainsString('tpl-compact', $html);
         $this->assertStringContainsString('Experience', $html);
     }
 

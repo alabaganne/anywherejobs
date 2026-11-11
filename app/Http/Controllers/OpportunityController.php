@@ -213,6 +213,9 @@ class OpportunityController extends Controller
                 'label' => \App\Support\LanguageGuess::name($code, $locale) ?? strtoupper($code),
                 'original' => $code === $opportunity->originalLocale(),
             ])->all(),
+            'kitThemes' => $request->user()?->isCandidate()
+                ? collect(\App\Support\CvTemplates::TEMPLATES)->map(fn ($theme, $id) => ['id' => $id, 'name' => $theme['name'], 'family' => $theme['family']])->values()->all()
+                : [],
         ]);
     }
 

@@ -13,6 +13,7 @@ const props = defineProps({
 	themes: { type: Object, required: true },
 	locale: { type: String, default: 'en' },
 	withLetter: { type: Boolean, default: false },
+	start: { type: String, default: 'design' },
 });
 
 const sections = computed(() => [
@@ -26,7 +27,7 @@ const sections = computed(() => [
 	{ id: 'languages', label: 'Languages', icon: Languages, count: cv.value.languages?.length, hint: 'The languages you speak.' },
 	...(props.withLetter ? [{ id: 'letter', label: 'Cover letter', icon: Mail, hint: 'The letter you send with this CV.', group: 'letter' }] : []),
 ]);
-const section = ref('design');
+const section = ref(props.start);
 const index = computed(() => sections.value.findIndex((item) => item.id === section.value));
 const current = computed(() => sections.value[index.value]);
 const previous = computed(() => sections.value[index.value - 1]);

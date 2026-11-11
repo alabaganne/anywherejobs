@@ -11,7 +11,7 @@ use App\Support\LanguageGuess;
 use Illuminate\Support\Str;
 use Laravel\Ai\Files\Document;
 
-// Writes the CV and cover letter of a kit from the candidate's profile, resume and the role.
+// Writes the CV, the cover letter or both for a kit from the candidate's profile, resume and the role.
 class ApplicationKits
 {
     public function __construct(private OpportunityClassifier $ai) {}
@@ -21,14 +21,16 @@ class ApplicationKits
         return $this->ai->enabled();
     }
 
+    // Writes the part the kit is waiting for ("cv", "letter" or "both") and returns the fields to save.
     public function write(ApplicationKit $kit): array
     {
+        $part = in_array($kit->writing, ApplicationKit::PARTS, true) ? $kit->writing : 'both';
         $candidate = $kit->candidate()->with('user', 'field', 'city', 'skills', 'mainResume')->firstOrFail();
         $role = $kit->opportunity()->with('company.user', 'skills')->firstOrFail();
         $resume = $candidate->mainResume?->hasFile() ? $candidate->mainResume : null;
 
-        $response = (new ApplicationKitWriter($kit->locale))->prompt(
-            $this->brief($candidate, $role, $kit->locale, (bool) $resume),
+        $response = (new ApplicationKitWriter($kit->locale, $part))->prompt(
+            $this->brief($candidate, $role, $kit->locale, (bool) $resume, $part),
             attachments: $resume ? [Document::fromStorage($resume->path, 'local')] : [],
             provider: $this->ai->provider(),
             model: $this->ai->model('letter'),
@@ -36,8 +38,8 @@ class ApplicationKits
         $data = $response->toArray();
 
         return [
-            'cv' => Cv::clean([...($data['cv'] ?? []), 'name' => (string) $candidate->user?->name, 'contact' => Cv::contact($candidate)]),
-            'cover_letter' => trim((string) ($data['cover_letter'] ?? '')),
+            ...($part !== 'letter' ? ['cv' => Cv::clean([...($data['cv'] ?? []), 'name' => (string) $candidate->user?->name, 'contact' => Cv::contact($candidate)])] : []),
+            ...($part !== 'cv' ? ['cover_letter' => trim((string) ($data['cover_letter'] ?? ''))] : []),
             'model' => $response->meta->model ?? $this->ai->model('letter'),
             'input_tokens' => (int) ($response->usage->inputTokens ?? 0),
             'output_tokens' => (int) ($response->usage->outputTokens ?? 0),
@@ -52,7 +54,7 @@ class ApplicationKits
         return array_values(array_unique(array_filter([in_array($original, CvTemplates::LOCALES, true) ? $original : null, 'en', 'fr'])));
     }
 
-    private function brief($candidate, $role, string $locale, bool $resume): string
+    private function brief($candidate, $role, string $locale, bool $resume, string $part = 'both'): string
     {
         $user = $candidate->user;
         $skills = $candidate->skills->pluck('name')->merge($candidate->preferences['skills'] ?? [])->unique()->implode(', ');
@@ -60,7 +62,7 @@ class ApplicationKits
         $history = fn (string $label, $rows) => $rows ? $label.":\n".collect($rows)->map(fn ($row) => '- '.implode(' | ', array_filter(array_map(fn ($value) => is_bool($value) ? ($value ? 'current' : null) : $value, $row))))->implode("\n") : null;
 
         return implode("\n", array_filter([
-            'Write a CV and a cover letter in '.(LanguageGuess::name($locale) ?? 'English').' for this candidate and job.',
+            'Write '.['cv' => 'a CV', 'letter' => 'a cover letter', 'both' => 'a CV and a cover letter'][$part].' in '.(LanguageGuess::name($locale) ?? 'English').' for this candidate and job.',
             '',
             'CANDIDATE',
             $line('Name', $user?->name),

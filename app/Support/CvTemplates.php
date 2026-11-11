@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 class CvTemplates
 {
     public const TEMPLATES = [
+        'compact' => ['name' => 'Compact', 'family' => 'One page', 'desc' => 'Small type and tight spacing, so a lot fits on one page.', 'ats_safe' => true],
         'ravenna' => ['name' => 'Ravenna', 'family' => 'Editorial', 'desc' => 'Centred serif masthead, classic and refined.', 'ats_safe' => true],
         'halden' => ['name' => 'Halden', 'family' => 'Modern', 'desc' => 'Left-aligned with a quiet accent rule.', 'ats_safe' => true],
         'marlow' => ['name' => 'Marlow', 'family' => 'Minimal', 'desc' => 'Lots of white space, hairline dividers.', 'ats_safe' => true],
@@ -31,7 +32,7 @@ class CvTemplates
 
     public const PAPERS = ['a4' => 'A4', 'letter' => 'US Letter'];
 
-    public const DEFAULT = ['template' => 'halden', 'accent' => 'navy', 'font' => 'sans', 'paper' => 'a4'];
+    public const DEFAULT = ['template' => 'compact', 'accent' => 'navy', 'font' => 'sans', 'paper' => 'a4'];
 
     // Languages a CV or letter can be written in.
     public const LOCALES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'nl', 'ar'];

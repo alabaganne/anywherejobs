@@ -36,7 +36,7 @@
         @include('cv.partials.sections', ['sections' => ['summary', 'experience', 'projects'], 'summaryLabel' => $labels['profile']])
     </div>
 @else
-    @include('cv.partials.header-'.match ($template) { 'halden' => 'left', 'atlas' => 'block', default => 'center' })
+    @include('cv.partials.header-'.match ($template) { 'halden' => 'left', 'atlas', 'compact' => 'block', default => 'center' })
     <div class="d-body">
         @include('cv.partials.sections', ['sections' => ['summary', 'experience', 'education', 'skills', 'projects', 'languages'], 'summaryLabel' => $labels['summary']])
     </div>

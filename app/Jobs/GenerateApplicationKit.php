@@ -24,7 +24,7 @@ class GenerateApplicationKit implements ShouldQueue
         $kit = ApplicationKit::find($this->kitId);
         if (! $kit || $kit->status !== 'queued') { return; }
         try {
-            $kit->update([...$kits->write($kit), 'status' => 'ready', 'error' => null]);
+            $kit->update([...$kits->write($kit), 'status' => 'ready', 'writing' => null, 'error' => null]);
         } catch (\Throwable $e) {
             Log::warning('Application kit failed.', ['kit_id' => $kit->id, 'error' => Str::limit($e->getMessage(), 300)]);
             $this->fail($kit, $credits);
@@ -42,7 +42,8 @@ class GenerateApplicationKit implements ShouldQueue
     private function fail(ApplicationKit $kit, Credits $credits): void
     {
         if ($kit->status !== 'queued') { return; }
-        $kit->update(['status' => $kit->cv ? 'ready' : 'failed', 'error' => 'We could not write your CV and letter right now. Please try again in a minute.']);
+        $what = ['cv' => 'your CV', 'letter' => 'your letter'][$kit->writing] ?? 'your CV and letter';
+        $kit->update(['status' => $kit->cv || filled($kit->cover_letter) ? 'ready' : 'failed', 'writing' => null, 'error' => "We could not write {$what} right now. Please try again in a minute."]);
         if ($kit->generations > 0) { $kit->decrement('generations'); }
         if ($user = $kit->candidate?->user) { $credits->refund($user, $kit->fresh()); }
     }

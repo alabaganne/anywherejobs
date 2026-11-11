@@ -32,15 +32,21 @@ class ApplicationKitController extends Controller
         $user = $request->user();
         $candidate = $user->ensureCandidateProfile() ?? abort(403);
         abort_unless($opportunity->publication_status === 'published' && $opportunity->isOpen(), 404);
-        $data = $request->validate(['locale' => ['required', Rule::in(ApplicationKits::locales($opportunity))]]);
+        $data = $request->validate([
+            'locale' => ['required', Rule::in(ApplicationKits::locales($opportunity))],
+            'part' => ['nullable', Rule::in(ApplicationKit::PARTS)],
+        ]);
+        $part = $data['part'] ?? 'both';
         abort_unless($writer->enabled(), 503, 'Tailored CVs and letters are not available right now.');
 
         $kit = ApplicationKit::firstOrCreate(
             ['candidate_id' => $candidate->id, 'opportunity_id' => $opportunity->id, 'locale' => $data['locale']],
             ['style' => CvTemplates::style($candidate->mainResume?->style ?? ApplicationKit::where('candidate_id', $candidate->id)->whereNotNull('style')->latest('updated_at')->value('style'))],
         );
-        if ($kit->wasRecentlyCreated || $kit->status === 'failed') {
-            if ($response = $this->start($user, $kit, $credits)) { return $response; }
+        // Asking again for a part that is already written just opens the kit.
+        $missing = ['cv' => ! $kit->cv, 'letter' => blank($kit->cover_letter), 'both' => ! $kit->cv && blank($kit->cover_letter)][$part];
+        if ($kit->wasRecentlyCreated || ($kit->status !== 'queued' && ($kit->status === 'failed' || $missing))) {
+            if ($response = $this->start($user, $kit, $credits, $part)) { return $response; }
         }
 
         return response()->json(['kit' => $this->summary($kit->fresh('opportunity')), 'url' => route('kits.show', $kit)]);
@@ -60,7 +66,8 @@ class ApplicationKitController extends Controller
     public function update(Request $request, ApplicationKit $kit)
     {
         $this->authorizeKit($request, $kit);
-        abort_if($kit->status === 'queued', 409, 'Your CV and letter are still being written.');
+        $writing = $kit->status === 'queued' ? ($kit->writing ?? 'both') : null;
+        abort_if($writing && ($request->has('cv') && $writing !== 'letter' || $request->has('cover_letter') && $writing !== 'cv'), 409, 'This is still being written.');
         $data = $request->validate([
             'cover_letter' => 'nullable|string|max:20000',
             'cv' => 'sometimes|array',
@@ -72,7 +79,7 @@ class ApplicationKitController extends Controller
         // The listing page saves the letter alone, without the CV.
         $kit->update([
             ...($request->has('cover_letter') ? ['cover_letter' => trim((string) ($data['cover_letter'] ?? ''))] : []),
-            ...(isset($data['cv']) ? ['cv' => Cv::clean($request->input('cv', []))] : []),
+            ...(isset($data['cv']) ? ['cv' => $this->keptCv($kit, Cv::clean($request->input('cv', [])))] : []),
             ...(isset($data['style']) ? ['style' => CvTemplates::style([...($kit->style ?? []), ...$data['style']])] : []),
         ]);
         if ($request->wantsJson()) {
@@ -87,7 +94,8 @@ class ApplicationKitController extends Controller
         $this->authorizeKit($request, $kit);
         abort_unless($kit->opportunity?->publication_status === 'published' && $kit->opportunity->isOpen(), 409, 'This listing is closed.');
         abort_unless($writer->enabled(), 503, 'Tailored CVs and letters are not available right now.');
-        if ($kit->status !== 'queued' && ($response = $this->start($request->user(), $kit, $credits))) {
+        $part = $request->validate(['part' => ['nullable', Rule::in(ApplicationKit::PARTS)]])['part'] ?? 'both';
+        if ($kit->status !== 'queued' && ($response = $this->start($request->user(), $kit, $credits, $part))) {
             return $response;
         }
 
@@ -115,19 +123,36 @@ class ApplicationKitController extends Controller
         $this->authorizeKit($request, $kit);
         abort_unless($kit->cover_letter, 404);
 
-        return $this->download($pdf->letterPdf($kit->cv ?? [], $kit->cover_letter, $kit->style, $kit->locale), $kit->fileName('letter'));
+        return $this->download($pdf->letterPdf($kit->cv ?: $this->sender($kit), $kit->cover_letter, $kit->style, $kit->locale), $kit->fileName('letter'));
     }
 
-    // Takes a credit when needed and queues the draft. Returns an error response when the user has no credit.
-    private function start($user, ApplicationKit $kit, Credits $credits)
+    // Takes a credit when needed and queues the draft of the CV, the letter or both. Returns an error response when the user has no credit.
+    private function start($user, ApplicationKit $kit, Credits $credits, string $part = 'both')
     {
         if (! $credits->chargeFor($user, $kit)) {
             return response()->json(['message' => 'You have no credits left. Get more to tailor more CVs and letters.', 'billing_url' => route('billing.index')], 402);
         }
-        $kit->update(['status' => 'queued', 'error' => null, 'generations' => $kit->generations + 1]);
+        $kit->update(['status' => 'queued', 'writing' => $part, 'error' => null, 'generations' => $kit->generations + 1]);
         GenerateApplicationKit::dispatch($kit->id);
 
         return null;
+    }
+
+    // A kit with only a letter keeps no CV until something besides the name and contact is filled in.
+    private function keptCv(ApplicationKit $kit, array $cv): ?array
+    {
+        return $kit->cv || collect($cv)->except(['name', 'contact'])->filter()->isNotEmpty() ? $cv : null;
+    }
+
+    // The name and contact lines at the top of the letter, from the CV or else from the profile.
+    private function sender(ApplicationKit $kit): array
+    {
+        if ($kit->cv) {
+            return ['name' => $kit->cv['name'] ?? '', 'contact' => $kit->cv['contact'] ?? []];
+        }
+        $candidate = $kit->candidate()->with('user')->first();
+
+        return ['name' => (string) $candidate?->user?->name, 'contact' => $candidate ? Cv::contact($candidate) : []];
     }
 
     private function authorizeKit(Request $request, ApplicationKit $kit): void
@@ -148,6 +173,7 @@ class ApplicationKitController extends Controller
             'locale' => $kit->locale,
             'language' => LanguageGuess::name($kit->locale) ?? strtoupper($kit->locale),
             'status' => $kit->status,
+            'writing' => $kit->status === 'queued' ? ($kit->writing ?? 'both') : null,
             'error' => $kit->error,
             'updated_at' => $kit->updated_at?->toIso8601String(),
             'updated_label' => $kit->updated_at?->diffForHumans(),
@@ -170,6 +196,7 @@ class ApplicationKitController extends Controller
             ...$this->summary($kit),
             'cv' => $kit->cv ? Cv::clean($kit->cv) : null,
             'cover_letter' => $kit->cover_letter,
+            'sender' => $this->sender($kit),
             'style' => CvTemplates::style($kit->style),
             'labels' => CvTemplates::labels($kit->locale),
             'application_id' => Application::where('candidate_id', $kit->candidate_id)->where('opportunity_id', $kit->opportunity_id)->value('id'),

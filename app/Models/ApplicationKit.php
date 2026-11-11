@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class ApplicationKit extends Model
 {
     protected $fillable = [
-        'candidate_id', 'opportunity_id', 'locale', 'status', 'cv', 'cover_letter', 'style', 'error',
+        'candidate_id', 'opportunity_id', 'locale', 'status', 'writing', 'cv', 'cover_letter', 'style', 'error',
         'model', 'input_tokens', 'output_tokens', 'generations', 'credits_used',
     ];
+
+    // A kit can write its CV and letter together or one at a time.
+    public const PARTS = ['cv', 'letter', 'both'];
 
     protected $casts = ['cv' => 'array', 'style' => 'array'];
 

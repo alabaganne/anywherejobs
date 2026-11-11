@@ -13,7 +13,7 @@
                     <div class="d-entry-head">
                         <div>
                             <div class="d-role">{{ $job['title'] }}</div>
-                            @if (filled($job['company']) || filled($job['location']))<div class="d-org">{{ implode(' · ', array_filter([$job['company'], $job['location']])) }}</div>@endif
+                            @if (filled($job['company']) || filled($job['location']))<div class="d-org">@if (filled($job['company']))<span class="d-company">{{ $job['company'] }}</span>@endif @if (filled($job['company']) && filled($job['location']))<span class="d-dot">·</span>@endif @if (filled($job['location']))<span class="d-place">{{ $job['location'] }}</span>@endif</div>@endif
                         </div>
                         <div class="d-dates">{{ $dates($job) }}</div>
                     </div>
@@ -30,7 +30,7 @@
                     <div class="d-entry-head">
                         <div>
                             <div class="d-role">{{ $degree ?: $school['school'] }}</div>
-                            @if ($degree)<div class="d-org">{{ $school['school'] }}</div>@endif
+                            @if ($degree)<div class="d-org"><span class="d-company">{{ $school['school'] }}</span></div>@endif
                         </div>
                         <div class="d-dates">{{ $dates($school) }}</div>
                     </div>

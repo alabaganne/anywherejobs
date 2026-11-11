@@ -224,6 +224,65 @@ class ApplicationKitTest extends TestCase
         $this->actingAs($candidate)->getJson(route('kits.show', $kit))->assertJsonPath('kit.style.font', 'serif')->assertJsonPath('kit.labels.cv', 'Resume');
     }
 
+    public function test_the_cv_and_the_letter_can_be_written_one_at_a_time_for_one_credit(): void
+    {
+        config(['billing.enabled' => true, 'billing.rewrites_per_kit' => 3]);
+        $candidate = $this->candidate();
+        $credits = app(\App\Billing\Credits::class);
+        $credits->grant($candidate, 1);
+        $before = $credits->balance($candidate);
+        $role = $this->role();
+        Http::fake(['api.openai.com/v1/responses' => Http::response($this->reply())]);
+        $prompt = fn ($request) => collect($request['input'])->flatMap(fn ($message) => is_array($message['content'] ?? null) ? $message['content'] : [])->where('type', 'input_text')->pluck('text')->implode("\n");
+
+        // The CV alone.
+        $this->actingAs($candidate)->postJson("/app/opportunities/{$role->id}/kit", ['locale' => 'en', 'part' => 'cv'])->assertOk();
+        $kit = ApplicationKit::sole();
+        $this->assertSame(['ready', null], [$kit->status, $kit->writing]);
+        $this->assertSame('Développeur Laravel', $kit->cv['headline']);
+        $this->assertNull($kit->cover_letter);
+        Http::assertSent(fn ($request) => str_contains($prompt($request), 'Write a CV in English') && ! str_contains(json_encode($request->data()), 'cover_letter'));
+        $this->actingAs($candidate)->postJson("/app/opportunities/{$role->id}/kit", ['locale' => 'en', 'part' => 'cv'])->assertOk();
+        Http::assertSentCount(1);
+
+        // Then the letter, which keeps the CV and is covered by the same credit.
+        $this->actingAs($candidate)->postJson("/app/opportunities/{$role->id}/kit", ['locale' => 'en', 'part' => 'letter'])->assertOk();
+        $kit->refresh();
+        Http::assertSentCount(2);
+        $this->assertStringContainsString('Bonjour', $kit->cover_letter);
+        $this->assertSame('Développeur Laravel', $kit->cv['headline']);
+        $this->assertSame($before - 1, $credits->balance($candidate));
+
+        // The listing page offers every theme, Compact first, and saving one keeps the rest of the style.
+        $segment = basename(parse_url($role->public_url, PHP_URL_PATH));
+        $this->actingAs($candidate)->get("/app/opportunities/{$segment}")->assertInertia(fn ($page) => $page->where('kitThemes.0.id', 'compact')->where('kitThemes.0.name', 'Compact'));
+        $this->actingAs($candidate)->putJson(route('kits.update', $kit), ['style' => ['template' => 'atlas']])->assertOk();
+        $this->assertSame(['template' => 'atlas', 'accent' => $kit->style['accent'], 'font' => $kit->style['font'], 'paper' => $kit->style['paper']], $kit->fresh()->style);
+
+        // Writing the CV again keeps the edited letter.
+        $this->actingAs($candidate)->putJson(route('kits.update', $kit), ['cover_letter' => 'My own letter.'])->assertOk();
+        $this->actingAs($candidate)->postJson(route('kits.regenerate', $kit), ['part' => 'cv'])->assertOk();
+        $this->assertSame('My own letter.', $kit->fresh()->cover_letter);
+        $this->actingAs($candidate)->postJson(route('kits.regenerate', $kit), ['part' => 'nope'])->assertUnprocessable();
+    }
+
+    public function test_a_letter_alone_has_no_cv_and_still_prints_the_name_on_top(): void
+    {
+        $candidate = $this->candidate();
+        Http::fake(['api.openai.com/v1/responses' => Http::response($this->reply())]);
+        $this->actingAs($candidate)->postJson("/app/opportunities/{$this->role()->id}/kit", ['locale' => 'en', 'part' => 'letter'])->assertOk();
+        $kit = ApplicationKit::sole();
+
+        $this->assertNull($kit->cv);
+        $this->actingAs($candidate)->getJson(route('kits.show', $kit))->assertOk()->assertJsonPath('kit.sender.name', $candidate->name)->assertJsonPath('kit.cv', null);
+        $this->actingAs($candidate)->get(route('kits.letter', $kit))->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->actingAs($candidate)->get(route('kits.cv', $kit))->assertNotFound();
+
+        // Saving from the editor with only the name and contact keeps it without a CV.
+        $this->actingAs($candidate)->putJson(route('kits.update', $kit), ['cover_letter' => 'Hello.', 'cv' => ['name' => $candidate->name, 'contact' => [$candidate->email]]])->assertOk();
+        $this->assertNull($kit->fresh()->cv);
+    }
+
     private function candidate(): User
     {
         return User::where('email', 'student@example.com')->firstOrFail();

@@ -19,7 +19,9 @@ const props = defineProps({ kit: { type: Object, required: true }, themes: { typ
 const kit = ref(props.kit);
 const blankCv = () => ({ name: '', contact: [], headline: '', summary: '', skills: [], experience: [], education: [], projects: [], languages: [] });
 const copy = (value) => JSON.parse(JSON.stringify(value || {}));
-const cv = ref({ ...blankCv(), ...copy(props.kit.cv) });
+// A kit with only a letter starts its CV from the name and contact lines.
+const fill = (data) => ({ ...blankCv(), ...copy(data.cv || data.sender) });
+const cv = ref(fill(props.kit));
 const style = ref({ ...props.kit.style });
 const letter = ref(props.kit.cover_letter || '');
 const saving = ref(false);
@@ -31,7 +33,7 @@ const dirty = computed(() => current() !== snapshot.value);
 
 const loadFrom = (data) => {
 	kit.value = data;
-	cv.value = { ...blankCv(), ...copy(data.cv) };
+	cv.value = fill(data);
 	style.value = { ...data.style };
 	letter.value = data.cover_letter || '';
 	snapshot.value = current();
@@ -50,8 +52,16 @@ const poll = () => {
 		poll();
 	}, 3000);
 };
-onMounted(poll);
-onBeforeUnmount(() => clearTimeout(timer));
+// Picks up what was saved on the listing page (like a new theme or letter) when you come back, unless this tab has unsaved edits.
+const refresh = async () => {
+	if (document.visibilityState !== 'visible' || dirty.value || saving.value || kit.value.status === 'queued') return;
+	try {
+		const { data } = await axios.get(route('kits.show', kit.value.id), { headers: { Accept: 'application/json' } });
+		if (!dirty.value && !saving.value && data.kit.status !== 'queued') loadFrom(data.kit);
+	} catch (e) { /* keep what is on screen */ }
+};
+onMounted(() => { poll(); document.addEventListener('visibilitychange', refresh); });
+onBeforeUnmount(() => { clearTimeout(timer); document.removeEventListener('visibilitychange', refresh); });
 
 // Saves in the background so the editor keeps its place. Returns true once the server has the latest version.
 const save = async () => {
@@ -131,11 +141,12 @@ const markApplied = async () => {
 };
 const hasApply = computed(() => !!kit.value.application_id || applyHere.value || !!(role.value.is_open && role.value.application_url));
 const meta = computed(() => [role.value.company, `Written in ${kit.value.language}`].filter(Boolean).join(' · '));
-const ready = computed(() => kit.value.status !== 'queued' && !(kit.value.status === 'failed' && !kit.value.cv));
+const hasCv = computed(() => ['headline', 'summary', 'skills', 'experience', 'education', 'projects', 'languages'].some((key) => (Array.isArray(cv.value[key]) ? cv.value[key].length : cv.value[key])));
+const ready = computed(() => kit.value.status !== 'queued' && !(kit.value.status === 'failed' && !kit.value.cv && !kit.value.cover_letter));
 </script>
 
 <template>
-	<CvStudio v-if="ready" v-model:cv="cv" v-model:style="style" v-model:letter="letter" :themes="themes" :locale="kit.locale" with-letter>
+	<CvStudio v-if="ready" v-model:cv="cv" v-model:style="style" v-model:letter="letter" :themes="themes" :locale="kit.locale" with-letter :start="kit.cv ? 'design' : 'letter'">
 		<template #title>
 			<Link :href="route('kits.index')" class="icon-btn shrink-0 -ml-2" aria-label="Back to CV & letters"><ArrowLeft class="size-5" /></Link>
 			<div class="min-w-0">
@@ -185,8 +196,8 @@ const ready = computed(() => kit.value.status !== 'queued' && !(kit.value.status
 					<button type="button" class="cta cta-secondary cta-sm" aria-haspopup="menu" :aria-expanded="open" @click="toggle"><Download class="size-4" aria-hidden="true" />Download<ChevronDown class="size-4 text-muted-2" aria-hidden="true" /></button>
 				</template>
 				<p class="px-3 pt-1.5 pb-1 text-[11.5px] font-medium uppercase tracking-[.08em] text-muted-2">CV</p>
-				<button :class="menuItem" role="menuitem" type="button" @click="pdf(route('kits.cv', kit.id))"><FileText class="size-4 text-muted-2" />PDF</button>
-				<button :class="menuItem" role="menuitem" type="button" @click="cvDocx"><FileText class="size-4 text-muted-2" />Word</button>
+				<button :class="menuItem" role="menuitem" type="button" :disabled="!hasCv" @click="pdf(route('kits.cv', kit.id))"><FileText class="size-4 text-muted-2" />PDF</button>
+				<button :class="menuItem" role="menuitem" type="button" :disabled="!hasCv" @click="cvDocx"><FileText class="size-4 text-muted-2" />Word</button>
 				<p class="px-3 pt-2.5 pb-1 text-[11.5px] font-medium uppercase tracking-[.08em] text-muted-2">Cover letter</p>
 				<button :class="menuItem" role="menuitem" type="button" :disabled="!letter.trim()" @click="pdf(route('kits.letter', kit.id))"><FileText class="size-4 text-muted-2" />PDF</button>
 				<button :class="menuItem" role="menuitem" type="button" :disabled="!letter.trim()" @click="letterDocx"><FileText class="size-4 text-muted-2" />Word</button>

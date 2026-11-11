@@ -107,6 +107,37 @@ body { -webkit-font-smoothing: antialiased; }
 .tpl-verona .d-sec-title { font-family: inherit; letter-spacing: 0.08em; border-bottom: 1.5px solid #1a1d1b; text-transform: none; font-size: 15px; }
 .tpl-verona .d-links { color: #444; }
 
+/* Compact: small type and tight spacing so a full career fits on one page */
+.tpl-compact { padding: 34px 44px; color: #1f2328; line-height: 1.38; }
+.tpl-compact .d-head-block { text-align: center; }
+.tpl-compact .d-name { font-size: 25px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--doc-accent); line-height: 1.15; }
+.tpl-compact .d-headline { color: #1f2328; font-weight: 700; font-size: 12.5px; margin-top: 3px; }
+.tpl-compact .d-contact { justify-content: center; gap: 2px 14px; font-size: 11px; color: #5b6168; margin-top: 3px; }
+.tpl-compact .d-contact span + span::before { content: "|"; inset-inline-start: -9px; color: #b4b9bf; }
+.tpl-compact .d-contact a, .tpl-compact .d-contact bdi[dir="ltr"] { color: var(--doc-accent); }
+.tpl-compact .d-body { margin-top: 8px; }
+.tpl-compact .d-sec { margin-top: 8px; }
+.tpl-compact .d-sec-title { font-size: 12px; letter-spacing: 0.03em; color: var(--doc-accent); border-bottom: 1px solid var(--doc-accent); padding-bottom: 1px; margin-bottom: 4px; }
+.tpl-compact .d-summary, .tpl-compact .d-skill-row { font-size: 11px; color: #1f2328; line-height: 1.4; }
+.tpl-compact .d-skills { gap: 1px; }
+.tpl-compact .d-entry { margin-bottom: 5px; }
+.tpl-compact .d-entry-head { gap: 10px; }
+.tpl-compact .d-entry-head > div:first-child { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 5px; min-width: 0; }
+.tpl-compact .d-role { font-size: 11.5px; color: #1f2328; }
+.tpl-compact .d-org { font-size: 11px; margin-top: 0; color: #5b6168; }
+.tpl-compact .d-company { font-weight: 700; font-size: 11.5px; color: #1f2328; }
+.tpl-compact .d-company::before { content: "|"; margin-inline-end: 5px; }
+.tpl-compact .d-dot { display: none; }
+.tpl-compact .d-place { font-style: italic; margin-inline-start: 4px; }
+.tpl-compact .d-dates { font-size: 10.5px; color: #5b6168; letter-spacing: 0; }
+.tpl-compact .d-bullets { margin-top: 2px; padding-inline-start: 15px; }
+.tpl-compact .d-bullets li { font-size: 11px; color: #1f2328; line-height: 1.38; margin-bottom: 1px; }
+.tpl-compact .d-bullets li::marker { color: #1f2328; }
+.tpl-compact .d-note { font-size: 11px; margin-top: 1px; color: #1f2328; font-style: normal; line-height: 1.38; }
+.tpl-compact .d-proj-link { font-weight: 600; }
+.tpl-compact.tpl-letter .d-head { margin-bottom: 26px; }
+.tpl-compact.tpl-letter .d-letter { font-size: 12.5px; line-height: 1.6; }
+
 /* Bergen: two columns */
 .tpl-soren { display: grid; grid-template-columns: 256px 1fr; padding: 0; }
 .tpl-soren .d-side { background: oklch(0.965 0.006 160); padding: 52px 30px; }
