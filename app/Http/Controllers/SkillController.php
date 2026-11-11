@@ -41,7 +41,7 @@ class SkillController extends Controller
 
         return Redirect::route('skills.index')->with('toast', [
             'type' => 'store',
-            'message' => 'Skill created successfully.'
+            'message' => __('Skill created successfully.')
         ]);
     }
 
@@ -63,7 +63,7 @@ class SkillController extends Controller
 
         return Redirect::route('skills.index')->with('toast', [
             'type' => 'update',
-            'message' => 'Skill updated successfully.'
+            'message' => __('Skill updated successfully.')
         ]);
     }
 
@@ -76,7 +76,7 @@ class SkillController extends Controller
 
         return Redirect::route('skills.index')->with('toast', [
             'type' => 'destroy',
-            'message' => 'Skill deleted successfully.'
+            'message' => __('Skill deleted successfully.')
         ]);
     }
 }

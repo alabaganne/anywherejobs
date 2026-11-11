@@ -22,7 +22,9 @@ import {
 	Users,
 	X,
 } from '@lucide/vue';
+import { useText } from '@/composables/useText';
 
+const { text } = useText();
 const props = defineProps({
 	active: { type: String, default: '' },
 	mobileOpen: { type: Boolean, default: false },
@@ -38,35 +40,35 @@ const isAdmin = computed(() => !!user.value?.is_admin);
 const badges = computed(() => page.props.badges || {});
 
 const main = computed(() => [
-	{ id: 'dashboard', label: 'Dashboard', route: 'dashboard', icon: LayoutDashboard },
-	{ id: 'opportunities', label: 'Roles', route: 'app.opportunities.index', icon: Compass },
-	...(isCandidate.value || isCompany.value ? [{ id: 'applications', label: 'Applications', route: 'applications.index', icon: FileText, badge: badges.value.applications }] : []),
-	...(isCompany.value ? [{ id: 'roles', label: 'My roles', href: `${route('companies.show', user.value?.userable_id)}#opportunities`, icon: Briefcase }] : []),
+	{ id: 'dashboard', label: text('Dashboard', 'Tableau de bord'), route: 'dashboard', icon: LayoutDashboard },
+	{ id: 'opportunities', label: text('Roles', 'Offres'), route: 'app.opportunities.index', icon: Compass },
+	...(isCandidate.value || isCompany.value ? [{ id: 'applications', label: text('Applications', 'Candidatures'), route: 'applications.index', icon: FileText, badge: badges.value.applications }] : []),
+	...(isCompany.value ? [{ id: 'roles', label: text('My roles', 'Mes offres'), href: `${route('companies.show', user.value?.userable_id)}#opportunities`, icon: Briefcase }] : []),
 	...(isCandidate.value ? [
-		{ id: 'profile', label: 'Profile', route: 'profile.show', icon: UserRound },
-		{ id: 'saved', label: 'Saved roles', route: 'likes.index', icon: Bookmark, badge: user.value?.likes_count },
-		{ id: 'saved-searches', label: 'Saved searches', route: 'saved-searches.index', icon: SearchCheck },
-		{ id: 'kits', label: 'CV & letters', route: 'kits.index', icon: FileUser },
+		{ id: 'profile', label: text('Profile', 'Profil'), route: 'profile.show', icon: UserRound },
+		{ id: 'saved', label: text('Saved roles', 'Favoris'), route: 'likes.index', icon: Bookmark, badge: user.value?.likes_count },
+		{ id: 'saved-searches', label: text('Saved searches', 'Mes recherches'), route: 'saved-searches.index', icon: SearchCheck },
+		{ id: 'kits', label: text('CV & letters', 'CV et lettres'), route: 'kits.index', icon: FileUser },
 	] : []),
-	{ id: 'messages', label: 'Messages', route: 'messages.index', icon: MessageSquare, badge: badges.value.messages },
-	{ id: 'companies', label: 'Companies', route: 'app.companies.index', icon: Building2 },
-	...(isAdmin.value || isCompany.value ? [{ id: 'talent', label: 'Talent', route: 'talent.index', icon: Users }] : []),
+	{ id: 'messages', label: text('Messages', 'Messages'), route: 'messages.index', icon: MessageSquare, badge: badges.value.messages },
+	{ id: 'companies', label: text('Companies', 'Entreprises'), route: 'app.companies.index', icon: Building2 },
+	...(isAdmin.value || isCompany.value ? [{ id: 'talent', label: text('Talent', 'Talents'), route: 'talent.index', icon: Users }] : []),
 ]);
 
 const admin = computed(() => [
-	{ id: 'leads', label: 'Job leads', route: 'leads.index', icon: Target },
-	{ id: 'imports', label: 'Imports', icon: Database, children: [
-		{ id: 'imports.companies', label: 'Companies', route: 'imports.companies' },
-		{ id: 'imports.sources', label: 'Sources', route: 'imports.sources.index' },
-		{ id: 'imports.review', label: 'Review queue', route: 'imports.review', badge: badges.value.imports_review },
-		{ id: 'imports.reports', label: 'Reports', route: 'imports.reports', badge: badges.value.reports },
-		{ id: 'imports.claims', label: 'Employer claims', route: 'imports.claims', badge: badges.value.claims },
-		{ id: 'imports.runs', label: 'Runs & health', route: 'imports.runs' },
+	{ id: 'leads', label: text('Job leads', 'Pistes d’emploi'), route: 'leads.index', icon: Target },
+	{ id: 'imports', label: text('Imports', 'Imports'), icon: Database, children: [
+		{ id: 'imports.companies', label: text('Companies', 'Entreprises'), route: 'imports.companies' },
+		{ id: 'imports.sources', label: text('Sources', 'Sources'), route: 'imports.sources.index' },
+		{ id: 'imports.review', label: text('Review queue', 'File de relecture'), route: 'imports.review', badge: badges.value.imports_review },
+		{ id: 'imports.reports', label: text('Reports', 'Signalements'), route: 'imports.reports', badge: badges.value.reports },
+		{ id: 'imports.claims', label: text('Employer claims', 'Demandes d’employeurs'), route: 'imports.claims', badge: badges.value.claims },
+		{ id: 'imports.runs', label: text('Runs & health', 'Exécutions et état'), route: 'imports.runs' },
 	] },
-	{ id: 'signups', label: 'Sign-up sources', route: 'signups.index', icon: UserPlus },
-	{ id: 'candidates', label: 'Candidates', route: 'candidates.index', icon: GraduationCap, badge: badges.value.public_profiles },
-	{ id: 'fields', label: 'Fields', route: 'fields.index', icon: BookOpen },
-	{ id: 'skills', label: 'Skills', route: 'skills.index', icon: Sparkles },
+	{ id: 'signups', label: text('Sign-up sources', 'Sources d’inscription'), route: 'signups.index', icon: UserPlus },
+	{ id: 'candidates', label: text('Candidates', 'Candidats'), route: 'candidates.index', icon: GraduationCap, badge: badges.value.public_profiles },
+	{ id: 'fields', label: text('Fields', 'Domaines'), route: 'fields.index', icon: BookOpen },
+	{ id: 'skills', label: text('Skills', 'Compétences'), route: 'skills.index', icon: Sparkles },
 ]);
 
 // A group opens on its own when one of its pages is active, and stays as the person leaves it.
@@ -92,18 +94,18 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-md bg-white p
 		id="workspace-navigation"
 		class="line-art flex flex-col sticky top-0 h-dvh bg-navy text-mist-2 px-3.5 pt-5 pb-4 overflow-y-auto max-[900px]:fixed max-[900px]:left-0 max-[900px]:z-50 max-[900px]:w-[264px] max-[900px]:transition-[transform,visibility] max-[900px]:duration-200"
 		:class="mobileOpen ? 'max-[900px]:translate-x-0' : 'max-[900px]:-translate-x-full max-[900px]:invisible'"
-		aria-label="Workspace"
+		:aria-label="text('Workspace', 'Espace de travail')"
 	>
 		<div class="flex items-center justify-between px-2.5 pb-6">
 			<Link :href="route('dashboard')" class="flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-white">
 				<BrandLogo wordmark dark size="xs" />
 			</Link>
-			<button class="hidden max-[900px]:grid place-items-center size-8 rounded-lg text-mist-2 hover:bg-white/10 hover:text-white" type="button" aria-label="Close navigation" @click="$emit('close')">
+			<button class="hidden max-[900px]:grid place-items-center size-8 rounded-lg text-mist-2 hover:bg-white/10 hover:text-white" type="button" :aria-label="text('Close navigation', 'Fermer la navigation')" @click="$emit('close')">
 				<X class="size-5" />
 			</button>
 		</div>
 
-		<nav class="flex flex-col gap-0.5" aria-label="Main">
+		<nav class="flex flex-col gap-0.5" :aria-label="text('Main', 'Principal')">
 			<Link
 				v-for="item in main"
 				:key="item.id"
@@ -119,8 +121,8 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-md bg-white p
 		</nav>
 
 		<template v-if="isAdmin">
-			<div class="px-3 pt-7 pb-2 text-[12px] tracking-caps text-mist-2/70 uppercase">Admin</div>
-			<nav class="flex flex-col gap-0.5" aria-label="Admin">
+			<div class="px-3 pt-7 pb-2 text-[12px] tracking-caps text-mist-2/70 uppercase">{{ text('Admin', 'Administration') }}</div>
+			<nav class="flex flex-col gap-0.5" :aria-label="text('Admin', 'Administration')">
 				<template v-for="item in admin" :key="item.id">
 					<template v-if="item.children">
 						<button
@@ -133,7 +135,7 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-md bg-white p
 						>
 							<component :is="item.icon" class="size-[18px] shrink-0" aria-hidden="true" />
 							<span class="truncate">{{ item.label }}</span>
-							<span v-if="!open[item.id] && total(item)" :class="badge" :aria-label="`${total(item)} waiting for review`">{{ total(item) > 99 ? '99+' : total(item) }}</span>
+							<span v-if="!open[item.id] && total(item)" :class="badge" :aria-label="text(`${total(item)} waiting for review`, `${total(item)} en attente de relecture`)">{{ total(item) > 99 ? '99+' : total(item) }}</span>
 							<ChevronDown class="size-4 shrink-0 transition-transform" :class="[open[item.id] ? 'rotate-180' : '', !open[item.id] && total(item) ? '' : 'ml-auto']" aria-hidden="true" />
 						</button>
 						<div v-show="open[item.id]" :id="`nav-group-${item.id}`" class="flex flex-col gap-0.5">
@@ -146,7 +148,7 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-md bg-white p
 								@click="$emit('close')"
 							>
 								<span class="truncate">{{ child.label }}</span>
-								<span v-if="child.badge" :class="badge" :aria-label="`${child.badge} waiting for review`">{{ child.badge > 99 ? '99+' : child.badge }}</span>
+								<span v-if="child.badge" :class="badge" :aria-label="text(`${child.badge} waiting for review`, `${child.badge} en attente de relecture`)">{{ child.badge > 99 ? '99+' : child.badge }}</span>
 							</Link>
 						</div>
 					</template>
@@ -159,7 +161,7 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-md bg-white p
 					>
 						<component :is="item.icon" class="size-[18px] shrink-0" aria-hidden="true" />
 						<span class="truncate">{{ item.label }}</span>
-						<span v-if="item.badge" :class="badge" :aria-label="`${item.badge} waiting for review`">{{ item.badge > 99 ? '99+' : item.badge }}</span>
+						<span v-if="item.badge" :class="badge" :aria-label="text(`${item.badge} waiting for review`, `${item.badge} en attente de relecture`)">{{ item.badge > 99 ? '99+' : item.badge }}</span>
 					</Link>
 				</template>
 			</nav>
@@ -168,9 +170,9 @@ const badge = 'ml-auto grid h-5 min-w-5 place-items-center rounded-md bg-white p
 		<div class="flex-1"></div>
 
 		<div class="border-t border-white/10 pt-3 mt-4 flex flex-col gap-0.5">
-			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('home')" @click="$emit('close')">{{ appName }} website</Link>
-			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('blog.index')" @click="$emit('close')">Blog</Link>
-			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('contact')" @click="$emit('close')">Help and feedback</Link>
+			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('home')" @click="$emit('close')">{{ text(`${appName} website`, `Site ${appName}`) }}</Link>
+			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('blog.index')" @click="$emit('close')">{{ text('Blog', 'Blog') }}</Link>
+			<Link :class="navItem(false, 'px-3 py-2.5 text-[13.5px]')" :href="route('contact')" @click="$emit('close')">{{ text('Help and feedback', 'Aide et commentaires') }}</Link>
 		</div>
 	</aside>
 </template>

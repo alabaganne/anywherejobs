@@ -58,7 +58,7 @@ class ApplicationSubmitted extends Notification implements ShouldQueue
         $role = $application->opportunity->title;
 
         return (new MailMessage)
-            ->subject('New application for '.$role)
+            ->subject(__('New application for :role', ['role' => $role]))
             ->markdown('mail.application-submitted', [
                 'company' => MailText::plain($application->company->display_name, 120),
                 'candidate' => MailText::plain($application->candidate->user->name, 120),
@@ -82,8 +82,8 @@ class ApplicationSubmitted extends Notification implements ShouldQueue
         $opportunityTitle = e($this->application->opportunity->title);
 
         return [
-            'title' => "{$this->application->candidate->user->name}'s Application",
-            'body' => "<span>{$candidateName}</span> has applied to <span>{$opportunityTitle}</span>.",
+            'title' => __(":name's Application",['name' => $this->application->candidate->user->name]),
+            'body' => __('<span>:candidate</span> has applied to <span>:role</span>.', ['candidate' => $candidateName, 'role' => $opportunityTitle]),
             'action' => route('applications.show', $this->application->id, false)
         ];
     }
@@ -92,7 +92,7 @@ class ApplicationSubmitted extends Notification implements ShouldQueue
 	{
 		return new BroadcastMessage([
 			'toast' => [
-				'message' => 'You received a new application.',
+				'message' => __('You received a new application.'),
 				'type' => 'notification'
 			],
 			'data' => new NotificationResource(NotificationModel::find($this->id))

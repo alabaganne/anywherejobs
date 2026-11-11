@@ -26,8 +26,8 @@ class ResumeController extends Controller
     public function read(Request $request, Resumes $resumes, Credits $credits)
     {
         $resume = $this->candidate($request)->mainResume;
-        abort_unless($resume?->hasFile(), 404, 'Upload your resume first.');
-        abort_unless($resumes->enabled(), 503, 'Reading resumes is not available right now.');
+        abort_unless($resume?->hasFile(), 404, __('Upload your resume first.'));
+        abort_unless($resumes->enabled(), 503, __('Reading resumes is not available right now.'));
         if (($charge = $credits->spend($request->user(), 'resume_read', $resume)) === false) {
             return self::noCredits();
         }
@@ -45,7 +45,7 @@ class ResumeController extends Controller
         } catch (\Throwable $e) {
             $credits->refundSpend($charge);
             Log::warning('Resume reading failed.', ['resume_id' => $resume->id, 'error' => Str::limit($e->getMessage(), 300)]);
-            return response()->json(['message' => 'We could not read your resume right now. Please try again in a minute. Your credit was given back.'], 502);
+            return response()->json(['message' => __('We could not read your resume right now. Please try again in a minute. Your credit was given back.')], 502);
         }
     }
 
@@ -67,7 +67,7 @@ class ResumeController extends Controller
         return Inertia::render('Resumes/Show', [
             'resume' => null,
             'draft' => [
-                'name' => 'Resume from my profile',
+                'name' => __('Resume from my profile'),
                 'locale' => $main?->locale && in_array($main->locale, CvTemplates::LOCALES, true) ? $main->locale : 'en',
                 'style' => CvTemplates::style($candidate->resumes()->whereNotNull('style')->latest('updated_at')->value('style')),
                 'content' => Cv::fromProfile($candidate),
@@ -99,7 +99,7 @@ class ResumeController extends Controller
             ]);
         });
 
-        return back()->with('toast', ['type' => 'update', 'message' => 'Resume saved.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Resume saved.')]);
     }
 
     // Saves a resume made from the profile (free, no AI) and makes it the main one.
@@ -134,7 +134,7 @@ class ResumeController extends Controller
             $main->refresh()->remove();
         }
 
-        return redirect()->route('resumes.show', $resume)->with('toast', ['type' => 'update', 'message' => $replace ? 'Your new resume replaced the old one.' : 'Your new resume is saved and is now your main resume.']);
+        return redirect()->route('resumes.show', $resume)->with('toast', ['type' => 'update', 'message' => $replace ? __('Your new resume replaced the old one.') : __('Your new resume is saved and is now your main resume.')]);
     }
 
     public function show(Request $request, Resume $resume)
@@ -150,7 +150,7 @@ class ResumeController extends Controller
     public function update(Request $request, Resume $resume)
     {
         $this->authorizeResume($request, $resume);
-        abort_if($resume->status === 'queued', 409, 'This resume is still being written.');
+        abort_if($resume->status === 'queued', 409, __('This resume is still being written.'));
         $data = $request->validate([
             'name' => 'sometimes|required|string|max:150',
             'content' => 'sometimes|array',
@@ -180,16 +180,16 @@ class ResumeController extends Controller
             return response()->json(['resume' => $this->detail($resume->fresh())]);
         }
 
-        return back()->with('toast', ['type' => 'update', 'message' => 'Resume saved.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Resume saved.')]);
     }
 
     public function makeMain(Request $request, Resume $resume)
     {
         $this->authorizeResume($request, $resume);
-        abort_unless($resume->status === 'ready' && $resume->path, 409, 'Save this resume first.');
+        abort_unless($resume->status === 'ready' && $resume->path, 409, __('Save this resume first.'));
         $resume->makeMain();
 
-        return back()->with('toast', ['type' => 'update', 'message' => "“{$resume->name}” is now your main resume."]);
+        return back()->with('toast', ['type' => 'update', 'message' => __('“:name” is now your main resume.', ['name' => $resume->name])]);
     }
 
     // Lays the resume out again from the profile as it is now.
@@ -200,7 +200,7 @@ class ResumeController extends Controller
         $resume->update(['content' => Cv::fromProfile($resume->candidate)]);
         $resume->render();
 
-        return back()->with('toast', ['type' => 'update', 'message' => 'Your resume now matches your profile.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Your resume now matches your profile.')]);
     }
 
     public function download(Request $request, Resume $resume)
@@ -216,7 +216,7 @@ class ResumeController extends Controller
         $this->authorizeResume($request, $resume);
         $resume->remove();
 
-        return redirect()->to(route('profile.show').'#resumes')->with('toast', ['type' => 'destroy', 'message' => 'Resume deleted.']);
+        return redirect()->to(route('profile.show').'#resumes')->with('toast', ['type' => 'destroy', 'message' => __('Resume deleted.')]);
     }
 
     // The live preview and theme thumbnails: the same HTML the PDF is printed from.
@@ -239,14 +239,14 @@ class ResumeController extends Controller
     {
         return [
             'themes' => CvTemplates::options(),
-            'locales' => collect(CvTemplates::LOCALES)->map(fn ($code) => ['code' => $code, 'label' => LanguageGuess::name($code), 'labels' => CvTemplates::labels($code)])->all(),
+            'locales' => collect(CvTemplates::LOCALES)->map(fn ($code) => ['code' => $code, 'label' => LanguageGuess::name($code, app()->getLocale()), 'labels' => CvTemplates::labels($code)])->all(),
             'ai_enabled' => app(Resumes::class)->enabled(),
         ];
     }
 
     public static function noCredits()
     {
-        return response()->json(['message' => 'You have no credits left. Get more to keep using the AI tools.', 'billing_url' => route('billing.index')], 402);
+        return response()->json(['message' => __('You have no credits left. Get more to keep using the AI tools.'), 'billing_url' => route('billing.index')], 402);
     }
 
     private function detail(Resume $resume): array
@@ -264,7 +264,7 @@ class ResumeController extends Controller
     private function checkLimit(Candidate $candidate): void
     {
         if ($candidate->resumes()->count() >= Resume::LIMIT) {
-            throw ValidationException::withMessages(['resume' => 'You can keep up to '.Resume::LIMIT.' resumes. Delete one first.']);
+            throw ValidationException::withMessages(['resume' => __('You can keep up to :count resumes. Delete one first.', ['count' => Resume::LIMIT])]);
         }
     }
 

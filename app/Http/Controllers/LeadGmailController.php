@@ -24,15 +24,15 @@ class LeadGmailController extends Controller
     {
         $state = $request->session()->pull('gmail_state');
         if (! $state || ! hash_equals($state, (string) $request->query('state')) || ! is_string($request->query('code'))) {
-            return $this->back('error', 'Gmail was not connected.');
+            return $this->back('error', __('Gmail was not connected.'));
         }
         try {
             GmailImport::connect($request->user(), $request->query('code'));
         } catch (Throwable $e) {
             Log::warning('Gmail connect failed.', ['user_id' => $request->user()->id, 'error' => Str::limit($e->getMessage(), 300)]);
-            return $this->back('error', 'Gmail was not connected. '.Str::limit($e->getMessage(), 160));
+            return $this->back('error', __('Gmail was not connected.').' '.Str::limit($e->getMessage(), 160));
         }
-        return $this->back('store', 'Gmail connected. Application emails are read every morning before the new leads.');
+        return $this->back('store', __('Gmail connected. Application emails are read every morning before the new leads.'));
     }
 
     public function sync(Request $request, GmailImport $gmail)
@@ -42,15 +42,15 @@ class LeadGmailController extends Controller
             $stats = $gmail->sync($request->user(), 14);
         } catch (Throwable $e) {
             Log::warning('Gmail sync failed.', ['user_id' => $request->user()->id, 'error' => Str::limit($e->getMessage(), 300)]);
-            return $this->back('error', 'Gmail could not be read. Try again later or connect it again.');
+            return $this->back('error', __('Gmail could not be read. Try again later or connect it again.'));
         }
-        return $this->back('update', "{$stats['emails']} new emails read: {$stats['added']} added, {$stats['updated']} merged with existing leads.");
+        return $this->back('update', __(':emails new emails read: :added added, :updated merged with existing leads.', ['emails' => $stats['emails'], 'added' => $stats['added'], 'updated' => $stats['updated']]));
     }
 
     public function disconnect(Request $request)
     {
         GmailImport::disconnect($request->user());
-        return $this->back('destroy', 'Gmail disconnected.');
+        return $this->back('destroy', __('Gmail disconnected.'));
     }
 
     private function back(string $type, string $message)

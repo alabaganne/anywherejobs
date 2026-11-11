@@ -2,6 +2,7 @@
 import { ArrowRight, Check, ChevronRight, Clock3, MapPin } from '@lucide/vue';
 import { computed, h, onMounted, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import { useText } from '@/composables/useText';
 import { appPath } from '@/utils/url';
 import AppShell from '@/Layouts/AppShell.vue';
 import CompanyLogo from '@/Components/Ui/CompanyLogo.vue';
@@ -16,6 +17,8 @@ const props = defineProps({
 	resumes: { type: Array, default: () => [] },
 	kits: { type: Array, default: () => [] },
 });
+
+const { text } = useText();
 
 const icons = {
 	chevron: ChevronRight,
@@ -36,12 +39,17 @@ const form = useForm({
 // The resume goes first; other files are added below.
 const attachedResume = computed(() => props.application?.attachments?.find((file) => file.resume) || null);
 const otherAttachments = computed(() => props.application?.attachments?.filter((file) => !file.resume) || []);
-const sources = { uploaded: 'Uploaded PDF', profile: 'From your profile', translation: 'AI translation', copy: 'Editable copy' };
+const sources = computed(() => ({
+	uploaded: text('Uploaded PDF', 'PDF importé'),
+	profile: text('From your profile', 'Depuis votre profil'),
+	translation: text('AI translation', 'Traduction par IA'),
+	copy: text('Editable copy', 'Copie modifiable'),
+}));
 const resumeOptions = computed(() => [
-	...(attachedResume.value ? [{ value: 'keep', label: attachedResume.value.name, hint: 'Already sent with this application' }] : []),
-	...props.kits.map((kit) => ({ value: `kit:${kit.id}`, label: 'Tailored CV for this role', hint: `${kit.language} · updated ${kit.updated_label}` })),
-	...props.resumes.map((resume) => ({ value: `resume:${resume.id}`, label: resume.name, hint: [resume.is_main && 'Main resume', resume.language, sources[resume.source]].filter(Boolean).join(' · ') })),
-	{ value: 'none', label: 'No resume', hint: 'Attach your files below instead' },
+	...(attachedResume.value ? [{ value: 'keep', label: attachedResume.value.name, hint: text('Already sent with this application', 'Déjà envoyé avec cette candidature') }] : []),
+	...props.kits.map((kit) => ({ value: `kit:${kit.id}`, label: text('Tailored CV for this role', 'CV adapté à cette offre'), hint: `${kit.language} · ${text('updated', 'mis à jour')} ${kit.updated_label}` })),
+	...props.resumes.map((resume) => ({ value: `resume:${resume.id}`, label: resume.name, hint: [resume.is_main && text('Main resume', 'CV principal'), resume.language, sources.value[resume.source]].filter(Boolean).join(' · ') })),
+	{ value: 'none', label: text('No resume', 'Pas de CV'), hint: text('Attach your files below instead', 'Joignez plutôt vos fichiers ci-dessous') },
 ]);
 const mainResume = props.resumes.find((resume) => resume.is_main);
 const choice = ref(attachedResume.value ? 'keep' : editing.value ? 'none' : mainResume ? `resume:${mainResume.id}` : 'none');
@@ -87,26 +95,26 @@ const attachmentError = computed(() =>
 	Object.entries(form.errors).find(([key]) => key === 'attachment_files' || key.startsWith('attachment_files.'))?.[1]
 );
 
-const tips = [
-	'Lead with your strongest, most relevant qualification.',
-	'Show evidence (projects, links, numbers), not adjectives.',
-	'Keep it short: cut anything that isn’t earning its place.',
-];
+const tips = computed(() => [
+	text('Lead with your strongest, most relevant qualification.', 'Commencez par votre atout le plus fort et le plus pertinent.'),
+	text('Show evidence (projects, links, numbers), not adjectives.', 'Donnez des preuves (projets, liens, chiffres), pas des adjectifs.'),
+	text('Keep it short: cut anything that isn’t earning its place.', 'Restez bref : supprimez tout ce qui n’apporte rien.'),
+]);
 </script>
 
 <template>
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
 		<div class="flex items-center gap-2 text-[13.5px] text-muted font-medium mb-[22px] [&_svg]:w-3.5 [&_svg]:h-3.5 [&_svg]:text-muted-2">
-			<Link class="hover:text-blue-700" :href="route('app.opportunities.index')">Roles</Link>
+			<Link class="hover:text-blue-700" :href="route('app.opportunities.index')">{{ text('Roles', 'Offres') }}</Link>
 			<component :is="icons.chevron" aria-hidden="true" />
 			<Link class="hover:text-blue-700" :href="appPath(opportunity.public_url) || route('app.opportunities.show', opportunity.id)">{{ opportunity.title }}</Link>
 			<component :is="icons.chevron" aria-hidden="true" />
-			<span class="text-ink-700 font-medium">{{ editing ? 'Edit application' : 'Apply' }}</span>
+			<span class="text-ink-700 font-medium">{{ editing ? text('Edit application', 'Modifier la candidature') : text('Apply', 'Postuler') }}</span>
 		</div>
 
 		<div class="mb-6">
-			<h1 class="text-[length:clamp(28px,2.6vw,36px)] font-medium leading-[1.15] text-navy">{{ editing ? 'Edit your application' : 'Introduce yourself' }}</h1>
-			<p class="text-muted text-[15px] mt-1.5">What makes you a strong candidate for this role?</p>
+			<h1 class="text-[length:clamp(28px,2.6vw,36px)] font-medium leading-[1.15] text-navy">{{ editing ? text('Edit your application', 'Modifier votre candidature') : text('Introduce yourself', 'Présentez-vous') }}</h1>
+			<p class="text-muted text-[15px] mt-1.5">{{ text('What makes you a strong candidate for this role?', 'Qu’est-ce qui fait de vous un bon candidat pour cette offre ?') }}</p>
 		</div>
 
 		<div class="grid grid-cols-[1fr_350px] gap-6 items-start max-[1080px]:grid-cols-1">
@@ -114,8 +122,8 @@ const tips = [
 			<form class="bg-white border border-transparent rounded-card" @submit.prevent="submit">
 				<div class="px-8 max-[560px]:px-5 py-[26px]">
 					<div class="mb-6">
-						<label class="block text-[14px] font-medium mb-2 text-navy" for="cover_letter">Cover letter</label>
-						<p class="text-[13px] text-muted mb-2.5">Tell the company a little bit about yourself and any work you’ve done that’s relevant to this role.</p>
+						<label class="block text-[14px] font-medium mb-2 text-navy" for="cover_letter">{{ text('Cover letter', 'Lettre de motivation') }}</label>
+						<p class="text-[13px] text-muted mb-2.5">{{ text('Tell the company a little bit about yourself and any work you’ve done that’s relevant to this role.', 'Présentez-vous brièvement à l’entreprise et parlez de ce que vous avez fait qui est utile pour cette offre.') }}</p>
 						<textarea id="cover_letter" v-model="form.cover_letter" class="fld !min-h-[220px]" rows="10"></textarea>
 						<div class="flex justify-between mt-[7px] text-xs">
 							<span class="text-red-600">{{ form.errors.cover_letter }}</span>
@@ -124,20 +132,20 @@ const tips = [
 					</div>
 
 					<div class="mb-6">
-						<label class="block text-[14px] font-medium mb-2 text-navy" for="message">Message <span class="text-muted-2 font-medium">(optional)</span></label>
-						<p class="text-[13px] text-muted mb-2.5">Any questions about this role or the company? You can even ask for a video call.</p>
+						<label class="block text-[14px] font-medium mb-2 text-navy" for="message">Message <span class="text-muted-2 font-medium">{{ text('(optional)', '(facultatif)') }}</span></label>
+						<p class="text-[13px] text-muted mb-2.5">{{ text('Any questions about this role or the company? You can even ask for a video call.', 'Des questions sur cette offre ou l’entreprise ? Vous pouvez même demander un appel vidéo.') }}</p>
 						<textarea id="message" v-model="form.message" class="fld !min-h-[130px]" rows="6"></textarea>
 						<div class="flex justify-between mt-[7px] text-xs">
 							<span class="text-red-600">{{ form.errors.message }}</span>
-							<span class="text-muted-2">{{ form.message?.length || 0 }} / 100 min if provided</span>
+							<span class="text-muted-2">{{ form.message?.length || 0 }} / {{ text('100 min if provided', '100 min si rempli') }}</span>
 						</div>
 					</div>
 
 					<fieldset class="mb-6">
-						<legend class="block text-[14px] font-medium mb-2 text-navy">Resume</legend>
+						<legend class="block text-[14px] font-medium mb-2 text-navy">{{ text('Resume', 'CV') }}</legend>
 						<p class="text-[13px] text-muted mb-2.5">
-							Sent as a PDF with your application.
-							<template v-if="!resumes.length && !kits.length">You have no saved resume yet: <Link class="text-blue-700 font-medium hover:underline" :href="`${route('profile.show')}#resumes`">add one on your profile</Link>, or attach it below.</template>
+							{{ text('Sent as a PDF with your application.', 'Envoyé en PDF avec votre candidature.') }}
+							<template v-if="!resumes.length && !kits.length">{{ text('You have no saved resume yet:', 'Vous n’avez pas encore de CV enregistré :') }} <Link class="text-blue-700 font-medium hover:underline" :href="`${route('profile.show')}#resumes`">{{ text('add one on your profile', 'ajoutez-en un sur votre profil') }}</Link>{{ text(', or attach it below.', ', ou joignez-le ci-dessous.') }}</template>
 						</p>
 						<div class="flex flex-col gap-2">
 							<label
@@ -157,8 +165,8 @@ const tips = [
 					</fieldset>
 
 					<div>
-						<label class="block text-[14px] font-medium mb-2 text-navy" for="attachment_files">Attachments</label>
-						<p id="attachment_files-hint" class="text-[13px] text-muted mb-2.5">Up to 10 files in all, your resume included, 10&nbsp;MB each. PDF, Word, text, or RTF files: work samples or anything that supports your application.</p>
+						<label class="block text-[14px] font-medium mb-2 text-navy" for="attachment_files">{{ text('Attachments', 'Pièces jointes') }}</label>
+						<p id="attachment_files-hint" class="text-[13px] text-muted mb-2.5">{{ text('Up to 10 files in all, your resume included, 10 MB each. PDF, Word, text, or RTF files: work samples or anything that supports your application.', '10 fichiers au plus en tout, CV compris, 10 Mo chacun. Fichiers PDF, Word, texte ou RTF : exemples de travail ou tout ce qui appuie votre candidature.') }}</p>
 						<input id="attachment_files" class="fld !py-[9px]" type="file" accept=".pdf,.doc,.docx,.txt,.rtf" multiple aria-describedby="attachment_files-hint" @input="pickFiles">
 						<div v-if="attachmentError" class="text-xs text-red-600 mt-[7px]">{{ attachmentError }}</div>
 						<div v-if="otherAttachments.length" class="flex flex-wrap gap-2 mt-3">
@@ -167,9 +175,9 @@ const tips = [
 					</div>
 				</div>
 				<div class="px-8 max-[560px]:px-5 py-4 border-t border-line-2 flex justify-end gap-2.5 bg-white rounded-b-card">
-					<Link class="cta cta-secondary" :href="editing ? route('applications.show', application.id) : appPath(opportunity.public_url) || route('app.opportunities.show', opportunity.id)">Cancel</Link>
+					<Link class="cta cta-secondary" :href="editing ? route('applications.show', application.id) : appPath(opportunity.public_url) || route('app.opportunities.show', opportunity.id)">{{ text('Cancel', 'Annuler') }}</Link>
 					<button class="cta cta-primary [&_svg]:w-[17px] [&_svg]:h-[17px]" type="submit" :disabled="form.processing">
-						{{ editing ? 'Save changes' : 'Submit application' }} <component :is="icons.arrow" aria-hidden="true" />
+						{{ editing ? text('Save changes', 'Enregistrer les modifications') : text('Submit application', 'Envoyer la candidature') }} <component :is="icons.arrow" aria-hidden="true" />
 					</button>
 				</div>
 			</form>
@@ -177,7 +185,7 @@ const tips = [
 			<!-- RIGHT -->
 			<div class="flex flex-col gap-4 sticky top-[94px]">
 				<section class="bg-white border border-transparent rounded-card p-6">
-					<h3 class="mb-4 text-[13px] tracking-caps text-brand uppercase">YOU'RE APPLYING TO</h3>
+					<h3 class="mb-4 text-[13px] tracking-caps text-brand uppercase">{{ text(`YOU'RE APPLYING TO`, 'VOUS POSTULEZ À') }}</h3>
 					<div class="flex items-center gap-[13px] mb-4">
 						<CompanyLogo class="w-[46px] h-[46px] rounded-card text-base" :name="opportunity.company.name" :src="opportunity.company.image" />
 						<div>
@@ -186,13 +194,13 @@ const tips = [
 						</div>
 					</div>
 					<div class="flex flex-col gap-0.5 [&_.ci]:flex [&_.ci]:items-center [&_.ci]:gap-3 [&_.ci]:py-2.5 [&_.ci]:text-sm [&_.ci]:text-ink-700 [&_svg]:w-[17px] [&_svg]:h-[17px] [&_svg]:text-muted-2 [&_svg]:shrink-0">
-						<div class="ci"><component :is="icons.clock" aria-hidden="true" />{{ opportunity.closing_at ? `Closes ${opportunity.closing_at}` : 'No deadline listed' }}</div>
-						<div v-if="opportunity.duration_weeks" class="ci"><component :is="icons.pin" aria-hidden="true" />{{ opportunity.duration_weeks }} weeks<template v-if="opportunity.term"> · {{ opportunity.term }}</template></div>
+						<div class="ci"><component :is="icons.clock" aria-hidden="true" />{{ opportunity.closing_at ? text(`Closes ${opportunity.closing_at}`, `Date limite : ${opportunity.closing_at}`) : text('No deadline listed', 'Pas de date limite indiquée') }}</div>
+						<div v-if="opportunity.duration_weeks" class="ci"><component :is="icons.pin" aria-hidden="true" />{{ opportunity.duration_weeks }} {{ text('weeks', 'semaines') }}<template v-if="opportunity.term"> · {{ opportunity.term }}</template></div>
 					</div>
 				</section>
 
 				<section class="bg-white border border-transparent rounded-card p-6">
-					<h3 class="mb-4 text-[13px] tracking-caps text-brand uppercase">TIPS</h3>
+					<h3 class="mb-4 text-[13px] tracking-caps text-brand uppercase">{{ text('TIPS', 'CONSEILS') }}</h3>
 					<ul class="list-none flex flex-col gap-[11px] [&_li]:flex [&_li]:items-start [&_li]:gap-2.5 [&_li]:text-[13.5px] [&_li]:text-ink-700 [&_li]:leading-[1.5]">
 						<li v-for="tip in tips" :key="tip">
 							<span class="w-[18px] h-[18px] rounded-md grid place-items-center shrink-0 bg-blue-50 text-blue-600 mt-px [&_svg]:w-[11px] [&_svg]:h-[11px]"><component :is="icons.check" aria-hidden="true" /></span>

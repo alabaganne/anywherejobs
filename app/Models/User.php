@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, HasLocalePreference
 {
     use HasFactory, Notifiable;
 
@@ -26,6 +27,12 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     public $timestamps = false;
+
+    // Emails and notifications go out in the language saved on the account.
+    public function preferredLocale(): string
+    {
+        return $this->locale === 'fr' ? 'fr' : 'en';
+    }
 
     protected static function booted(): void
     {

@@ -92,7 +92,7 @@ class Resume extends Model
     // What lists and pages show.
     public function summary(): array
     {
-        $language = fn (?string $code) => $code ? ['code' => $code, 'label' => LanguageGuess::name($code) ?? strtoupper($code)] : null;
+        $language = fn (?string $code) => $code ? ['code' => $code, 'label' => LanguageGuess::name($code, app()->getLocale()) ?? strtoupper($code)] : null;
 
         return [
             'id' => $this->id,

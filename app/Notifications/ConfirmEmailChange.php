@@ -24,7 +24,7 @@ class ConfirmEmailChange extends Notification
         ]);
 
         return (new MailMessage)
-            ->subject('Confirm your new email for '.config('app.name'))
+            ->subject(__('Confirm your new email for :app', ['app' => config('app.name')]))
             ->markdown('mail.email-change', [
                 'name' => MailText::plain(MailText::firstName($notifiable->name), 80),
                 'old' => MailText::plain($notifiable->email, 255),

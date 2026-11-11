@@ -1,6 +1,9 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import axios from 'axios';
+import { useText } from '@/composables/useText';
+
+const { text } = useText();
 
 // Shows the CV (or letter) exactly as the PDF prints it: the server renders the HTML, scaled here to fit.
 // Each printed page is drawn as its own sheet, cut where the PDF breaks.
@@ -122,7 +125,7 @@ onBeforeUnmount(() => { observer?.disconnect(); clearTimeout(timer); });
 			ref="frame"
 			:srcdoc="html"
 			sandbox="allow-same-origin"
-			title="Preview"
+			:title="text('Preview', 'Aperçu')"
 			tabindex="-1"
 			class="absolute top-0 left-0 origin-top-left border-0"
 			:style="{ width: `${page().width}px`, height: `${height}px`, transform: `scale(${scale})` }"
@@ -137,7 +140,7 @@ onBeforeUnmount(() => { observer?.disconnect(); clearTimeout(timer); });
 				:key="index"
 				class="relative overflow-hidden rounded-[4px] ring-1 ring-[#dde3ec]"
 				:style="{ height: `${page().height * scale}px`, background: sheetBackground }"
-				:aria-label="sheets.length > 1 ? `Page ${index + 1} of ${sheets.length}` : null"
+				:aria-label="sheets.length > 1 ? text(`Page ${index + 1} of ${sheets.length}`, `Page ${index + 1} sur ${sheets.length}`) : null"
 			>
 				<div class="absolute inset-x-0 overflow-hidden" :style="{ top: `${sheet.offset * scale}px`, height: `${sheet.height * scale}px` }">
 					<iframe
@@ -145,7 +148,7 @@ onBeforeUnmount(() => { observer?.disconnect(); clearTimeout(timer); });
 						:ref="setFrame(index)"
 						:srcdoc="html"
 						sandbox="allow-same-origin"
-						:title="index === 0 ? 'Preview' : `Preview, page ${index + 1}`"
+						:title="index === 0 ? text('Preview', 'Aperçu') : text(`Preview, page ${index + 1}`, `Aperçu, page ${index + 1}`)"
 						:tabindex="index === 0 ? 0 : -1"
 						:aria-hidden="index === 0 ? null : 'true'"
 						class="absolute left-0 origin-top-left border-0 pointer-events-none"
@@ -155,6 +158,6 @@ onBeforeUnmount(() => { observer?.disconnect(); clearTimeout(timer); });
 				</div>
 			</div>
 		</div>
-		<p v-if="failed" class="absolute inset-x-0 top-4 text-center text-sm text-red-700" role="alert">The preview could not load. Your changes are still here.</p>
+		<p v-if="failed" class="absolute inset-x-0 top-4 text-center text-sm text-red-700" role="alert">{{ text('The preview could not load. Your changes are still here.', 'L’aperçu n’a pas pu se charger. Vos modifications sont toujours là.') }}</p>
 	</div>
 </template>

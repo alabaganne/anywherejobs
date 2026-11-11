@@ -21,9 +21,9 @@
     {{-- Footer --}}
     <x-slot:footer>
         <x-mail::footer>
-            {{ config('app.name') }} · IT internships and jobs around the world
-            Browse roles: {{ rtrim(config('app.url'), '/') }}/opportunities
-            Settings: {{ rtrim(config('app.url'), '/') }}/settings
+            {{ config('app.name') }} · {{ __('IT internships and jobs around the world') }}
+            {{ __('Browse roles') }}: {{ rtrim(config('app.url'), '/') }}/opportunities
+            {{ __('Settings') }}: {{ rtrim(config('app.url'), '/') }}/settings
         </x-mail::footer>
     </x-slot:footer>
 </x-mail::layout>

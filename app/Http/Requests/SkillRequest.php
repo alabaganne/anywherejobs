@@ -22,7 +22,7 @@ class SkillRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.unique' => 'A skill with that name already exists.',
+            'name.unique' => __('A skill with that name already exists.'),
         ];
     }
 

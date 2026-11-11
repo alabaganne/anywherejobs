@@ -86,7 +86,7 @@ class ApplicationController extends Controller
         $request->user()->ensureCandidateProfile() ?? abort(403);
         $application = DB::transaction(function () use ($request, $opportunity) {
             $request->user()->userable()->lockForUpdate()->first();
-            abort_if(Application::where('candidate_id', $request->user()->userable_id)->where('opportunity_id', $opportunity->id)->exists(), 409, 'You already have an application for this role.');
+            abort_if(Application::where('candidate_id', $request->user()->userable_id)->where('opportunity_id', $opportunity->id)->exists(), 409, __('You already have an application for this role.'));
             return Application::create([
             'candidate_id' => $request->user()->userable->id,
             'opportunity_id' => $opportunity->id,
@@ -107,7 +107,7 @@ class ApplicationController extends Controller
 
         return Redirect::route('applications.index')->with('toast', [
             'type' => 'store',
-            'message' => 'Your application has been submitted.'
+            'message' => __('Your application has been submitted.')
         ]);
     }
 
@@ -153,7 +153,7 @@ class ApplicationController extends Controller
 
         return Redirect::route('applications.show', $application)->with('toast', [
             'type' => 'update',
-            'message' => 'Application updated successfully.'
+            'message' => __('Application updated successfully.')
         ]);
     }
 
@@ -164,7 +164,7 @@ class ApplicationController extends Controller
 
         return Redirect::route('applications.index')->with('toast', [
             'type' => 'destroy',
-            'message' => 'Applications deleted successfully.'
+            'message' => __('Applications deleted successfully.')
         ]);
     }
 
@@ -181,7 +181,7 @@ class ApplicationController extends Controller
 
         return Redirect::back()->with('toast', [
             'type' => 'notification',
-            'message' => 'Reply sent to the applicant.'
+            'message' => __('Reply sent to the applicant.')
         ]);
     }
     // The application is already saved, so a mail or broadcast error must not fail the request.
@@ -226,7 +226,7 @@ class ApplicationController extends Controller
             'resumes' => $candidate->resumes()->where('status', 'ready')->whereNotNull('path')->orderByDesc('is_main')->latest('updated_at')->get()
                 ->map(fn (Resume $resume) => [...$resume->only('id', 'name', 'file_name', 'is_main', 'source'), 'language' => $resume->summary()['language']['label'] ?? null])->all(),
             'kits' => ApplicationKit::where('candidate_id', $candidate->id)->where('opportunity_id', $opportunityId)->whereNotNull('cv')->latest('updated_at')->get()
-                ->map(fn (ApplicationKit $kit) => ['id' => $kit->id, 'language' => \App\Support\LanguageGuess::name($kit->locale) ?? strtoupper($kit->locale), 'updated_label' => $kit->updated_at?->diffForHumans()])->all(),
+                ->map(fn (ApplicationKit $kit) => ['id' => $kit->id, 'language' => \App\Support\LanguageGuess::name($kit->locale, app()->getLocale()) ??strtoupper($kit->locale), 'updated_label' => $kit->updated_at?->diffForHumans()])->all(),
         ];
     }
 
@@ -237,7 +237,7 @@ class ApplicationController extends Controller
         $path = 'applications/'.Str::random(40).'.pdf';
         if ($request->filled('resume_id')) {
             $resume = Resume::where('candidate_id', $candidateId)->findOrFail($request->integer('resume_id'));
-            abort_unless($resume->hasFile() && Storage::disk('local')->copy($resume->path, $path), 409, 'This resume file is missing. Upload it again.');
+            abort_unless($resume->hasFile() && Storage::disk('local')->copy($resume->path, $path), 409, __('This resume file is missing. Upload it again.'));
             $name = $resume->file_name ?: 'resume.pdf';
         } elseif ($request->filled('kit_id')) {
             $kit = ApplicationKit::where('candidate_id', $candidateId)->with('opportunity.company')->findOrFail($request->integer('kit_id'));
@@ -275,7 +275,7 @@ class ApplicationController extends Controller
         rescue(fn () => Lead::fromApplication($application));
 
         return back()->with('toast', [
-            'type' => 'store', 'message' => 'Marked as applied and saved to your tracker. This does not submit an application to the employer.',
+            'type' => 'store', 'message' => __('Marked as applied and saved to your tracker. This does not submit an application to the employer.'),
         ]);
     }
 
@@ -288,7 +288,7 @@ class ApplicationController extends Controller
             'candidate_notes' => 'nullable|string|max:10000',
         ]));
 
-        return back()->with('toast', ['type' => 'update', 'message' => 'Your private tracker was updated.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Your private tracker was updated.')]);
     }
 
     public function downloadAttachment(Application $application, int $attachment, Request $request)

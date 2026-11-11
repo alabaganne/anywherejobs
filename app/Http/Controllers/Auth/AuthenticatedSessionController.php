@@ -36,6 +36,10 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+        // Signing in on the French page keeps the workspace in French until the person picks a language.
+        if ($request->is('fr/*') && ! $request->user()->locale) {
+            $request->user()->forceFill(['locale' => 'fr'])->save();
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

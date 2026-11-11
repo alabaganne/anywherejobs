@@ -39,7 +39,7 @@ class OpportunityController extends Controller
         $countries = Opportunity::available()->whereNotNull('country_code')->distinct()->orderBy('country_code')
             ->pluck('country_code')->map(fn ($code) => [
                 'code' => $code,
-                'name' => \App\Support\Countries::name($code, $request->is('fr/*') ? 'fr' : 'en'),
+                'name' => \App\Support\Countries::name($code, \App\Support\Locale::of($request)),
             ])->values();
 
         $seo = PublicSeo::browse($request, $category, $results->total());
@@ -168,7 +168,7 @@ class OpportunityController extends Controller
         return redirect($opportunity->publication_status === 'published'
             ? route('app.opportunities.show', ['opportunity' => $opportunity->id.'-'.$opportunity->slug])
             : route('opportunities.edit', $opportunity))
-            ->with('toast', ['type' => 'store', 'message' => 'Your role has been saved.']);
+            ->with('toast', ['type' => 'store', 'message' => __('Your role has been saved.')]);
     }
 
     public function show(Opportunity $opportunity)
@@ -183,7 +183,7 @@ class OpportunityController extends Controller
         abort_unless(preg_match('/^([1-9][0-9]*)(?:-.+)?$/u', $segment, $matches), 404);
         $opportunity = $this->canonicalOpportunity(Opportunity::findOrFail($matches[1]));
         abort_unless($opportunity->publication_status === 'published', 404);
-        $locale = $request->is('fr/*') ? 'fr' : 'en';
+        $locale = \App\Support\Locale::of($request);
         $app = $request->routeIs('app.*');
         $canonicalSegment = basename(parse_url($opportunity->publicUrl($locale), PHP_URL_PATH));
         if ($segment !== $canonicalSegment) {
@@ -269,7 +269,7 @@ class OpportunityController extends Controller
         return redirect($opportunity->publication_status === 'published'
             ? route('app.opportunities.show', ['opportunity' => $opportunity->id.'-'.$opportunity->slug])
             : route('opportunities.edit', $opportunity))
-            ->with('toast', ['type' => 'update', 'message' => 'Role updated successfully.']);
+            ->with('toast', ['type' => 'update', 'message' => __('Role updated successfully.')]);
     }
 
     public function destroy(Opportunity $opportunity)
@@ -278,7 +278,7 @@ class OpportunityController extends Controller
         $opportunity->update(['status' => 'closed', 'publication_status' => 'suppressed']);
         return Redirect::route('dashboard')->with('toast', [
             'type' => 'destroy',
-            'message' => 'Role removed from public discovery. Application history is retained.',
+            'message' => __('Role removed from public discovery. Application history is retained.'),
         ]);
     }
 

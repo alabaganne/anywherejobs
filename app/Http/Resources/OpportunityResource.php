@@ -12,7 +12,7 @@ class OpportunityResource extends JsonResource
     {
         $user = $request->user();
         $detail = $request->routeIs('opportunities.show', 'app.opportunities.show', 'fr.opportunity', 'imports.items.show');
-        $locale = $request->is('fr', 'fr/*') ? 'fr' : 'en';
+        $locale = \App\Support\Locale::of($request);
         $candidate = $user && $user->isCandidate() ? $user->userable : null;
         $application = $candidate && $this->relationLoaded('candidateApplications')
             ? $this->candidateApplications->firstWhere('candidate_id', $candidate->id)
@@ -52,7 +52,7 @@ class OpportunityResource extends JsonResource
             'application_url' => $user ? $this->application_url : null,
             'publication_status' => $this->publication_status,
             'status' => $this->status,
-            'closing_at' => $this->closing_at?->format('F d, Y'),
+            'closing_at' => \App\Support\Locale::date($this->closing_at),
             'closing_date' => $this->closing_at?->toDateString(),
             'expires_at' => $this->expires_at?->toIso8601String(),
             'is_open' => $this->isOpen(),
@@ -123,7 +123,7 @@ class OpportunityResource extends JsonResource
                 'candidate_id' => $application->candidate_id,
                 'channel' => $application->channel,
                 'status' => $application->status,
-                'created_at' => $application->created_at?->format('F d, Y'),
+                'created_at' => \App\Support\Locale::date($application->created_at),
             ] : null,
             'liked' => $candidate ? (bool) $this->is_saved : false,
         ];

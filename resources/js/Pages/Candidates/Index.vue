@@ -4,6 +4,7 @@ import { Link } from '@inertiajs/vue3';
 import AppShell from '@/Layouts/AppShell.vue';
 import Pagination from '@/Components/Ui/Pagination.vue';
 import PublicReview from '@/Components/Candidate/PublicReview.vue';
+import { useText } from '@/composables/useText';
 
 defineOptions({
 	layout: (_h, page) => h(AppShell, { active: 'candidates' }, () => page),
@@ -15,10 +16,11 @@ const props = defineProps({
 	pending_count: { type: Number, default: 0 },
 });
 
+const { text } = useText();
 const filters = computed(() => [
-	{ key: null, label: 'All' },
-	{ key: 'pending', label: `Waiting for review${props.pending_count ? ` (${props.pending_count})` : ''}` },
-	{ key: 'approved', label: 'Public' },
+	{ key: null, label: text('All', 'Tous') },
+	{ key: 'pending', label: text('Waiting for review', 'En attente de validation') + (props.pending_count ? ` (${props.pending_count})` : '') },
+	{ key: 'approved', label: text('Public', 'Public') },
 ]);
 
 const initialsFor = (name) =>
@@ -37,13 +39,13 @@ const meta = computed(() => props.candidates.meta ?? props.candidates);
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
 		<div class="mb-6 flex items-end justify-between gap-4 flex-wrap">
 			<div>
-			<h1 class="text-[length:clamp(28px,2.6vw,36px)] font-medium leading-[1.15] text-navy">Candidates</h1>
-			<p class="text-muted text-[15px] mt-1.5">Every candidate profile on {{ appName }}. Approve the ones that asked to be shown on the public site.</p>
+			<h1 class="text-[length:clamp(28px,2.6vw,36px)] font-medium leading-[1.15] text-navy">{{ text('Candidates', 'Candidats') }}</h1>
+			<p class="text-muted text-[15px] mt-1.5">{{ text(`Every candidate profile on ${appName}. Approve the ones that asked to be shown on the public site.`, `Tous les profils de candidats sur ${appName}. Approuvez ceux qui ont demandé à apparaître sur le site public.`) }}</p>
 			</div>
-			<Link class="cta cta-primary" :href="route('candidates.create')">Add candidate</Link>
+			<Link class="cta cta-primary" :href="route('candidates.create')">{{ text('Add candidate', 'Ajouter un candidat') }}</Link>
 		</div>
 
-		<nav class="flex flex-wrap gap-2 mb-5" aria-label="Filter candidates">
+		<nav class="flex flex-wrap gap-2 mb-5" :aria-label="text('Filter candidates', 'Filtrer les candidats')">
 			<Link
 				v-for="item in filters"
 				:key="item.key || 'all'"
@@ -64,18 +66,18 @@ const meta = computed(() => props.candidates.meta ?? props.candidates);
 				<div class="px-6 py-8 flex flex-col items-center text-center">
 					<div class="w-[72px] h-[72px] rounded-card bg-brand grid place-items-center text-white font-medium text-[26px]">{{ initialsFor(candidate.name) }}</div>
 					<h3 class="mt-4 text-[20px] leading-[1.35] text-navy">{{ candidate.name }}</h3>
-					<span class="text-[13px] text-muted mt-1">{{ candidate.headline || candidate.field?.name || 'Candidate' }}</span>
+					<span class="text-[13px] text-muted mt-1">{{ candidate.headline || candidate.field?.name || text('Candidate', 'Candidat') }}</span>
 				</div>
 				<div v-if="candidate.public_status" class="px-6 pb-4">
 					<PublicReview :candidate="candidate" compact />
 				</div>
 				<div class="flex gap-2.5 px-6 pb-6 mt-auto">
-					<Link class="flex-1 justify-center h-[42px] inline-flex items-center font-medium text-[15px] rounded-card bg-blue-600 text-white hover:bg-blue-700 transition-colors" :href="route('candidates.show', candidate.id)">Profile</Link>
+					<Link class="flex-1 justify-center h-[42px] inline-flex items-center font-medium text-[15px] rounded-card bg-blue-600 text-white hover:bg-blue-700 transition-colors" :href="route('candidates.show', candidate.id)">{{ text('Profile', 'Profil') }}</Link>
 				</div>
 			</article>
 		</div>
 
-		<div v-if="!candidates.data.length" class="text-center py-[60px] text-muted">{{ filter === 'pending' ? 'No profiles are waiting for review.' : filter === 'approved' ? 'No public profiles yet.' : 'No candidates found.' }}</div>
+		<div v-if="!candidates.data.length" class="text-center py-[60px] text-muted">{{ filter === 'pending' ? text('No profiles are waiting for review.', 'Aucun profil n’attend de validation.') : filter === 'approved' ? text('No public profiles yet.', 'Aucun profil public pour le moment.') : text('No candidates found.', 'Aucun candidat trouvé.') }}</div>
 
 		<Pagination :meta="meta" />
 	</div>

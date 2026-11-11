@@ -126,7 +126,7 @@ class ProfileController extends Controller
             // Only candidates have a public profile, so only they pick a username.
             'username' => $user->isCandidate() ? Username::rules($user->id) : 'prohibited',
         ], [
-            'phone_number.unique' => 'Another account already uses this phone number.',
+            'phone_number.unique' => __('Another account already uses this phone number.'),
             ...Username::messages(),
         ]);
 
@@ -148,7 +148,7 @@ class ProfileController extends Controller
 
         return Redirect::route('profile.show')->with('toast', [
             'type' => 'update',
-            'message' => 'Profile updated successfully.'
+            'message' => __('Profile updated successfully.')
         ]);
     }
 

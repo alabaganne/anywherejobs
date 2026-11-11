@@ -1,6 +1,9 @@
 <script setup>
 import { computed } from 'vue';
 import { statusPill } from '@/utils/status';
+import { useText } from '@/composables/useText';
+
+const { fr } = useText();
 
 const props = defineProps({
 	status: { type: String, default: null },
@@ -8,7 +11,7 @@ const props = defineProps({
 	set: { type: String, default: 'application' },
 });
 
-const pill = computed(() => statusPill(props.status, props.set));
+const pill = computed(() => statusPill(props.status, props.set, fr.value ? 'fr' : 'en'));
 </script>
 
 <template>

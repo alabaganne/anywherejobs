@@ -84,7 +84,7 @@ class CompanyController extends Controller
 
         return Redirect::route('app.companies.index')->with('toast', [
             'type' => 'store',
-            'message' => 'Company created successfully.'
+            'message' => __('Company created successfully.')
         ]);
     }
 
@@ -176,7 +176,7 @@ class CompanyController extends Controller
 
         return Redirect::route('companies.show', $company)->with('toast', [
             'type' => 'update',
-            'message' => 'Company updated successfully.'
+            'message' => __('Company updated successfully.')
         ]);
     }
 
@@ -195,7 +195,7 @@ class CompanyController extends Controller
 
         return Redirect::route('app.companies.index')->with('toast', [
             'type' => 'destroy',
-            'message' => 'Company deleted successfully.'
+            'message' => __('Company deleted successfully.')
         ]);
     }
 

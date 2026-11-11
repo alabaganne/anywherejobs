@@ -2,6 +2,9 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { Bell, BellOff, Trash2, X } from '@lucide/vue';
+import { useText } from '@/composables/useText';
+
+const { text } = useText();
 
 const props = defineProps({
 	open: { type: Boolean, default: false },
@@ -57,7 +60,7 @@ const openNotification = (notification) => {
 };
 
 const clearAll = () => {
-	if (!confirm('Delete all your notifications? This cannot be undone.')) return;
+	if (!confirm(text('Delete all your notifications? This cannot be undone.', 'Supprimer toutes vos notifications ? Cette action est irréversible.'))) return;
 	router.delete(route('notifications.clear'), { preserveScroll: true });
 };
 </script>
@@ -89,12 +92,12 @@ const clearAll = () => {
 			>
 				<header class="flex items-center gap-3 px-6 py-5 border-b border-line-2">
 					<h2 id="notifications-title" class="text-[20px] leading-[1.35] text-navy">Notifications</h2>
-					<span v-if="unreadCount" class="text-xs font-medium text-brand bg-pale px-2 py-[3px] rounded-md">{{ unreadCount }} new</span>
+					<span v-if="unreadCount" class="text-xs font-medium text-brand bg-pale px-2 py-[3px] rounded-md">{{ text(`${unreadCount} new`, `${unreadCount} ${unreadCount > 1 ? 'nouvelles' : 'nouvelle'}`) }}</span>
 					<button
 						ref="closeButton"
 						class="ml-auto w-9 h-9 rounded-card border border-line grid place-items-center text-muted hover:border-brand hover:text-brand transition-colors"
 						type="button"
-						aria-label="Close notifications"
+						:aria-label="text('Close notifications', 'Fermer les notifications')"
 						@click="emit('close')"
 					><X :size="17" /></button>
 				</header>
@@ -118,15 +121,15 @@ const clearAll = () => {
 							<span class="block text-xs text-muted-2 mt-1.5">{{ notification.created_at }}</span>
 						</span>
 						<span v-if="!notification.read_at" class="w-2 h-2 rounded-full bg-brand mt-2 shrink-0" aria-hidden="true"></span>
-						<span v-if="!notification.read_at" class="sr-only">Unread</span>
+						<span v-if="!notification.read_at" class="sr-only">{{ text('Unread', 'Non lue') }}</span>
 					</button>
 				</div>
 
 				<div v-else class="flex-1 grid place-items-center px-8">
 					<div class="text-center">
 						<div class="w-14 h-14 rounded-card bg-pale grid place-items-center text-muted-2 mx-auto mb-4"><BellOff :size="22" /></div>
-						<b class="block text-[16px] font-medium text-navy">You're all caught up</b>
-						<p class="text-[13.5px] text-muted mt-1">Application updates will show up here.</p>
+						<b class="block text-[16px] font-medium text-navy">{{ text('You’re all caught up', 'Vous êtes à jour') }}</b>
+						<p class="text-[13.5px] text-muted mt-1">{{ text('Application updates will show up here.', 'Les mises à jour de vos candidatures apparaîtront ici.') }}</p>
 					</div>
 				</div>
 
@@ -135,7 +138,7 @@ const clearAll = () => {
 						class="w-full inline-flex items-center justify-center gap-2 text-[13.5px] tracking-caps uppercase h-11 rounded-card border border-red-200 text-red-700 hover:bg-red-50 transition-colors"
 						type="button"
 						@click="clearAll"
-					><Trash2 :size="16" /> Clear all notifications</button>
+					><Trash2 :size="16" /> {{ text('Clear all notifications', 'Effacer toutes les notifications') }}</button>
 				</footer>
 			</aside>
 		</Transition>

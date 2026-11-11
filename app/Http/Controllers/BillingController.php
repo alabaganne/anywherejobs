@@ -45,20 +45,20 @@ class BillingController extends Controller
 
         $credits->claimBeta($user);
 
-        return back()->with('toast', ['type' => 'store', 'message' => config('billing.beta_credits').' free credits added. Thanks for trying the beta.']);
+        return back()->with('toast', ['type' => 'store', 'message' => __(':count free credits added. Thanks for trying the beta.', ['count' => config('billing.beta_credits')])]);
     }
 
     public function checkout(Request $request, Gateways $gateways, Credits $credits)
     {
         abort_unless(config('billing.enabled'), 404);
-        abort_if($credits->beta(), 403, 'Payments open after the beta.');
+        abort_if($credits->beta(), 403, __('Payments open after the beta.'));
         $user = $request->user();
         abort_unless($user->isCandidate(), 403);
         $data = $request->validate(['pack' => 'required|in:'.implode(',', array_keys(config('billing.packs'))), 'gateway' => 'required|in:'.implode(',', $gateways->available())]);
         $pack = config('billing.packs.'.$data['pack']);
         $currency = config("billing.gateways.{$data['gateway']}.currency");
         $amount = (int) ($currency === 'USD' ? $pack['price_usd'] : $pack['price_tnd']);
-        abort_if($amount < 1 || ($data['gateway'] === 'lemonsqueezy' && ! $pack['lemonsqueezy_variant']), 422, 'This pack is not on sale with this payment method yet.');
+        abort_if($amount < 1 || ($data['gateway'] === 'lemonsqueezy' && ! $pack['lemonsqueezy_variant']), 422, __('This pack is not on sale with this payment method yet.'));
 
         $payment = Payment::create(['user_id' => $user->id, 'gateway' => $data['gateway'], 'pack' => $data['pack'], 'credits' => $pack['credits'], 'amount' => $amount, 'currency' => $currency]);
         try {
@@ -66,7 +66,7 @@ class BillingController extends Controller
         } catch (\Throwable $e) {
             Log::warning('Checkout failed.', ['payment_id' => $payment->id, 'error' => Str::limit($e->getMessage(), 300)]);
             $payment->update(['status' => 'failed']);
-            return back()->with('toast', ['type' => 'destroy', 'message' => 'We could not open the payment page. Please try again in a minute.']);
+            return back()->with('toast', ['type' => 'destroy', 'message' => __('We could not open the payment page. Please try again in a minute.')]);
         }
     }
 
@@ -77,7 +77,7 @@ class BillingController extends Controller
         $paid = $request->input('result') !== 'fail' && ($payment = $gateways->get($gateway)?->confirm($request)) && $credits->addPurchase($payment);
 
         return redirect()->route('billing.index')->with('toast', $paid || ($payment ?? null)?->fresh()->status === 'paid'
-            ? ['type' => 'store', 'message' => 'Payment received. Your credits are ready.']
-            : ['type' => 'update', 'message' => 'We have not received this payment yet. If you paid, your credits appear here in a few minutes.']);
+            ? ['type' => 'store', 'message' => __('Payment received. Your credits are ready.')]
+            : ['type' => 'update', 'message' => __('We have not received this payment yet. If you paid, your credits appear here in a few minutes.')]);
     }
 }

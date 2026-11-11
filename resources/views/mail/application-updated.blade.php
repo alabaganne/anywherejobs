@@ -1,26 +1,26 @@
 <x-mail::message>
 # {!! $headline !!}
 
-Hi {!! $candidate !!},
+{!! __('Hi :name,', ['name' => $candidate]) !!}
 
 {!! $body !!}
 
 <x-mail::panel>
 **{!! $role !!}**<br>
-{!! $company !!} · Status: {!! $statusLabel !!}
+{!! $company !!} · {{ __('Status') }}: {!! $statusLabel !!}
 </x-mail::panel>
 
 <x-mail::button :url="$url">
-See your application
+{{ __('See your application') }}
 </x-mail::button>
 
 @if ($tip)
 {!! $tip !!}
 
 @endif
-The {{ config('app.name') }} team
+{{ __('The :app team', ['app' => config('app.name')]) }}
 
 <x-slot:subcopy>
-You get this email because you applied to this role on {{ config('app.name') }}. If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
+{{ __("You get this email because you applied to this role on :app. If the button doesn't work, open this link:", ['app' => config('app.name')]) }} <span class="break-all">[{{ $url }}]({{ $url }})</span>
 </x-slot:subcopy>
 </x-mail::message>

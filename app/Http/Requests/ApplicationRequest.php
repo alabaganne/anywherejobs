@@ -46,8 +46,8 @@ class ApplicationRequest extends FormRequest
     public function messages()
     {
         return [
-            'resume_id.exists' => 'Pick one of your saved resumes.',
-            'kit_id.exists' => 'Pick a tailored CV made for this listing.',
+            'resume_id.exists' => __('Pick one of your saved resumes.'),
+            'kit_id.exists' => __('Pick a tailored CV made for this listing.'),
         ];
     }
 
@@ -61,7 +61,7 @@ class ApplicationRequest extends FormRequest
                 || (! $this->boolean('remove_resume') && $kept->contains(fn ($file) => $file['resume'] ?? false));
             $total = $kept->reject(fn ($file) => $file['resume'] ?? false)->count() + count($this->file('attachment_files', [])) + ($hasResume ? 1 : 0);
             if ($total > self::MAX_FILES) {
-                $validator->errors()->add('attachment_files', 'You can send up to '.self::MAX_FILES.' files in all, your resume included.');
+                $validator->errors()->add('attachment_files', __('You can send up to :count files in all, your resume included.', ['count' => self::MAX_FILES]));
             }
         }];
     }

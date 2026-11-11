@@ -1,6 +1,9 @@
 <script setup>
 import { ref } from 'vue';
 import { X } from '@lucide/vue';
+import { useText } from '@/composables/useText';
+
+const { text: tr } = useText();
 
 // A list of short items edited as chips: Enter or a comma adds one, Backspace on an empty box removes the last.
 const items = defineModel({ type: Array, required: true });
@@ -40,14 +43,14 @@ const remove = (index) => {
 	<div class="w-full flex flex-wrap items-center gap-1.5 border border-transparent rounded-card bg-pale p-2 cursor-text transition-colors hover:border-blue-200 focus-within:border-brand focus-within:bg-white" @click.self="input?.focus()">
 		<span v-for="(item, index) in items" :key="`${item}-${index}`" class="inline-flex items-center gap-1 rounded-md bg-white text-navy text-[13.5px] pl-2.5 pr-1 py-1" dir="auto">
 			{{ item }}
-			<button type="button" class="grid place-items-center size-5 rounded-md text-blue-700 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-brand" :aria-label="`Remove ${item}`" @click="remove(index)"><X class="size-3.5" aria-hidden="true" /></button>
+			<button type="button" class="grid place-items-center size-5 rounded-md text-blue-700 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-brand" :aria-label="tr(`Remove ${item}`, `Retirer ${item}`)" @click="remove(index)"><X class="size-3.5" aria-hidden="true" /></button>
 		</span>
 		<input
 			ref="input"
 			v-model="draft"
 			dir="auto"
 			class="flex-1 min-w-[140px] border-0 bg-transparent px-1.5 py-1 text-[15px] text-navy outline-none focus:ring-0 placeholder:text-subtle-2"
-			:placeholder="items.length ? 'Add another…' : placeholder"
+			:placeholder="items.length ? tr('Add another…', 'Ajouter un autre…') : placeholder"
 			:aria-label="label"
 			@keydown="keydown"
 			@paste="paste"

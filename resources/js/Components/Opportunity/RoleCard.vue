@@ -40,7 +40,7 @@ const toggleSave = () => toggleSaved(props.opportunity);
 <template>
     <article class="bg-white border border-line rounded-card p-6 max-[480px]:p-5 flex flex-col min-w-0 transition-colors duration-180 hover:border-brand/40">
         <div class="flex gap-3.5 items-center">
-            <CompanyLogo class="w-12 h-12 rounded-card text-base shrink-0" :name="opportunity.company?.name || 'Company'" :src="opportunity.company?.image" />
+            <CompanyLogo class="w-12 h-12 rounded-card text-base shrink-0" :name="opportunity.company?.name || text('Company', 'Entreprise')" :src="opportunity.company?.image" />
             <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1 min-w-0">
                     <p class="text-[15px] text-navy truncate" :title="opportunity.company?.name">{{ opportunity.company?.name }}</p>

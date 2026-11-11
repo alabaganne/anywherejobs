@@ -102,10 +102,10 @@ class CvTemplates
         $list = fn (array $items, callable $map) => collect($items)->map(fn ($item, $id) => ['id' => $id, ...$map($item)])->values()->all();
 
         return [
-            'templates' => $list(self::TEMPLATES, fn ($t) => $t),
-            'accents' => $list(self::ACCENTS, fn ($a) => ['name' => $a['name'], 'value' => $a['value'], 'hex' => $a['hex']]),
-            'fonts' => $list(self::FONTS, fn ($name) => ['name' => $name]),
-            'papers' => $list(self::PAPERS, fn ($name) => ['name' => $name]),
+            'templates' => $list(self::TEMPLATES, fn ($t) => [...$t, 'family' => __($t['family']), 'desc' => __($t['desc'])]),
+            'accents' => $list(self::ACCENTS, fn ($a) => ['name' => __($a['name']), 'value' => $a['value'], 'hex' => $a['hex']]),
+            'fonts' => $list(self::FONTS, fn ($name) => ['name' => __($name)]),
+            'papers' => $list(self::PAPERS, fn ($name) => ['name' => __($name)]),
             'default' => self::DEFAULT,
         ];
     }

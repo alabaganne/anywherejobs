@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Languages } from '@lucide/vue';
+import { useText } from '@/composables/useText';
 
 const props = defineProps({
 	skills: { type: Array, default: () => [] },
@@ -17,7 +18,8 @@ const top = computed(() => (split.value ? props.skills.slice(0, TOP) : props.ski
 const rest = computed(() => (split.value ? props.skills.slice(TOP) : []));
 const shown = computed(() => (open.value ? rest.value : rest.value.slice(0, LIMIT - TOP)));
 const hidden = computed(() => rest.value.length - shown.value.length);
-const text = (en, french) => (props.fr ? french : en);
+const page = useText();
+const text = (en, french) => (props.fr || page.fr.value ? french : en);
 </script>
 
 <template>

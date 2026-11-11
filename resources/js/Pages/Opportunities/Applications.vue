@@ -2,6 +2,7 @@
 import { ChevronRight } from '@lucide/vue';
 import { h } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import { useText } from '@/composables/useText';
 import AppShell from '@/Layouts/AppShell.vue';
 import CompanyLogo from '@/Components/Ui/CompanyLogo.vue';
 import StatusPill from '@/Components/Ui/StatusPill.vue';
@@ -16,6 +17,8 @@ defineProps({
 	opportunity: { type: Object, required: true },
 });
 
+const { text } = useText();
+
 const icons = {
 	chevron: ChevronRight,
 };
@@ -24,21 +27,21 @@ const icons = {
 <template>
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
 		<div class="flex items-center gap-2 text-[13.5px] text-muted font-medium mb-[22px] [&_svg]:w-3.5 [&_svg]:h-3.5 [&_svg]:text-muted-2">
-			<Link class="hover:text-blue-700" :href="route('app.opportunities.index')">Roles</Link>
+			<Link class="hover:text-blue-700" :href="route('app.opportunities.index')">{{ text('Roles', 'Offres') }}</Link>
 			<component :is="icons.chevron" aria-hidden="true" />
 			<Link class="hover:text-blue-700" :href="route('app.opportunities.show', opportunity.id)">{{ opportunity.title }}</Link>
 			<component :is="icons.chevron" aria-hidden="true" />
-			<span class="text-ink-700 font-medium">Applicants</span>
+			<span class="text-ink-700 font-medium">{{ text('Applicants', 'Candidats') }}</span>
 		</div>
 
 		<div class="mb-[22px]">
-			<h1 class="text-[length:clamp(28px,2.6vw,36px)] font-medium leading-[1.15] text-navy">Applicants</h1>
-			<p class="text-muted text-[15px] mt-1.5">Everyone who applied to <b class="text-ink-700 font-medium">{{ opportunity.title }}</b>.</p>
+			<h1 class="text-[length:clamp(28px,2.6vw,36px)] font-medium leading-[1.15] text-navy">{{ text('Applicants', 'Candidats') }}</h1>
+			<p class="text-muted text-[15px] mt-1.5">{{ text('Everyone who applied to', 'Toutes les personnes qui ont postulé à') }} <b class="text-ink-700 font-medium">{{ opportunity.title }}</b>.</p>
 		</div>
 
 		<div class="bg-white border border-transparent rounded-card overflow-hidden">
 			<div class="grid grid-cols-[1fr_150px_130px_40px] gap-4 px-[22px] py-3 border-b border-line-2 bg-paper-2 max-[760px]:hidden [&_span]:text-[11.5px] [&_span]:tracking-[.08em] [&_span]:uppercase [&_span]:text-muted-2 [&_span]:font-medium [&_span:last-child]:text-right">
-				<span>Applicant</span><span>Applied</span><span>Status</span><span></span>
+				<span>{{ text('Applicant', 'Candidat') }}</span><span>{{ text('Applied', 'Postulée le') }}</span><span>{{ text('Status', 'Statut') }}</span><span></span>
 			</div>
 			<Link
 				v-for="(application, index) in applications.data"
@@ -59,7 +62,7 @@ const icons = {
 				<div class="w-[34px] h-[34px] rounded-[9px] border border-line grid place-items-center text-muted-2 justify-self-end max-[760px]:hidden [&_svg]:w-4 [&_svg]:h-4"><component :is="icons.chevron" aria-hidden="true" /></div>
 			</Link>
 
-			<div v-if="!applications.data.length" class="px-[22px] py-8 text-[14px] text-muted">No applications yet.</div>
+			<div v-if="!applications.data.length" class="px-[22px] py-8 text-[14px] text-muted">{{ text('No applications yet.', 'Aucune candidature pour le moment.') }}</div>
 		</div>
 
 		<Pagination :meta="applications.meta" />

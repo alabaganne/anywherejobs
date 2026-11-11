@@ -19,7 +19,7 @@ class FieldRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.unique' => 'A field with that name already exists.'
+            'name.unique' => __('A field with that name already exists.')
         ];
     }
 

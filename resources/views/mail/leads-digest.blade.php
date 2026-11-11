@@ -1,5 +1,5 @@
 <x-mail::message>
-# Your job leads for today
+# {{ __('Your job leads for today') }}
 
 @foreach ($leads as $lead)
 **{!! $lead['company'] !!}**: {!! $lead['title'] !!}<br>
@@ -7,12 +7,12 @@
 
 @endforeach
 <x-mail::button :url="$url">
-Open job leads
+{{ __('Open job leads') }}
 </x-mail::button>
 
-The {{ config('app.name') }} team
+{{ __('The :app team', ['app' => config('app.name')]) }}
 
 <x-slot:subcopy>
-You get this email because job lead emails are on (LEADS_DIGEST_EMAIL). If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
+{{ __("You get this email because job lead emails are on (LEADS_DIGEST_EMAIL). If the button doesn't work, open this link:") }} <span class="break-all">[{{ $url }}]({{ $url }})</span>
 </x-slot:subcopy>
 </x-mail::message>

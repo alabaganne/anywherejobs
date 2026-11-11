@@ -26,7 +26,7 @@ class ApplicationResource extends JsonResource
                 'public_url' => $this->opportunity->public_url,
                 'field' => ['name' => $this->opportunity->field?->name],
                 'city' => ['name' => $this->opportunity->location ?: $this->opportunity->city?->name ?: $this->opportunity->country_code],
-                'closing_at' => $this->opportunity->closing_at?->format('F d, Y'),
+                'closing_at' => \App\Support\Locale::date($this->opportunity->closing_at),
             ],
             'candidate' => [
                 'id' => $this->candidate->id,
@@ -45,7 +45,7 @@ class ApplicationResource extends JsonResource
                 'phone_number' => $this->channel === 'internal' ? $this->company->user?->phone_number : null,
                 'city' => ['name' => $this->company->city?->name],
             ],
-            'created_at' => $this->created_at->format('F d, Y'),
+            'created_at' => \App\Support\Locale::date($this->created_at),
             'updated_at' => $this->updated_at->diffForHumans(),
         ];
     }

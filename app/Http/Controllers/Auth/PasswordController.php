@@ -26,7 +26,7 @@ class PasswordController extends Controller
 
         return back()->with('toast', [
             'type' => 'update',
-            'message' => 'Password updated.',
+            'message' => __('Password updated.'),
         ]);
     }
 }

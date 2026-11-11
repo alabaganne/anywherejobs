@@ -1,28 +1,28 @@
 <x-mail::message>
-# Confirm your new email
+# {{ __('Confirm your new email') }}
 
-Hi {!! $name !!},
+{!! __('Hi :name,', ['name' => $name]) !!}
 
-Someone asked to change the email of your {{ config('app.name') }} account.
+{{ __('Someone asked to change the email of your :app account.', ['app' => config('app.name')]) }}
 
 <x-mail::panel>
-From: {!! $old !!}<br>
-To: {!! $new !!}
+{{ __('From') }}: {!! $old !!}<br>
+{{ __('To') }}: {!! $new !!}
 </x-mail::panel>
 
-If this was you, confirm the change. We will then send a link to the new address so you can verify it too.
+{{ __('If this was you, confirm the change. We will then send a link to the new address so you can verify it too.') }}
 
 <x-mail::button :url="$url">
-Confirm the change
+{{ __('Confirm the change') }}
 </x-mail::button>
 
-The link works for {{ $minutes }} minutes. Until you confirm, nothing changes and you keep signing in with this address.
+{{ __('The link works for :minutes minutes. Until you confirm, nothing changes and you keep signing in with this address.', ['minutes' => $minutes]) }}
 
-If you did not ask for this, ignore this email and change your password.
+{{ __('If you did not ask for this, ignore this email and change your password.') }}
 
-The {{ config('app.name') }} team
+{{ __('The :app team', ['app' => config('app.name')]) }}
 
 <x-slot:subcopy>
-If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
+{{ __("If the button doesn't work, open this link:") }} <span class="break-all">[{{ $url }}]({{ $url }})</span>
 </x-slot:subcopy>
 </x-mail::message>

@@ -20,16 +20,16 @@ class EmailChangeController extends Controller
         $request->merge(['email' => trim((string) $request->input('email'))]);
         $data = $request->validate([
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id), function ($attribute, $value, $fail) use ($user) {
-                if (mb_strtolower($value) === mb_strtolower($user->email)) { $fail('This is already your email.'); }
+                if (mb_strtolower($value) === mb_strtolower($user->email)) { $fail(__('This is already your email.')); }
             }],
             'password' => ['required', 'current_password'],
-        ], ['email.unique' => 'Another account already uses this email.']);
+        ], ['email.unique' => __('Another account already uses this email.')]);
 
         if (! $user->hasVerifiedEmail()) {
             $user->forceFill(['email' => $data['email'], 'pending_email' => null])->save();
             $this->sendVerification($user);
 
-            return back()->with('toast', ['type' => 'update', 'message' => "Email changed. We sent a link to {$user->email} to verify it."]);
+            return back()->with('toast', ['type' => 'update', 'message' => __('Email changed. We sent a link to :email to verify it.', ['email' => $user->email])]);
         }
 
         $user->forceFill(['pending_email' => $data['email']])->save();
@@ -37,17 +37,17 @@ class EmailChangeController extends Controller
             $user->notify(new ConfirmEmailChange);
         } catch (\Throwable $exception) {
             Log::warning('Email change link failed to send.', ['user_id' => $user->id, 'error' => $exception->getMessage()]);
-            throw ValidationException::withMessages(['email' => 'We could not send the email right now. Please try again in a minute.']);
+            throw ValidationException::withMessages(['email' => __('We could not send the email right now. Please try again in a minute.')]);
         }
 
-        return back()->with('toast', ['type' => 'update', 'message' => "Check {$user->email}: we sent a link to confirm the change."]);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Check :email: we sent a link to confirm the change.', ['email' => $user->email])]);
     }
 
     public function destroy(Request $request)
     {
         $request->user()->forceFill(['pending_email' => null])->save();
 
-        return back()->with('toast', ['type' => 'update', 'message' => 'Email change cancelled.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Email change cancelled.')]);
     }
 
     public function confirm(Request $request, User $user, string $hash)
@@ -58,17 +58,17 @@ class EmailChangeController extends Controller
             : redirect()->route('login')->with('status', $message);
 
         if (! $user->pending_email || ! hash_equals(sha1($user->pending_email), $hash)) {
-            return $done('This link is no longer valid. Ask for a new one in Settings.');
+            return $done(__('This link is no longer valid. Ask for a new one in Settings.'));
         }
         if (User::where('email', $user->pending_email)->whereKeyNot($user->id)->exists()) {
             $user->forceFill(['pending_email' => null])->save();
-            return $done('Another account now uses that email, so we did not change yours.');
+            return $done(__('Another account now uses that email, so we did not change yours.'));
         }
 
         $user->forceFill(['email' => $user->pending_email, 'pending_email' => null, 'email_verified_at' => null])->save();
         $this->sendVerification($user);
 
-        return $done("Your email is now {$user->email}. We sent a link there to verify it.");
+        return $done(__('Your email is now :email. We sent a link there to verify it.', ['email' => $user->email]));
     }
 
     private function sendVerification(User $user): void

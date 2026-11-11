@@ -57,12 +57,13 @@ class ApplicationReviewed extends Notification implements ShouldQueue
         $company = $application->company->display_name;
         $role = $application->opportunity->title;
 
+        $with = ['company' => $company, 'role' => $role];
         [$subject, $headline, $body, $tip] = match ($application->status) {
-            'interview' => ["{$company} would like to interview you", 'You have an interview request', "{$company} wants to talk with you about {$role}.", 'Watch your inbox and your '.config('app.name').' messages for the next steps.'],
-            'offer' => ["Good news from {$company}", 'You received an offer', "{$company} made you an offer for {$role}. Congratulations!", 'Reply to the employer soon so they know your answer.'],
-            'closed' => ["Update on your application to {$company}", 'Your application was closed', "{$company} decided not to move forward with your application for {$role}.", 'It happens to everyone. New roles come in every day, so keep going.'],
-            'review' => ["{$company} is reviewing your application", 'Your application is under review', "{$company} is now reviewing your application for {$role}.", null],
-            default => ["{$company} saw your application", 'Your application was seen', "{$company} opened your application for {$role}.", null],
+            'interview' => [__(':company would like to interview you', $with), __('You have an interview request'), __(':company wants to talk with you about :role.', $with), __('Watch your inbox and your :app messages for the next steps.', ['app' => config('app.name')])],
+            'offer' => [__('Good news from :company', $with), __('You received an offer'), __(':company made you an offer for :role. Congratulations!', $with), __('Reply to the employer soon so they know your answer.')],
+            'closed' => [__('Update on your application to :company', $with), __('Your application was closed'), __(':company decided not to move forward with your application for :role.', $with), __('It happens to everyone. New roles come in every day, so keep going.')],
+            'review' => [__(':company is reviewing your application', $with), __('Your application is under review'), __(':company is now reviewing your application for :role.', $with), null],
+            default => [__(':company saw your application', $with), __('Your application was seen'), __(':company opened your application for :role.', $with), null],
         };
 
         return (new MailMessage)
@@ -74,7 +75,7 @@ class ApplicationReviewed extends Notification implements ShouldQueue
                 'tip' => $tip,
                 'role' => MailText::plain($role, 160),
                 'company' => MailText::plain($company, 120),
-                'statusLabel' => ucfirst($application->status),
+                'statusLabel' => __(ucfirst($application->status)),
                 'url' => route('applications.show', $application),
             ]);
     }
@@ -91,8 +92,8 @@ class ApplicationReviewed extends Notification implements ShouldQueue
         $opportunityTitle = e($this->application->opportunity->title);
 
         return [
-            'title' => "{$this->application->company->display_name}'s Reply",
-            'body' => "<span>{$companyName}</span> has reviewed your application for <span>{$opportunityTitle}</span>.",
+            'title' => __(":company's Reply", ['company' => $this->application->company->display_name]),
+            'body' => __('<span>:company</span> has reviewed your application for <span>:role</span>.', ['company' => $companyName, 'role' => $opportunityTitle]),
             'action' => route('applications.show', $this->application->id, false),
         ];
     }
@@ -101,7 +102,7 @@ class ApplicationReviewed extends Notification implements ShouldQueue
 	{
 		return new BroadcastMessage([
 			'toast' => [
-				'message' => "{$this->application->company->display_name} has reviewed your application.",
+				'message' => __(':company has reviewed your application.', ['company' => $this->application->company->display_name]),
 				'type' => 'notification',
 			],
 			'data' => new NotificationResource(NotificationModel::find($this->id))

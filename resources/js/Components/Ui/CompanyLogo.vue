@@ -1,6 +1,9 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { logoColor, initialsFor } from '@/utils/brand';
+import { useText } from '@/composables/useText';
+
+const { text } = useText();
 
 const props = defineProps({
 	name: { type: String, default: '' },
@@ -21,7 +24,7 @@ const label = computed(() => props.initials || initialsFor(props.name));
 	<!-- Size/radius classes come from the caller so each screen keeps the
 	     exact classes of its design reference. -->
 	<div v-if="showImage" class="grid place-items-center overflow-hidden bg-white shrink-0">
-		<img :src="src" :alt="name ? `${name} logo` : ''" class="w-full h-full object-contain" loading="lazy" @error="failed = true" />
+		<img :src="src" :alt="name ? text(`${name} logo`, `Logo de ${name}`) : ''" class="w-full h-full object-contain" loading="lazy" @error="failed = true" />
 	</div>
 	<div v-else class="grid place-items-center text-white font-semibold shrink-0" :style="style" aria-hidden="true">
 		{{ label }}

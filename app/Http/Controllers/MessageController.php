@@ -96,7 +96,7 @@ class MessageController extends Controller
 			'text' => ['required', 'string', 'max:5000'],
 		]);
 
-		abort_unless($request->user()->canMessage(User::findOrFail($request->to_id)), 403, 'You cannot message this user.');
+		abort_unless($request->user()->canMessage(User::findOrFail($request->to_id)), 403, __('You cannot message this user.'));
 
 		$message = Message::create([
 			'from_id' => auth()->user()->id,

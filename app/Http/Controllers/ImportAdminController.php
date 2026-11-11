@@ -61,13 +61,13 @@ class ImportAdminController extends Controller
     {
         $data = $request->validate(['count' => 'required|integer|min:1|max:100']);
         if (FetchNewOpportunities::running()) {
-            throw ValidationException::withMessages(['count' => 'A fetch is already running. Wait for it to finish.']);
+            throw ValidationException::withMessages(['count' => __('A fetch is already running. Wait for it to finish.')]);
         }
         if (! FetchNewOpportunities::start($data['count'], $request->user()->name)) {
-            throw ValidationException::withMessages(['count' => 'No approved source is enabled.']);
+            throw ValidationException::withMessages(['count' => __('No approved source is enabled.')]);
         }
         $this->audit($request, 'fetch.queued', null, null, ['count' => $data['count']]);
-        return back()->with('toast', ['type' => 'update', 'message' => 'Fetching new listings. Progress shows on this page.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Fetching new listings. Progress shows on this page.')]);
     }
 
     private function fetchState(): ?array
@@ -168,7 +168,7 @@ class ImportAdminController extends Controller
     {
         $source = ImportSource::create($this->sourceData($request));
         $this->audit($request, 'source.created', null, $source->id, ['permission_status' => $source->permission_status]);
-        return redirect()->route('imports.sources.index')->with('toast', ['type' => 'store', 'message' => 'Source configuration saved.']);
+        return redirect()->route('imports.sources.index')->with('toast', ['type' => 'store', 'message' => __('Source configuration saved.')]);
     }
 
     public function updateSource(Request $request, ImportSource $source)
@@ -188,7 +188,7 @@ class ImportAdminController extends Controller
             $this->audit($request, 'source.updated', null, $source->id, ['permission_status' => $source->permission_status, 'enabled' => $source->enabled]);
         });
         $fromEditPage = url()->previous() === route('imports.sources.edit', $source);
-        return ($fromEditPage ? redirect()->route('imports.sources.index') : back())->with('toast', ['type' => 'update', 'message' => 'Source updated.']);
+        return ($fromEditPage ? redirect()->route('imports.sources.index') : back())->with('toast', ['type' => 'update', 'message' => __('Source updated.')]);
     }
 
     private function sourceData(Request $request, ?ImportSource $source = null): array
@@ -221,13 +221,13 @@ class ImportAdminController extends Controller
         $data['allowed_domains'] ??= [];
         $data['settings'] = collect($data['settings'] ?? [])->only(['employer_name', 'job_path_prefix', 'authoritative_employer', 'scope', 'freshness_hours', 'curated_snapshot', 'pages'])->all();
         if (in_array($data['provider'], SourceReader::BOARDS, true) && $data['publication_mode'] !== 'leads') {
-            throw ValidationException::withMessages(['publication_mode' => 'Remote job boards only feed job leads; their listings are never published.']);
+            throw ValidationException::withMessages(['publication_mode' => __('Remote job boards only feed job leads; their listings are never published.')]);
         }
         if ($source && ($source->url !== $data['url'] || $source->provider !== $data['provider'] || $source->allowed_domains !== $data['allowed_domains']) && $data['permission_status'] === 'approved' && $source->permission_notes === $data['permission_notes']) {
-            throw ValidationException::withMessages(['permission_notes' => 'Record a fresh permission review when changing the source URL, provider, or allowed domains.']);
+            throw ValidationException::withMessages(['permission_notes' => __('Record a fresh permission review when changing the source URL, provider, or allowed domains.')]);
         }
         if ($data['enabled'] && $data['permission_status'] !== 'approved') {
-            throw ValidationException::withMessages(['enabled' => 'A source must have recorded reuse approval before imports are enabled.']);
+            throw ValidationException::withMessages(['enabled' => __('A source must have recorded reuse approval before imports are enabled.')]);
         }
         try {
             (new SourceHttp(new ImportSource($data)))->validate($data['url']);
@@ -276,7 +276,7 @@ class ImportAdminController extends Controller
     public function trust(Request $request, OpportunitySource $item, OpportunityImporter $importer)
     {
         $source = $item->importSource;
-        abort_if($source->publication_mode === 'leads' || $source->provider === 'pages', 422, 'This source cannot be trusted as a whole.');
+        abort_if($source->publication_mode === 'leads' || $source->provider === 'pages', 422, __('This source cannot be trusted as a whole.'));
         if ($item->state !== 'published') {
             try {
                 $importer->publish($item);
@@ -298,16 +298,16 @@ class ImportAdminController extends Controller
                 }
             });
         $this->audit($request, 'source.trusted', null, $source->id, ['item_id' => $item->id, 'published' => $published]);
-        return back()->with('toast', ['type' => 'update', 'message' => "Approved. {$source->name} is trusted now, and {$published} more waiting ".str('listing')->plural($published).' went live.']);
+        return back()->with('toast', ['type' => 'update', 'message' => trans_choice('Approved. :source is trusted now, and :count more waiting listing went live.|Approved. :source is trusted now, and :count more waiting listings went live.', $published, ['source' => $source->name])]);
     }
 
     public function runSource(Request $request, ImportSource $source)
     {
-        abort_unless($source->isApproved(), 422, 'Enable this source only after recording reuse approval.');
+        abort_unless($source->isApproved(), 422, __('Enable this source only after recording reuse approval.'));
         $data = $request->validate(['recheck' => 'nullable|boolean']);
         ImportOpportunitySource::dispatch($source->id, 40, (bool) ($data['recheck'] ?? false));
         $this->audit($request, 'source.queued', null, $source->id, ['recheck' => (bool) ($data['recheck'] ?? false)]);
-        return back()->with('toast', ['type' => 'update', 'message' => 'Import queued. Source limits and robots rules still apply.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Import queued. Source limits and robots rules still apply.')]);
     }
 
     public function publish(Request $request, OpportunitySource $item, OpportunityImporter $importer)
@@ -318,7 +318,7 @@ class ImportAdminController extends Controller
             throw ValidationException::withMessages(['publication' => $exception->getMessage()]);
         }
         $this->audit($request, 'opportunity.published', $published->id, $item->import_source_id, ['item_id' => $item->id]);
-        return back()->with('toast', ['type' => 'update', 'message' => 'Role reviewed. Suppressed listings stay hidden until explicitly restored.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Role reviewed. Suppressed listings stay hidden until explicitly restored.')]);
     }
 
     public function reject(Request $request, OpportunitySource $item)
@@ -354,9 +354,9 @@ class ImportAdminController extends Controller
             $opportunity = Opportunity::lockForUpdate()->findOrFail($opportunity->id);
             $overrides = $opportunity->moderation_overrides ?: [];
             if ($data['action'] === 'restore') {
-                abort_if($opportunity->merged_into_id, 422, 'A merged duplicate cannot be restored.');
+                abort_if($opportunity->merged_into_id, 422, __('A merged duplicate cannot be restored.'));
                 if ($opportunity->origin === 'imported') {
-                    abort_unless($opportunity->hasFreshSource(), 422, 'Restore requires a current approved source.');
+                    abort_unless($opportunity->hasFreshSource(), 422, __('Restore requires a current approved source.'));
                 }
                 unset($overrides['publication_status']);
                 $opportunity->update(['publication_status' => 'published', 'moderation_overrides' => $overrides]);
@@ -368,12 +368,12 @@ class ImportAdminController extends Controller
                 $opportunity->update(['status' => 'closed', 'moderation_overrides' => $overrides]);
             } else {
                 $corrections = collect($data['corrections'] ?? [])->only(['title', 'description', 'kind', 'country_code', 'location', 'remote_eligibility', 'applicant_scope', 'relocation', 'visa_sponsorship'])->all();
-                abort_unless($corrections, 422, 'Choose a fact to correct.');
+                abort_unless($corrections, 422, __('Choose a fact to correct.'));
                 $opportunity->update([...$corrections, 'moderation_overrides' => array_merge($overrides, $corrections)]);
             }
             $this->audit($request, 'opportunity.'.$data['action'], $opportunity->id, null, ['reason' => $data['reason'], 'corrections' => $data['corrections'] ?? []]);
         });
-        return back()->with('toast', ['type' => 'update', 'message' => 'Moderation saved. Import refreshes retain reviewed corrections.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Moderation saved. Import refreshes retain reviewed corrections.')]);
     }
 
     public function resolveReport(Request $request, int $report)
@@ -396,9 +396,9 @@ class ImportAdminController extends Controller
             $roles = Opportunity::whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
             $duplicate = $roles->get($opportunity->id);
             $survivor = $roles->get((int) $data['survivor_id']);
-            abort_if($duplicate->id === $survivor->id || $duplicate->merged_into_id || $survivor->merged_into_id, 422, 'Select two distinct, unmerged roles.');
-            abort_unless($duplicate->company_id === $survivor->company_id, 422, 'Verify and consolidate the employer identity before merging different companies.');
-            abort_if($duplicate->origin === 'native' && $survivor->origin !== 'native', 422, 'Keep the employer-managed role as the survivor.');
+            abort_if($duplicate->id === $survivor->id || $duplicate->merged_into_id || $survivor->merged_into_id, 422, __('Select two distinct, unmerged roles.'));
+            abort_unless($duplicate->company_id === $survivor->company_id, 422, __('Verify and consolidate the employer identity before merging different companies.'));
+            abort_if($duplicate->origin === 'native' && $survivor->origin !== 'native', 422, __('Keep the employer-managed role as the survivor.'));
             foreach (DB::table('likes')->where('opportunity_id', $duplicate->id)->get() as $like) {
                 DB::table('likes')->insertOrIgnore(['candidate_id' => $like->candidate_id, 'opportunity_id' => $survivor->id]);
             }
@@ -427,7 +427,7 @@ class ImportAdminController extends Controller
             $duplicate->update(['merged_into_id' => $survivor->id, 'publication_status' => 'suppressed', 'status' => 'closed']);
             $this->audit($request, 'opportunity.merged', $survivor->id, null, ['duplicate_id' => $duplicate->id, 'reason' => $data['reason'], 'delivery_history' => $deliveryHistory]);
         });
-        return back()->with('toast', ['type' => 'update', 'message' => 'Duplicate merged. Saved roles, application history, and the old URL are preserved.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Duplicate merged. Saved roles, application history, and the old URL are preserved.')]);
     }
 
     public function reviewClaim(Request $request, int $claim)
@@ -438,9 +438,9 @@ class ImportAdminController extends Controller
             abort_unless($record && $record->status === 'pending', 404);
             if ($data['status'] === 'approved') {
                 $claimant = User::with('userable')->findOrFail($record->user_id);
-                abort_unless($claimant->isCompany(), 422, 'The claimant needs an existing employer account.');
+                abort_unless($claimant->isCompany(), 422, __('The claimant needs an existing employer account.'));
                 $company = Company::with('user')->lockForUpdate()->findOrFail($record->company_id);
-                abort_if($company->user || $company->claimed_by_company_id || $company->id === $claimant->userable_id, 422, 'This company already has an account or a verified claim.');
+                abort_if($company->user || $company->claimed_by_company_id || $company->id === $claimant->userable_id, 422, __('This company already has an account or a verified claim.'));
                 $target = $claimant->userable;
                 DB::table('opportunities')->where('company_id', $company->id)->update(['company_id' => $target->id]);
                 DB::table('applications')->where('company_id', $company->id)->update(['company_id' => $target->id]);
@@ -450,7 +450,7 @@ class ImportAdminController extends Controller
             DB::table('company_claims')->where('id', $claim)->update([...$data, 'updated_at' => now()]);
             $this->audit($request, 'company-claim.'.$data['status'], null, null, ['claim_id' => $claim, 'company_id' => $record->company_id, 'review_notes' => $data['review_notes']]);
         });
-        return back()->with('toast', ['type' => 'update', 'message' => 'Claim review saved. Imported applications remain external.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Claim review saved. Imported applications remain external.')]);
     }
 
     private function audit(Request $request, string $action, ?int $opportunityId, ?int $source, array $details): void

@@ -11,6 +11,7 @@ import ProfileBanner from '@/Components/Candidate/ProfileBanner.vue';
 import VerifiedBadge from '@/Components/Company/VerifiedBadge.vue';
 import { logoColor } from '@/utils/brand';
 import { appPath } from '@/utils/url';
+import { useText } from '@/composables/useText';
 
 defineOptions({
 	layout: (_h, page) => h(AppShell, { active: 'companies' }, () => page),
@@ -31,10 +32,11 @@ const opportunities = computed(() => props.company.opportunities?.data ?? props.
 const pagination = computed(() => props.company.opportunities?.meta);
 const totalRoles = computed(() => pagination.value?.total ?? opportunities.value.length);
 const page = usePage();
+const { text } = useText();
 const hiring = computed(() => props.company.hiring || { open: 0, jobs: 0, internships: 0 });
 const headline = computed(() => {
 	const fields = (hiring.value.fields || []).slice(0, 2).map((field) => field.name);
-	return fields.length ? `Hiring in ${fields.join(' and ')}` : { startup: 'Startup', established: 'Established company' }[props.company.stage] || null;
+	return fields.length ? text(`Hiring in ${fields.join(' and ')}`, `Recrute en ${fields.join(' et ')}`) : { startup: text('Startup', 'Start-up'), established: text('Established company', 'Entreprise établie') }[props.company.stage] || null;
 });
 const ownsCompany = computed(() => page.props.auth?.user?.id === props.company.user_id);
 const canEdit = computed(() => ownsCompany.value || page.props.auth?.user?.is_admin);
@@ -42,9 +44,9 @@ const canManageRole = (role) => canEdit.value && (page.props.auth?.user?.is_admi
 const roleHref = (role) => canManageRole(role)
 	? route('opportunities.edit', role.id)
 	: role.publication_status === 'published' ? appPath(role.public_url) : null;
-const roleStatus = (role) => role.publication_status === 'draft' ? 'Draft'
-	: role.publication_status === 'suppressed' ? 'Suppressed'
-	: role.is_open ? 'Open' : 'Closed';
+const roleStatus = (role) => role.publication_status === 'draft' ? text('Draft', 'Brouillon')
+	: role.publication_status === 'suppressed' ? text('Suppressed', 'Masquée')
+	: role.is_open ? text('Open', 'Ouverte') : text('Closed', 'Fermée');
 const canClaim = computed(() => page.props.auth?.user?.userable_type === 'company' && !props.company.user_id && !props.company.claimed_by_company_id);
 const claimForm = useForm({ evidence: '' });
 const requestClaim = () => claimForm.post(route('companies.claim', props.company.id), { preserveScroll: true, onSuccess: () => claimForm.reset() });
@@ -61,36 +63,36 @@ const roleInitials = (title) =>
 <template>
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
 		<div class="flex items-center gap-2 text-[13.5px] text-muted font-medium mb-[22px] [&_svg]:w-3.5 [&_svg]:h-3.5 [&_svg]:text-muted-2">
-			<Link class="hover:text-blue-700" :href="route('app.companies.index')">Companies</Link>
+			<Link class="hover:text-blue-700" :href="route('app.companies.index')">{{ text('Companies', 'Entreprises') }}</Link>
 			<component :is="icons.chevron" aria-hidden="true" />
 			<span class="text-ink-700 font-medium">{{ company.name }}</span>
 		</div>
 
 		<ProfileBanner class="mb-6" :name="company.name" :headline="headline" :items="[
 			{ icon: icons.pin, label: company.city?.name || company.location },
-			{ icon: Users, label: company.size && `${company.size} people` },
-			{ icon: CalendarDays, label: company.founded_year && `Founded in ${company.founded_year}` },
+			{ icon: Users, label: company.size && text(`${company.size} people`, `${company.size} personnes`) },
+			{ icon: CalendarDays, label: company.founded_year && text(`Founded in ${company.founded_year}`, `Fondée en ${company.founded_year}`) },
 		]">
 			<template #avatar><CompanyLogo class="w-[78px] h-[78px] rounded-card text-[28px]" :name="company.name" :src="company.image" /></template>
 			<template #badge><VerifiedBadge v-if="company.verified" dark class="text-xs!" /></template>
-			<Link v-if="canEdit" :class="[button, 'bg-blue-600 text-white hover:bg-blue-700']" :href="route('companies.edit', company.id)">Edit company</Link>
-			<Link v-else-if="hiring.open" :class="[button, 'bg-blue-600 text-white hover:bg-blue-700']" :href="route('app.opportunities.index', { companies: [company.id] })">View {{ hiring.open }} open {{ hiring.open === 1 ? 'role' : 'roles' }}</Link>
-			<Link v-if="!ownsCompany && company.user_id" :class="[button, 'bg-white text-navy-900 hover:bg-pale']" :href="route('messages.show', company.user_id)">Message company</Link>
-			<a v-if="company.website" :href="company.website" target="_blank" rel="noopener noreferrer" :class="[button, 'bg-white text-navy-900 hover:bg-pale']">Website<ArrowUpRight :size="15" aria-hidden="true" /></a>
+			<Link v-if="canEdit" :class="[button, 'bg-blue-600 text-white hover:bg-blue-700']" :href="route('companies.edit', company.id)">{{ text('Edit company', 'Modifier l’entreprise') }}</Link>
+			<Link v-else-if="hiring.open" :class="[button, 'bg-blue-600 text-white hover:bg-blue-700']" :href="route('app.opportunities.index', { companies: [company.id] })">{{ text(`View ${hiring.open} open ${hiring.open === 1 ? 'role' : 'roles'}`, `Voir ${hiring.open} ${hiring.open > 1 ? 'offres ouvertes' : 'offre ouverte'}`) }}</Link>
+			<Link v-if="!ownsCompany && company.user_id" :class="[button, 'bg-white text-navy-900 hover:bg-pale']" :href="route('messages.show', company.user_id)">{{ text('Message company', 'Écrire à l’entreprise') }}</Link>
+			<a v-if="company.website" :href="company.website" target="_blank" rel="noopener noreferrer" :class="[button, 'bg-white text-navy-900 hover:bg-pale']">{{ text('Website', 'Site web') }}<ArrowUpRight :size="15" aria-hidden="true" /></a>
 		</ProfileBanner>
 
 		<div class="grid grid-cols-[minmax(0,1fr)_320px] gap-6 items-start max-[1080px]:grid-cols-1">
 			<div class="flex flex-col gap-6 min-w-0">
 				<section class="bg-white border border-line rounded-card p-[26px]">
-					<h2 class="mb-3 text-[20px] leading-[1.35] text-navy">About {{ company.name }}</h2>
+					<h2 class="mb-3 text-[20px] leading-[1.35] text-navy">{{ text('About', 'À propos de') }} {{ company.name }}</h2>
 					<p v-if="company.about" class="text-[15px] leading-[1.72] text-ink-700 whitespace-pre-line" dir="auto">{{ company.about }}</p>
-					<p v-else class="text-[15px] text-slate-400">No description yet.<Link v-if="canEdit" :href="route('companies.edit', company.id)" class="ml-1.5 font-medium text-blue-700 hover:underline">Add one</Link></p>
+					<p v-else class="text-[15px] text-slate-400">{{ text('No description yet.', 'Pas encore de description.') }}<Link v-if="canEdit" :href="route('companies.edit', company.id)" class="ml-1.5 font-medium text-blue-700 hover:underline">{{ text('Add one', 'En ajouter une') }}</Link></p>
 				</section>
 
 				<section id="opportunities" class="bg-white border border-line rounded-card scroll-mt-24">
 					<div class="flex items-center justify-between px-[26px] pt-[22px]">
-						<h2 class="text-[20px] leading-[1.35] text-navy">{{ canEdit ? 'Manage roles' : 'Open roles' }}</h2>
-						<span class="text-[13px] text-muted font-medium bg-paper-2 border border-line-2 px-[11px] py-1 rounded-full">{{ totalRoles }} {{ totalRoles === 1 ? 'role' : 'roles' }}</span>
+						<h2 class="text-[20px] leading-[1.35] text-navy">{{ canEdit ? text('Manage roles', 'Gérer les offres') : text('Open roles', 'Offres ouvertes') }}</h2>
+						<span class="text-[13px] text-muted font-medium bg-paper-2 border border-line-2 px-[11px] py-1 rounded-full">{{ totalRoles }} {{ text(totalRoles === 1 ? 'role' : 'roles', totalRoles > 1 ? 'offres' : 'offre') }}</span>
 					</div>
 					<div class="px-3.5 pt-2.5 pb-3.5">
 						<component
@@ -105,15 +107,15 @@ const roleInitials = (title) =>
 							<span class="flex-1 min-w-0">
 								<b class="text-base font-medium block">{{ opportunity.title }}</b>
 								<span class="flex flex-wrap gap-3.5 mt-[7px] text-muted text-[13px] [&_span]:inline-flex [&_span]:items-center [&_span]:gap-[5px] [&_svg]:w-[13px] [&_svg]:h-[13px] [&_svg]:text-muted-2">
-									<span>{{ opportunity.kind === 'job' ? 'Job' : 'Internship' }}</span>
+									<span>{{ opportunity.kind === 'job' ? text('Job', 'Emploi') : text('Internship', 'Stage') }}</span>
 									<span><component :is="icons.pin" aria-hidden="true" />{{ opportunity.location_label }}</span>
-									<span><component :is="icons.clock" aria-hidden="true" />{{ opportunity.closing_at ? `Closes ${opportunity.closing_at}` : 'No deadline listed' }}</span>
+									<span><component :is="icons.clock" aria-hidden="true" />{{ opportunity.closing_at ? text(`Closes ${opportunity.closing_at}`, `Clôture le ${opportunity.closing_at}`) : text('No deadline listed', 'Pas de date limite indiquée') }}</span>
 									<span class="font-medium">{{ roleStatus(opportunity) }}</span>
 								</span>
-								<span v-if="canManageRole(opportunity)" class="block mt-2 text-[13px] text-blue-700 font-medium">Edit role</span>
+								<span v-if="canManageRole(opportunity)" class="block mt-2 text-[13px] text-blue-700 font-medium">{{ text('Edit role', 'Modifier l’offre') }}</span>
 							</span>
 						</component>
-						<div v-if="!opportunities.length" class="px-3 py-6 text-[14px] text-slate-400">No roles posted yet.</div>
+						<div v-if="!opportunities.length" class="px-3 py-6 text-[14px] text-slate-400">{{ text('No roles posted yet.', 'Aucune offre publiée pour le moment.') }}</div>
 						<Pagination v-if="pagination" :meta="pagination" />
 					</div>
 				</section>
@@ -121,11 +123,11 @@ const roleInitials = (title) =>
 
 			<div class="flex flex-col gap-6 min-w-0">
 				<form v-if="canClaim" class="bg-white border border-line rounded-card px-6 py-[22px]" @submit.prevent="requestClaim">
-					<h3 class="font-medium mb-2">Represent this company?</h3>
-					<p class="text-sm text-muted mb-4">Request a review of your connection to this employer. Imported applications keep their original destination.</p>
-					<label class="text-sm font-medium">Proof of ownership<textarea v-model="claimForm.evidence" class="fld mt-2" required maxlength="3000" placeholder="Describe your company domain and how your connection can be verified."></textarea></label>
+					<h3 class="font-medium mb-2">{{ text('Represent this company?', 'Vous représentez cette entreprise ?') }}</h3>
+					<p class="text-sm text-muted mb-4">{{ text('Request a review of your connection to this employer. Imported applications keep their original destination.', 'Demandez une vérification de votre lien avec cet employeur. Les candidatures importées gardent leur destination d’origine.') }}</p>
+					<label class="text-sm font-medium">{{ text('Proof of ownership', 'Preuve de propriété') }}<textarea v-model="claimForm.evidence" class="fld mt-2" required maxlength="3000" :placeholder="text('Describe your company domain and how your connection can be verified.', 'Décrivez le domaine de votre entreprise et comment votre lien peut être vérifié.')"></textarea></label>
 					<p v-if="claimForm.errors.evidence" class="text-sm text-red-600 mt-2" role="alert">{{ claimForm.errors.evidence }}</p>
-					<button type="submit" class="cta cta-primary mt-3" :disabled="claimForm.processing">Request company review</button>
+					<button type="submit" class="cta cta-primary mt-3" :disabled="claimForm.processing">{{ text('Request company review', 'Demander la vérification de l’entreprise') }}</button>
 				</form>
 				<CompanyHiring :hiring="hiring" />
 				<CompanyFacts :company="company" />

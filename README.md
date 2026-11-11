@@ -54,6 +54,10 @@ Resume and letter PDFs are printed by headless Chrome. `/usr/bin/google-chrome`,
 
 The usual local URL is `http://127.0.0.1:8000`. To inspect complete server-rendered HTML, build both bundles and run the SSR service as described below. The example configuration uses database queues, so queued work also needs a worker. Digests and Google indexing remain disabled by default.
 
+### Languages
+
+The site is in English and French. Public pages take the language from the link (`/fr/...`); signed-in pages, server messages and emails take it from the account (`users.locale`, changed with the language menu in the top bar). Page text is written as `text('English', 'Français')` (`resources/js/composables/useText.js`), server text as `__('English sentence')` with the French in `resources/lang/fr.json` and `resources/lang/fr/validation.php`. `tests/Feature/WorkspaceLanguageTest.php` covers the language route, a French flash message, a validation error and an email.
+
 ## Real opportunity seed
 
 `php artisan db:seed` now adds six real, sourced opportunities plus their employer and reference records, and the daily import sources. It does not truncate tables or create accounts, applications, messages or other demo activity. Repeat runs preserve existing listings and moderation decisions. `InternshipSeeder` delegates to this same catalogue.

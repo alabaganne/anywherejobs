@@ -42,7 +42,7 @@ class ContactController extends Controller
         } catch (\Throwable $exception) {
             Log::error('Contact form email failed.', ['error' => $exception->getMessage()]);
 
-            return back()->withErrors(['message' => 'Your message could not be sent. Please try again in a few minutes.'])->withInput();
+            return back()->withErrors(['message' => __('Your message could not be sent. Please try again in a few minutes.')])->withInput();
         }
 
         return back()->with('status', 'contact-sent');

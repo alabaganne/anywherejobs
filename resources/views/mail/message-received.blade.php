@@ -1,21 +1,21 @@
 <x-mail::message>
-# {!! $sender !!} sent you a message
+# {!! __(':sender sent you a message', ['sender' => $sender]) !!}
 
-Hi {!! $recipient !!},
+{!! __('Hi :name,', ['name' => $recipient]) !!}
 
 <x-mail::panel>
 {!! $excerpt !!}
 </x-mail::panel>
 
 <x-mail::button :url="$url">
-Read and reply
+{{ __('Read and reply') }}
 </x-mail::button>
 
-We only email you about a conversation once in a while, so check {{ config('app.name') }} for newer messages.
+{{ __('We only email you about a conversation once in a while, so check :app for newer messages.', ['app' => config('app.name')]) }}
 
-The {{ config('app.name') }} team
+{{ __('The :app team', ['app' => config('app.name')]) }}
 
 <x-slot:subcopy>
-You get this email because someone messaged you on {{ config('app.name') }}. If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
+{{ __("You get this email because someone messaged you on :app. If the button doesn't work, open this link:", ['app' => config('app.name')]) }} <span class="break-all">[{{ $url }}]({{ $url }})</span>
 </x-slot:subcopy>
 </x-mail::message>

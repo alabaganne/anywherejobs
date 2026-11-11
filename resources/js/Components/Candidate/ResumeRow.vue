@@ -4,6 +4,7 @@ import { Link } from '@inertiajs/vue3';
 import { CornerDownRight, Download, Ellipsis, FilePenLine, FileText, Languages, Pencil, Star, Trash2 } from '@lucide/vue';
 import Menu from '@/Components/Ui/Menu.vue';
 import { menuItem } from '@/utils/menu';
+import { useText } from '@/composables/useText';
 
 // One resume on the profile page: one button for what you most likely want, the rest in a menu.
 const props = defineProps({
@@ -15,19 +16,20 @@ const props = defineProps({
 });
 const emit = defineEmits(['ai', 'main', 'remove']);
 
-const kind = { uploaded: 'Uploaded PDF', profile: 'From your profile', translation: 'Translation', copy: 'Editable copy' };
+const { text } = useText();
+const kind = computed(() => ({ uploaded: text('Uploaded PDF', 'PDF importé'), profile: text('From your profile', 'Depuis votre profil'), translation: text('Translation', 'Traduction'), copy: text('Editable copy', 'Copie modifiable') }));
 const ready = computed(() => props.resume.status === 'ready');
 const status = computed(() => ({
-	queued: props.resume.source === 'copy' ? 'Being read…' : 'Being translated…',
-	draft: 'Draft',
-	failed: props.resume.source === 'copy' ? 'Reading failed' : 'Translation failed',
+	queued: props.resume.source === 'copy' ? text('Being read…', 'Lecture en cours…') : text('Being translated…', 'Traduction en cours…'),
+	draft: text('Draft', 'Brouillon'),
+	failed: props.resume.source === 'copy' ? text('Reading failed', 'Lecture échouée') : text('Translation failed', 'Traduction échouée'),
 })[props.resume.status]);
-const details = computed(() => [props.resume.language?.label, kind[props.resume.source], `updated ${props.resume.updated_label}`].filter(Boolean).join(' · '));
+const details = computed(() => [props.resume.language?.label, kind.value[props.resume.source], text(`updated ${props.resume.updated_label}`, `mis à jour ${props.resume.updated_label}`)].filter(Boolean).join(' · '));
 const primary = computed(() => {
 	const resume = props.resume;
-	if (resume.status === 'draft') return { label: 'Finish', icon: Pencil, href: route('resumes.show', resume.id) };
-	if (resume.editable && ['ready', 'failed'].includes(resume.status)) return { label: 'Open', icon: Pencil, href: route('resumes.show', resume.id) };
-	if (ready.value && resume.has_file) return { label: 'Download', icon: Download, href: route('resumes.download', resume.id), file: true };
+	if (resume.status === 'draft') return { label: text('Finish', 'Terminer'), icon: Pencil, href: route('resumes.show', resume.id) };
+	if (resume.editable && ['ready', 'failed'].includes(resume.status)) return { label: text('Open', 'Ouvrir'), icon: Pencil, href: route('resumes.show', resume.id) };
+	if (ready.value && resume.has_file) return { label: text('Download', 'Télécharger'), icon: Download, href: route('resumes.download', resume.id), file: true };
 	return null;
 });
 const starting = computed(() => props.busy?.startsWith(`${props.resume.id}-`));
@@ -48,22 +50,22 @@ const aiItems = computed(() => ready.value && (props.resume.targets.length || pr
 			</div>
 		</div>
 		<div class="flex items-center gap-2 ml-auto">
-			<span v-if="starting" class="text-[13px] text-muted" role="status">Starting…</span>
+			<span v-if="starting" class="text-[13px] text-muted" role="status">{{ text('Starting…', 'Démarrage…') }}</span>
 			<component :is="primary.file ? 'a' : Link" v-else-if="primary" :href="primary.href" class="cta cta-secondary cta-sm"><component :is="primary.icon" class="size-4" aria-hidden="true" />{{ primary.label }}</component>
 			<Menu width="w-72">
 				<template #button="{ open, toggle }">
-					<button type="button" class="icon-btn size-9 border border-line bg-white" :aria-label="`More for ${resume.name}`" aria-haspopup="menu" :aria-expanded="open" @click="toggle"><Ellipsis class="size-5" aria-hidden="true" /></button>
+					<button type="button" class="icon-btn size-9 border border-line bg-white" :aria-label="text(`More for ${resume.name}`, `Plus d’actions pour ${resume.name}`)" aria-haspopup="menu" :aria-expanded="open" @click="toggle"><Ellipsis class="size-5" aria-hidden="true" /></button>
 				</template>
-				<a v-if="ready && resume.has_file && !primary?.file" :class="menuItem" role="menuitem" :href="route('resumes.download', resume.id)"><Download class="size-4 text-muted-2" />Download PDF</a>
-				<button v-if="ready && !resume.is_main" :class="menuItem" role="menuitem" type="button" @click="emit('main')"><Star class="size-4 text-muted-2" />Make it my main resume</button>
+				<a v-if="ready && resume.has_file && !primary?.file" :class="menuItem" role="menuitem" :href="route('resumes.download', resume.id)"><Download class="size-4 text-muted-2" />{{ text('Download PDF', 'Télécharger le PDF') }}</a>
+				<button v-if="ready && !resume.is_main" :class="menuItem" role="menuitem" type="button" @click="emit('main')"><Star class="size-4 text-muted-2" />{{ text('Make it my main resume', 'En faire mon CV principal') }}</button>
 				<template v-if="aiItems">
 					<div class="h-px bg-line-2 my-1.5" />
-					<button v-for="target in resume.targets" :key="target.code" :class="menuItem" role="menuitem" type="button" :disabled="!!aiOff || !!busy" @click="emit('ai', target)"><Languages class="size-4 text-muted-2" />Translate to {{ target.label }}<span v-if="paid" class="ml-auto text-xs font-normal text-muted">1 credit</span></button>
-					<button v-if="resume.source === 'uploaded'" :class="menuItem" role="menuitem" type="button" :disabled="!!aiOff || !!busy" @click="emit('ai', null)"><FilePenLine class="size-4 text-muted-2" />Turn into an editable copy<span v-if="paid" class="ml-auto text-xs font-normal text-muted">1 credit</span></button>
+					<button v-for="target in resume.targets" :key="target.code" :class="menuItem" role="menuitem" type="button" :disabled="!!aiOff || !!busy" @click="emit('ai', target)"><Languages class="size-4 text-muted-2" />{{ text(`Translate to ${target.label}`, `Traduire en ${target.label}`) }}<span v-if="paid" class="ml-auto text-xs font-normal text-muted">{{ text('1 credit', '1 crédit') }}</span></button>
+					<button v-if="resume.source === 'uploaded'" :class="menuItem" role="menuitem" type="button" :disabled="!!aiOff || !!busy" @click="emit('ai', null)"><FilePenLine class="size-4 text-muted-2" />{{ text('Turn into an editable copy', 'Créer une copie modifiable') }}<span v-if="paid" class="ml-auto text-xs font-normal text-muted">{{ text('1 credit', '1 crédit') }}</span></button>
 					<p v-if="aiOff" class="px-3 pt-1 pb-1.5 text-xs text-muted">{{ aiOff }}</p>
 				</template>
 				<div class="h-px bg-line-2 my-1.5" />
-				<button :class="menuItem" class="!text-red-700 hover:!bg-red-50" role="menuitem" type="button" @click="emit('remove')"><Trash2 class="size-4 text-red-600" />Delete</button>
+				<button :class="menuItem" class="!text-red-700 hover:!bg-red-50" role="menuitem" type="button" @click="emit('remove')"><Trash2 class="size-4 text-red-600" />{{ text('Delete', 'Supprimer') }}</button>
 			</Menu>
 		</div>
 	</div>

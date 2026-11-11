@@ -46,7 +46,7 @@ class NewMessage implements ShouldBroadcast
 	public function broadcastWith() {
 		return [
 			'toast' => [
-				'message' => "{$this->message->sender->name} Sent you a message.",
+				'message' => __(':name Sent you a message.', ['name' => $this->message->sender->name], \App\Models\User::find($this->to_id)?->preferredLocale()),
 				'type' => 'message'
 			],
 			'message' => $this->message

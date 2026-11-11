@@ -80,7 +80,7 @@ class LeadController extends Controller
             'status' => 'required|in:'.implode(',', Lead::STATUSES), 'applied_at' => 'nullable|date|before_or_equal:today', 'notes' => 'nullable|string|max:5000',
         ]);
         (new LeadImport($this->candidate($request)))->save($data, 'manual');
-        return back()->with('toast', ['type' => 'store', 'message' => 'Saved to your job leads.']);
+        return back()->with('toast', ['type' => 'store', 'message' => __('Saved to your job leads.')]);
     }
 
     // Any status can be set by hand, also back to an earlier one.
@@ -95,7 +95,7 @@ class LeadController extends Controller
         $lead->fill($data);
         if (in_array($lead->status, ['applied', 'interviewing', 'offer'], true) && ! array_key_exists('applied_at', $data)) { $lead->applied_at ??= today(); }
         $lead->save();
-        return back()->with('toast', ['type' => 'update', 'message' => 'Lead updated.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Lead updated.')]);
     }
 
     // Opening a posting from the list marks the lead opened.
@@ -117,7 +117,7 @@ class LeadController extends Controller
         } catch (Throwable $e) {
             return back()->withErrors(['file' => Str::limit($e->getMessage(), 200)]);
         }
-        return back()->with('toast', ['type' => 'store', 'message' => "{$stats['added']} added, {$stats['updated']} merged with existing leads, {$stats['skipped']} rows without company or role, {$stats['contacts']} contacts."]);
+        return back()->with('toast', ['type' => 'store', 'message' => __(':added added, :updated merged with existing leads, :skipped rows without company or role, :contacts contacts.', ['added' => $stats['added'], 'updated' => $stats['updated'], 'skipped' => $stats['skipped'], 'contacts' => $stats['contacts']])]);
     }
 
     public function storeContact(Request $request, Lead $lead)
@@ -125,7 +125,7 @@ class LeadController extends Controller
         $this->own($request, $lead);
         LeadContact::create([...$this->contactData($request), 'candidate_id' => $lead->candidate_id, 'company_id' => $lead->company_id, 'company_name' => $lead->company_name,
             'source' => $request->input('source') === 'ai' ? 'ai' : 'manual']);
-        return back()->with('toast', ['type' => 'store', 'message' => 'Contact saved.']);
+        return back()->with('toast', ['type' => 'store', 'message' => __('Contact saved.')]);
     }
 
     public function updateContact(Request $request, LeadContact $contact)
@@ -133,32 +133,32 @@ class LeadController extends Controller
         abort_unless($contact->candidate_id === $this->candidate($request)->id, 404);
         $data = $request->has('contacted') ? ['contacted_at' => $request->boolean('contacted') ? now() : null] : $this->contactData($request);
         $contact->update($data);
-        return back()->with('toast', ['type' => 'update', 'message' => 'Contact updated.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Contact updated.')]);
     }
 
     public function destroyContact(Request $request, LeadContact $contact)
     {
         abort_unless($contact->candidate_id === $this->candidate($request)->id, 404);
         $contact->delete();
-        return back()->with('toast', ['type' => 'destroy', 'message' => 'Contact removed.']);
+        return back()->with('toast', ['type' => 'destroy', 'message' => __('Contact removed.')]);
     }
 
     // Asks the AI for one person at the company from public pages; nothing is saved until the owner keeps it.
     public function suggestContact(Request $request, Lead $lead, OpportunityClassifier $classifier)
     {
         $this->own($request, $lead);
-        abort_unless($classifier->enabled(), 422, 'AI is off.');
+        abort_unless($classifier->enabled(), 422, __('AI is off.'));
         $prompt = implode("\n", array_filter(['Company: '.$lead->company_name, $lead->company?->website ? 'Website: '.$lead->company->website : null,
             'Role: '.$lead->title, $lead->url ? 'Job posting: '.$lead->url : null]));
         try {
             $answer = (new ContactFinder)->prompt($prompt, provider: $classifier->provider(), model: $classifier->model('discovery'))->toArray();
         } catch (Throwable $e) {
             Log::warning('Contact suggestion failed.', ['lead_id' => $lead->id, 'error' => Str::limit($e->getMessage(), 300)]);
-            return response()->json(['message' => 'The search did not work this time. Try again later.'], 502);
+            return response()->json(['message' => __('The search did not work this time. Try again later.')], 502);
         }
         $url = fn ($value) => is_string($value) && preg_match('~^https?://\S+$~i', $value) && strlen($value) <= 500 ? $value : null;
         if (empty($answer['found']) || trim((string) ($answer['name'] ?? '')) === '') {
-            return response()->json(['message' => 'No one was found on public pages.']);
+            return response()->json(['message' => __('No one was found on public pages.')]);
         }
         return response()->json(['contact' => [
             'name' => Str::limit(trim($answer['name']), 191, ''), 'title' => Str::limit(trim((string) $answer['title']), 191, ''),
@@ -176,7 +176,7 @@ class LeadController extends Controller
 
     private function card(Lead $lead, Collection $contacts): array
     {
-        $date = $lead->posted_at?->format('j M');
+        $date = $lead->posted_at?->locale(app()->getLocale())->translatedFormat('j M');
         return [
             ...$lead->only('id', 'company_name', 'title', 'url', 'status', 'eligibility', 'eligibility_quote', 'score', 'origin', 'external_ref', 'notes'),
             'urls' => array_values(array_diff($lead->urls ?? [], [$lead->url])),
@@ -184,8 +184,8 @@ class LeadController extends Controller
             'extra' => $lead->extra ?? [],
             'applied_at' => $lead->applied_at?->toDateString(),
             'opened_at' => $lead->opened_at?->toIso8601String(),
-            'posted' => $lead->reposted_at ? 'Repost, first posted '.$lead->posted_at?->format('j M Y')
-                : ($date ? 'Posted '.$date.(isset(self::DATE_SOURCES[$lead->date_source]) ? ' ('.self::DATE_SOURCES[$lead->date_source].')' : '') : null),
+            'posted' => $lead->reposted_at ? __('Repost, first posted :date', ['date' => $lead->posted_at?->locale(app()->getLocale())->translatedFormat('j M Y')])
+                : ($date ? __('Posted :date', ['date' => $date]).(isset(self::DATE_SOURCES[$lead->date_source]) ? ' ('.__(self::DATE_SOURCES[$lead->date_source]).')' : '') : null),
             'company' => $lead->company ? ['verified' => (bool) $lead->company->verified_at, 'stage' => $lead->company->stage, 'logo' => $lead->company->logo,
                 'url' => $lead->company->hasPublicName() ? route('companies.show', $lead->company_id, false) : null] : null,
             'open_url' => route('leads.open', $lead),

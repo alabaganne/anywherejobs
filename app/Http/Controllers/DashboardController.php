@@ -59,15 +59,15 @@ class DashboardController extends Controller
                 if (!empty($preferences[$key])) {
                     $query->whereIn($column, $preferences[$key]);
                     $reasons[] = match ($key) {
-                        'kinds' => 'Matches your role types',
-                        'work_types' => 'Matches your work arrangement',
-                        'fields' => 'Matches your fields of interest',
-                        'seniority' => 'Matches your experience preference',
+                        'kinds' => __('Matches your role types'),
+                        'work_types' => __('Matches your work arrangement'),
+                        'fields' => __('Matches your fields of interest'),
+                        'seniority' => __('Matches your experience preference'),
                     };
                 }
             }
             if (!empty($preferences['countries'])) {
-                $reasons[] = 'Matches a target location or stated remote eligibility';
+                $reasons[] = __('Matches a target location or stated remote eligibility');
             }
             if (!empty($preferences['skills'])) {
                 $query->where(function ($query) use ($preferences) {
@@ -77,7 +77,7 @@ class DashboardController extends Controller
                             ->orWhere('title', 'like', $term)->orWhere('description', 'like', $term);
                     }
                 });
-                $reasons[] = 'Includes a skill you selected';
+                $reasons[] = __('Includes a skill you selected');
             }
             $recommended = $query->latest()->take(100)->get()->filter(function ($opportunity) use ($user, $preferences) {
                 if (! $opportunity->hasFreshSource() || ! $opportunity->isEligibleForCountry($user->userable->country_code, (bool) ($preferences['include_unknown_eligibility'] ?? false))) {
@@ -96,7 +96,7 @@ class DashboardController extends Controller
                 return false;
             })->take(6)->values();
             $props['recommended'] = OpportunityResource::collection($recommended);
-            $props['recommendation_reasons'] = $reasons ?: ['Recent roles to explore. Add preferences in Settings for a closer match.'];
+            $props['recommendation_reasons'] = $reasons ?: [__('Recent roles to explore. Add preferences in Settings for a closer match.')];
         }
 
         $props['is_new_user'] = $this->isNewUser($user, $applications ?? null);

@@ -135,18 +135,18 @@ class PublicCandidateController extends Controller
         if (array_key_exists('contact', $data)) {
             $candidate->forceFill(['public_contact' => $data['contact']])->save();
             return back()->with('toast', ['type' => 'update', 'message' => $data['contact']
-                ? 'Your resume, email and phone number will show on your public profile.'
-                : 'Your resume, email and phone number are hidden from your public profile.']);
+                ? __('Your resume, email and phone number will show on your public profile.')
+                : __('Your resume, email and phone number are hidden from your public profile.')]);
         }
 
         if (! $data['public']) {
             $candidate->forceFill(['public_status' => null, 'public_reviewed_at' => null])->save();
-            $message = 'Your profile is private.';
+            $message = __('Your profile is private.');
         } elseif (in_array($candidate->public_status, ['pending', 'approved'], true)) {
-            $message = 'Your request is already saved.';
+            $message = __('Your request is already saved.');
         } else {
             $candidate->forceFill(['public_status' => 'pending', 'public_reviewed_at' => null])->save();
-            $message = 'Request sent. Your profile goes public once the '.config('app.name').' team approves it.';
+            $message = __('Request sent. Your profile goes public once the :app team approves it.', ['app' => config('app.name')]);
         }
 
         return back()->with('toast', ['type' => 'update', 'message' => $message]);
@@ -156,7 +156,7 @@ class PublicCandidateController extends Controller
     {
         $data = $request->validate(['decision' => 'required|in:approve,decline']);
         if (! $candidate->public_status) {
-            throw ValidationException::withMessages(['decision' => 'This candidate has not asked for a public profile.']);
+            throw ValidationException::withMessages(['decision' => __('This candidate has not asked for a public profile.')]);
         }
 
         $status = $data['decision'] === 'approve' ? 'approved' : 'declined';
@@ -165,7 +165,7 @@ class PublicCandidateController extends Controller
             $candidate->user?->notify(new PublicProfileReviewed($candidate));
         }
 
-        return back()->with('toast', ['type' => 'update', 'message' => $status === 'approved' ? 'Profile approved. It is now public.' : 'Profile declined. It stays private.']);
+        return back()->with('toast', ['type' => 'update', 'message' => $status === 'approved' ? __('Profile approved. It is now public.') : __('Profile declined. It stays private.')]);
     }
 
     // Finds the candidate from a username or an {id}-{name} link.

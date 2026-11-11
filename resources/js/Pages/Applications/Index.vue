@@ -2,6 +2,7 @@
 import { ChevronRight } from '@lucide/vue';
 import { computed, h } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
+import { useText } from '@/composables/useText';
 import AppShell from '@/Layouts/AppShell.vue';
 import CompanyLogo from '@/Components/Ui/CompanyLogo.vue';
 import PageHeader from '@/Components/Ui/PageHeader.vue';
@@ -22,18 +23,19 @@ const icons = {
 	chevron: ChevronRight,
 };
 
+const { text } = useText();
 const page = usePage();
 const isCandidate = computed(() => page.props.auth?.user?.userable_type === 'candidate');
 const description = computed(() => isCandidate.value
-	? "Track every role you've applied to and see where you stand at a glance."
-	: 'Review every application to your open roles at a glance.');
+	? text(`Track every role you've applied to and see where you stand at a glance.`, 'Suivez chaque offre à laquelle vous avez postulé et voyez où vous en êtes d’un coup d’œil.')
+	: text('Review every application to your open roles at a glance.', 'Consultez d’un coup d’œil toutes les candidatures à vos offres ouvertes.'));
 
 const buckets = [
-	{ key: 'all', label: 'All', dot: 'bg-blue-500' },
-	{ key: 'review', label: 'In review', dot: 'bg-amber-600' },
-	{ key: 'interview', label: 'Interview', dot: 'bg-emerald-600' },
-	{ key: 'offer', label: 'Offer', dot: 'bg-violet-600' },
-	{ key: 'closed', label: 'Closed', dot: 'bg-muted-2' },
+	{ key: 'all', label: ['All', 'Toutes'], dot: 'bg-blue-500' },
+	{ key: 'review', label: ['In review', 'En cours d’examen'], dot: 'bg-amber-600' },
+	{ key: 'interview', label: ['Interview', 'Entretien'], dot: 'bg-emerald-600' },
+	{ key: 'offer', label: ['Offer', 'Proposition'], dot: 'bg-violet-600' },
+	{ key: 'closed', label: ['Closed', 'Clôturées'], dot: 'bg-muted-2' },
 ];
 
 const rows = computed(() => props.applications.data);
@@ -48,9 +50,9 @@ const partyName = (application) => (isCandidate.value ? application.company?.nam
 
 <template>
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
-		<PageHeader title="Applications" :description="description" />
+		<PageHeader :title="text('Applications', 'Candidatures')" :description="description" />
 
-		<div class="flex gap-2 p-1 -mx-1 -mt-1 mb-4 overflow-x-auto [scrollbar-width:none]" role="group" aria-label="Filter by status">
+		<div class="flex gap-2 p-1 -mx-1 -mt-1 mb-4 overflow-x-auto [scrollbar-width:none]" role="group" :aria-label="text('Filter by status', 'Filtrer par statut')">
 			<button
 				v-for="bucket in buckets"
 				:key="bucket.key"
@@ -61,7 +63,7 @@ const partyName = (application) => (isCandidate.value ? application.company?.nam
 				@click="setFilter(bucket.key)"
 			>
 				<span v-if="bucket.key !== 'all'" class="size-2 rounded-full" :class="bucket.dot"></span>
-				{{ bucket.label }}
+				{{ text(bucket.label[0], bucket.label[1]) }}
 				<span class="text-xs opacity-70">{{ counts[bucket.key] ?? 0 }}</span>
 			</button>
 		</div>
@@ -69,7 +71,7 @@ const partyName = (application) => (isCandidate.value ? application.company?.nam
 		<!-- TABLE -->
 		<div class="bg-white border border-transparent rounded-card overflow-hidden">
 			<div class="grid grid-cols-[1fr_150px_130px_40px] gap-4 px-[22px] py-3 border-b border-line-2 bg-paper-2 max-[760px]:hidden [&_span]:text-[11.5px] [&_span]:tracking-[.08em] [&_span]:uppercase [&_span]:text-muted-2 [&_span]:font-medium [&_span:last-child]:text-right">
-				<span>{{ isCandidate ? 'Role' : 'Applicant · Role' }}</span><span>Applied</span><span>Status</span><span></span>
+				<span>{{ isCandidate ? text('Role', 'Offre') : text('Applicant · Role', 'Candidat · Offre') }}</span><span>{{ text('Applied', 'Postulée le') }}</span><span>{{ text('Status', 'Statut') }}</span><span></span>
 			</div>
 			<div>
 				<Link
@@ -87,17 +89,17 @@ const partyName = (application) => (isCandidate.value ? application.company?.nam
 						</div>
 					</div>
 					<div class="text-[13px] text-muted-2 max-[760px]:hidden">{{ application.created_at }}</div>
-					<div class="max-[760px]:pl-[60px]"><StatusPill :status="application.status" /><span v-if="application.channel === 'external'" class="block text-xs text-muted mt-1">Your reported status</span></div>
+					<div class="max-[760px]:pl-[60px]"><StatusPill :status="application.status" /><span v-if="application.channel === 'external'" class="block text-xs text-muted mt-1">{{ text('Your reported status', 'Votre statut déclaré') }}</span></div>
 					<div class="w-[34px] h-[34px] rounded-[9px] border border-line grid place-items-center text-muted-2 justify-self-end max-[760px]:hidden [&_svg]:w-4 [&_svg]:h-4"><component :is="icons.chevron" aria-hidden="true" /></div>
 				</Link>
 
 				<div v-if="!rows.length && status !== 'all'" class="px-[22px] py-8 text-[14px] text-muted">
-					No applications with this status.
-					<button class="font-medium text-blue-700" type="button" @click="setFilter('all')">Show all</button>
+					{{ text('No applications with this status.', 'Aucune candidature avec ce statut.') }}
+					<button class="font-medium text-blue-700" type="button" @click="setFilter('all')">{{ text('Show all', 'Tout afficher') }}</button>
 				</div>
 				<div v-else-if="!rows.length" class="px-[22px] py-8 text-[14px] text-muted">
-					No applications here yet.
-					<Link v-if="isCandidate" class="font-medium text-blue-700" :href="route('app.opportunities.index')">Browse roles</Link>
+					{{ text('No applications here yet.', 'Aucune candidature pour le moment.') }}
+					<Link v-if="isCandidate" class="font-medium text-blue-700" :href="route('app.opportunities.index')">{{ text('Browse roles', 'Parcourir les offres') }}</Link>
 				</div>
 			</div>
 		</div>

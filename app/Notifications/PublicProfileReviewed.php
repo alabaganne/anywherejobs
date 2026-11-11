@@ -22,7 +22,7 @@ class PublicProfileReviewed extends Notification
     public function toArray($notifiable)
     {
         return $this->candidate->isPubliclyListed()
-            ? ['title' => 'Your public profile is live', 'body' => 'Visitors and companies can now see your profile on '.config('app.name').'.', 'action' => parse_url($this->candidate->publicUrl(), PHP_URL_PATH)]
-            : ['title' => 'Your public profile was not approved', 'body' => 'Your profile stays private. You can update it and ask again from your profile.', 'action' => route('profile.show', [], false)];
+            ? ['title' => __('Your public profile is live'), 'body' => __('Visitors and companies can now see your profile on :app.', ['app' => config('app.name')]), 'action' => parse_url($this->candidate->publicUrl(), PHP_URL_PATH)]
+            : ['title' => __('Your public profile was not approved'), 'body' => __('Your profile stays private. You can update it and ask again from your profile.'), 'action' => route('profile.show', [], false)];
     }
 }

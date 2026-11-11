@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Inertia\Inertia;
+use App\Support\Locale;
 use App\Support\PublicSeo;
 use Tighten\Ziggy\Ziggy;
 use Closure;
@@ -45,7 +46,10 @@ class HandleInertiaRequests extends Middleware
     public function handle(Request $request, Closure $next)
     {
         Inertia::disableSsr(fn () => !PublicSeo::isPublic($request));
-        app()->setLocale($request->is('fr', 'fr/*') ? 'fr' : 'en');
+        if ($request->routeIs('login', 'register', 'password.request', 'fr.login', 'fr.register', 'fr.password.request')) {
+            $request->session()->put('locale', $request->is('fr/*') ? 'fr' : 'en');
+        }
+        app()->setLocale(Locale::of($request));
         $response = parent::handle($request, $next);
         if (!PublicSeo::isPublic($request)) {
             $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
@@ -95,7 +99,7 @@ class HandleInertiaRequests extends Middleware
         return array_merge(parent::share($request), [
             'auth' => ['user' => null],
             'toast' => fn () => Session::get('toast'),
-            'locale' => $request->is('fr', 'fr/*') ? 'fr' : 'en',
+            'locale' => Locale::of($request),
             'ziggy' => fn () => [...(new Ziggy)->toArray(), 'location' => $request->url()],
             'seo' => fn () => PublicSeo::forRequest($request),
             'billing' => [

@@ -24,6 +24,17 @@ class SavedSearchController extends Controller
                 'last_sent_at' => $search->last_sent_at?->toIso8601String(),
                 'browse_url' => self::browseUrl($search->filters, true),
             ]),
+            'filterLabels' => [
+                'search' => __('Search'), 'category' => __('Category'), 'kind' => __('Type'), 'country' => __('Country'),
+                'work_type' => __('Work mode'), 'seniority' => __('Experience'), 'employment_type' => __('Contract'),
+                'language' => __('Language'), 'program_type' => __('Programme'), 'compensation_status' => __('Pay'),
+                'fields' => __('Field'), 'field' => __('Field'), 'skills' => __('Skills'), 'companies' => __('Companies'),
+                'cities' => __('Cities'), 'posted_within' => __('Posted within (days)'), 'min_pay' => __('Pay from'),
+                'currency' => __('Currency'), 'pay_unit' => __('Pay period'), 'duration_max' => __('Longest duration (months)'),
+                'start_after' => __('Starts after'), 'audience' => __('Audience'), 'worldwide' => __('Open worldwide'),
+                'remote_from_tunisia' => __('Remote from Tunisia'), 'include_unknown_remote' => __('Include unknown remote'),
+                'relocation' => __('Relocation'),
+            ],
             'initialFilters' => $initial,
             'initialBrowseUrl' => self::browseUrl($initial, true),
             'deliveryEnabled' => (bool) config('importer.digests_enabled'),
@@ -34,10 +45,10 @@ class SavedSearchController extends Controller
     public function store(Request $request)
     {
         abort_unless($request->user()->isCandidate(), 403);
-        abort_if(SavedSearch::where('user_id', $request->user()->id)->count() >= 20, 422, 'You can save up to 20 searches.');
+        abort_if(SavedSearch::where('user_id', $request->user()->id)->count() >= 20, 422, __('You can save up to 20 searches.'));
         $data = $this->validated($request);
         SavedSearch::create([...$data, 'user_id' => $request->user()->id]);
-        return redirect()->route('saved-searches.index')->with('toast', ['type' => 'store', 'message' => 'Search saved.']);
+        return redirect()->route('saved-searches.index')->with('toast', ['type' => 'store', 'message' => __('Search saved.')]);
     }
 
     public function update(Request $request, SavedSearch $savedSearch)
@@ -48,24 +59,26 @@ class SavedSearchController extends Controller
             unset($data['subscribed_at']);
         }
         $savedSearch->update($data);
-        return back()->with('toast', ['type' => 'update', 'message' => 'Saved search updated.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Saved search updated.')]);
     }
 
     public function destroy(Request $request, SavedSearch $savedSearch)
     {
         $this->authorizeSearch($request, $savedSearch);
         $savedSearch->delete();
-        return back()->with('toast', ['type' => 'destroy', 'message' => 'Saved search removed.']);
+        return back()->with('toast', ['type' => 'destroy', 'message' => __('Saved search removed.')]);
     }
 
     public function unsubscribeConfirmation(SavedSearch $savedSearch)
     {
+        app()->setLocale($savedSearch->user?->preferredLocale() ?? 'en');
         return response()->view('saved-searches.unsubscribe', ['search' => $savedSearch, 'done' => false])
             ->header('X-Robots-Tag', 'noindex, nofollow')->header('Cache-Control', 'private, no-store');
     }
 
     public function unsubscribe(SavedSearch $savedSearch)
     {
+        app()->setLocale($savedSearch->user?->preferredLocale() ?? 'en');
         $savedSearch->update(['frequency' => 'off', 'subscribed_at' => null]);
         return response()->view('saved-searches.unsubscribe', ['search' => $savedSearch, 'done' => true])
             ->header('X-Robots-Tag', 'noindex, nofollow')->header('Cache-Control', 'private, no-store');

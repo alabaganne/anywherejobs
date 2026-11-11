@@ -1,6 +1,9 @@
 <script setup>
 import { nextTick, ref } from 'vue';
 import { Plus, X } from '@lucide/vue';
+import { useText } from '@/composables/useText';
+
+const { text } = useText();
 
 // Bullet points edited one per box: Enter starts a new one, Backspace in an empty one removes it.
 const items = defineModel({ type: Array, required: true });
@@ -41,12 +44,12 @@ const keydown = (event, index) => {
 				dir="auto"
 				rows="1"
 				class="fld !min-h-0 !py-2 !text-[14px] resize-none field-sizing-content"
-				:aria-label="`Point ${index + 1}`"
+				:aria-label="text(`Point ${index + 1}`, `Point ${index + 1}`)"
 				@input="set(index, $event.target.value)"
 				@keydown="keydown($event, index)"
 			></textarea>
-			<button type="button" class="mt-1.5 grid place-items-center size-7 shrink-0 rounded-lg text-muted-2 hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-blue-500" :aria-label="`Remove point ${index + 1}`" @click="remove(index)"><X class="size-4" aria-hidden="true" /></button>
+			<button type="button" class="mt-1.5 grid place-items-center size-7 shrink-0 rounded-lg text-muted-2 hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-blue-500" :aria-label="text(`Remove point ${index + 1}`, `Retirer le point ${index + 1}`)" @click="remove(index)"><X class="size-4" aria-hidden="true" /></button>
 		</div>
-		<button type="button" class="justify-self-start inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-blue-700 hover:bg-blue-50" @click="insert(items.length)"><Plus class="size-4" aria-hidden="true" /> Add a point</button>
+		<button type="button" class="justify-self-start inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-blue-700 hover:bg-blue-50" @click="insert(items.length)"><Plus class="size-4" aria-hidden="true" /> {{ text('Add a point', 'Ajouter un point') }}</button>
 	</div>
 </template>

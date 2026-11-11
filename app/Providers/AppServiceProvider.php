@@ -59,17 +59,17 @@ class AppServiceProvider extends ServiceProvider
         });
 
         VerifyEmail::toMailUsing(fn ($user, string $url) => (new MailMessage)
-            ->subject('Confirm your email for '.config('app.name'))
-            ->greeting('Hi '.Str::of($user->name)->before(' ').',')
-            ->line('Thanks for joining '.config('app.name').'. Please confirm this is your email address so you can apply to roles, message employers and get alerts.')
-            ->action('Confirm my email', $url)
-            ->line('The link works for '.config('auth.verification.expire', 60).' minutes. If you did not create an account, you can ignore this email.'));
+            ->subject(__('Confirm your email for :app', ['app' => config('app.name')]))
+            ->greeting(__('Hi :name,', ['name' => Str::of($user->name)->before(' ')]))
+            ->line(__('Thanks for joining :app. Please confirm this is your email address so you can apply to roles, message employers and get alerts.', ['app' => config('app.name')]))
+            ->action(__('Confirm my email'), $url)
+            ->line(__('The link works for :minutes minutes. If you did not create an account, you can ignore this email.', ['minutes' => config('auth.verification.expire', 60)])));
 
         ResetPassword::toMailUsing(fn ($user, string $token) => (new MailMessage)
-            ->subject('Reset your '.config('app.name').' password')
-            ->greeting('Hi '.Str::of($user->name)->before(' ').',')
-            ->line('We got a request to reset the password for your '.config('app.name').' account.')
-            ->action('Choose a new password', url(route('password.reset', ['token' => $token, 'email' => $user->getEmailForPasswordReset()], false)))
-            ->line('The link works for '.config('auth.passwords.'.config('auth.defaults.passwords').'.expire').' minutes. If you did not ask for this, you can ignore this email and your password stays the same.'));
+            ->subject(__('Reset your :app password', ['app' => config('app.name')]))
+            ->greeting(__('Hi :name,', ['name' => Str::of($user->name)->before(' ')]))
+            ->line(__('We got a request to reset the password for your :app account.', ['app' => config('app.name')]))
+            ->action(__('Choose a new password'), url(route('password.reset', ['token' => $token, 'email' => $user->getEmailForPasswordReset()], false)))
+            ->line(__('The link works for :minutes minutes. If you did not ask for this, you can ignore this email and your password stays the same.', ['minutes' => config('auth.passwords.'.config('auth.defaults.passwords').'.expire')])));
     }
 }

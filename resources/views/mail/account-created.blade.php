@@ -1,21 +1,21 @@
 <x-mail::message>
-# Your {{ config('app.name') }} account is ready
+# {{ __('Your :app account is ready', ['app' => config('app.name')]) }}
 
-Hi {!! $name !!},
+{!! __('Hi :name,', ['name' => $name]) !!}
 
-An account was created for you on {{ config('app.name') }}, where students and professionals find internships and jobs in Tunisia and worldwide.
+{{ __('An account was created for you on :app, where students and professionals find internships and jobs in Tunisia and worldwide.', ['app' => config('app.name')]) }}
 
-Choose a password to sign in. This also confirms your email address.
+{{ __('Choose a password to sign in. This also confirms your email address.') }}
 
 <x-mail::button :url="$url">
-Choose my password
+{{ __('Choose my password') }}
 </x-mail::button>
 
-The link works for {{ $minutes }} minutes. After that, use "Forgot password" on the sign-in page to get a new one.
+{{ __('The link works for :minutes minutes. After that, use "Forgot password" on the sign-in page to get a new one.', ['minutes' => $minutes]) }}
 
-The {{ config('app.name') }} team
+{{ __('The :app team', ['app' => config('app.name')]) }}
 
 <x-slot:subcopy>
-If you did not expect this email, you can ignore it. If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
+{{ __("If you did not expect this email, you can ignore it. If the button doesn't work, open this link:") }} <span class="break-all">[{{ $url }}]({{ $url }})</span>
 </x-slot:subcopy>
 </x-mail::message>

@@ -31,11 +31,11 @@ class Username
     public static function messages(): array
     {
         return [
-            'username.regex' => 'Use 3 to 30 lowercase letters, numbers or dashes, starting with a letter.',
-            'username.not_regex' => 'Use one dash at a time.',
-            'username.min' => 'Use at least 3 characters.',
-            'username.not_in' => 'This username is reserved. Pick another one.',
-            'username.unique' => 'Someone already uses this username.',
+            'username.regex' => __('Use 3 to 30 lowercase letters, numbers or dashes, starting with a letter.'),
+            'username.not_regex' => __('Use one dash at a time.'),
+            'username.min' => __('Use at least 3 characters.'),
+            'username.not_in' => __('This username is reserved. Pick another one.'),
+            'username.unique' => __('Someone already uses this username.'),
         ];
     }
 }

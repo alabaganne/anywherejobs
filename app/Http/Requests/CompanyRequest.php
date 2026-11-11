@@ -25,8 +25,8 @@ class CompanyRequest extends FormRequest
 
     public function messages() {
         return [
-            'name.required' => 'The company name is required',
-            'city_id.required' => 'The city field is required',
+            'name.required' => __('The company name is required'),
+            'city_id.required' => __('The city field is required'),
         ];
     }
 

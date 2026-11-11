@@ -86,7 +86,7 @@ class CandidateController extends Controller
 
         return Redirect::route('candidates.index')->with('toast', [
             'type' => 'store',
-            'message' => 'Candidate created successfully.'
+            'message' => __('Candidate created successfully.')
         ]);
     }
 
@@ -167,7 +167,7 @@ class CandidateController extends Controller
 
         return Redirect::route('candidates.show', $candidate)->with('toast', [
             'type' => 'update',
-            'message' => 'Candidate updated successfully.'
+            'message' => __('Candidate updated successfully.')
         ]);
     }
 
@@ -187,7 +187,7 @@ class CandidateController extends Controller
 
         return Redirect::route('candidates.index')->with('toast', [
             'type' => 'destroy',
-            'message' => 'Candidate deleted successfully.'
+            'message' => __('Candidate deleted successfully.')
         ]);
     }
 }

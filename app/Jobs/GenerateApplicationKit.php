@@ -42,8 +42,9 @@ class GenerateApplicationKit implements ShouldQueue
     private function fail(ApplicationKit $kit, Credits $credits): void
     {
         if ($kit->status !== 'queued') { return; }
-        $what = ['cv' => 'your CV', 'letter' => 'your letter'][$kit->writing] ?? 'your CV and letter';
-        $kit->update(['status' => $kit->cv || filled($kit->cover_letter) ? 'ready' : 'failed', 'writing' => null, 'error' => "We could not write {$what} right now. Please try again in a minute."]);
+        $locale = $kit->candidate?->user?->preferredLocale();
+        $what = __(['cv' => 'your CV', 'letter' => 'your letter'][$kit->writing] ?? 'your CV and letter', [], $locale);
+        $kit->update(['status' => $kit->cv || filled($kit->cover_letter) ? 'ready' : 'failed', 'writing' => null, 'error' => __('We could not write :what right now. Please try again in a minute.', ['what' => $what], $locale)]);
         if ($kit->generations > 0) { $kit->decrement('generations'); }
         if ($user = $kit->candidate?->user) { $credits->refund($user, $kit->fresh()); }
     }

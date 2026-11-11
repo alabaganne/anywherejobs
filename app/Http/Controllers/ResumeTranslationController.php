@@ -17,13 +17,13 @@ class ResumeTranslationController extends Controller
     public function store(Request $request, Resume $resume, Resumes $ai, Credits $credits)
     {
         $this->authorizeResume($request, $resume);
-        abort_unless($resume->status === 'ready' && $resume->path, 409, 'Save this resume before translating it.');
+        abort_unless($resume->status === 'ready' && $resume->path, 409, __('Save this resume before translating it.'));
         $data = $request->validate(['locale' => 'required|in:en,fr']);
-        abort_if($data['locale'] === $resume->locale, 422, 'This resume is already in that language.');
-        abort_unless($ai->enabled(), 503, 'Translating resumes is not available right now.');
+        abort_if($data['locale'] === $resume->locale, 422, __('This resume is already in that language.'));
+        abort_unless($ai->enabled(), 503, __('Translating resumes is not available right now.'));
 
         return $this->draft($request, $resume, ['source' => 'translation', 'locale' => $data['locale']], [
-            'name' => mb_substr($resume->name.' ('.LanguageGuess::name($data['locale']).')', 0, 150),
+            'name' => mb_substr($resume->name.' ('.LanguageGuess::name($data['locale'], app()->getLocale()).')', 0, 150),
             'style' => $resume->style,
         ], $credits);
     }
@@ -32,8 +32,8 @@ class ResumeTranslationController extends Controller
     public function copy(Request $request, Resume $resume, Resumes $ai, Credits $credits)
     {
         $this->authorizeResume($request, $resume);
-        abort_unless($resume->source === 'uploaded' && $resume->status === 'ready' && $resume->path, 409, 'Only an uploaded PDF needs an editable copy.');
-        abort_unless($ai->enabled(), 503, 'Reading resumes is not available right now.');
+        abort_unless($resume->source === 'uploaded' && $resume->status === 'ready' && $resume->path, 409, __('Only an uploaded PDF needs an editable copy.'));
+        abort_unless($ai->enabled(), 503, __('Reading resumes is not available right now.'));
 
         return $this->draft($request, $resume, ['source' => 'copy'], [
             'name' => mb_substr($resume->name.' (editable)', 0, 150),
@@ -46,9 +46,9 @@ class ResumeTranslationController extends Controller
     public function regenerate(Request $request, Resume $resume, Resumes $ai, Credits $credits)
     {
         $this->authorizeResume($request, $resume);
-        abort_unless(in_array($resume->source, ['translation', 'copy'], true) && in_array($resume->status, ['draft', 'failed'], true), 409, 'Only drafts can be written again.');
-        abort_unless($resume->translatedFrom?->path, 409, 'The resume it was made from was deleted.');
-        abort_unless($ai->enabled(), 503, 'Translating resumes is not available right now.');
+        abort_unless(in_array($resume->source, ['translation', 'copy'], true) && in_array($resume->status, ['draft', 'failed'], true), 409, __('Only drafts can be written again.'));
+        abort_unless($resume->translatedFrom?->path, 409, __('The resume it was made from was deleted.'));
+        abort_unless($ai->enabled(), 503, __('Translating resumes is not available right now.'));
         if ($response = $this->start($request->user(), $resume, $credits)) {
             return $response;
         }
@@ -64,7 +64,7 @@ class ResumeTranslationController extends Controller
             return $this->found($draft);
         }
         if (! $draft && Resume::where('candidate_id', $source->candidate_id)->count() >= Resume::LIMIT) {
-            return response()->json(['message' => 'You can keep up to '.Resume::LIMIT.' resumes. Delete one first.'], 422);
+            return response()->json(['message' => __('You can keep up to :count resumes. Delete one first.', ['count' => Resume::LIMIT])], 422);
         }
 
         $draft ??= Resume::create(['candidate_id' => $source->candidate_id, 'translated_from_id' => $source->id, 'status' => 'queued', ...$match, ...$attributes]);

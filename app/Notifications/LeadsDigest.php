@@ -24,7 +24,7 @@ class LeadsDigest extends Notification
     {
         $count = $this->leads->count();
         return (new MailMessage)
-            ->subject($count === 1 ? 'One new job lead today' : "{$count} new job leads today")
+            ->subject($count === 1 ? __('One new job lead today') : __(':count new job leads today', ['count' => $count]))
             ->markdown('mail.leads-digest', [
                 'leads' => $this->leads->map(fn ($lead) => [
                     'company' => MailText::plain($lead->company_name, 120),

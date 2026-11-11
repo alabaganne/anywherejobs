@@ -13,6 +13,7 @@ class OpportunityDigest extends Mailable
 {
     public function __construct(public SavedSearch $search, public Collection $opportunities, public string $batchId)
     {
+        $this->locale($search->user?->preferredLocale() ?? 'en');
     }
 
     public function headers(): Headers
@@ -25,7 +26,7 @@ class OpportunityDigest extends Mailable
 
     public function build()
     {
-        return $this->subject('New roles for '.$this->search->name.' on '.config('app.name'))->markdown('emails.opportunity-digest')->with([
+        return $this->subject(__('New roles for :name on :app', ['name' => $this->search->name, 'app' => config('app.name')]))->markdown('emails.opportunity-digest')->with([
             'unsubscribeUrl' => URL::signedRoute('saved-searches.unsubscribe', ['savedSearch' => $this->search->id]),
             'browseUrl' => SavedSearchController::browseUrl($this->search->filters),
         ]);

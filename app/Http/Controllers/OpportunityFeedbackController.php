@@ -20,17 +20,17 @@ class OpportunityFeedbackController extends Controller
             ...$data, 'opportunity_id' => $opportunity->id, 'user_id' => $request->user()?->id,
             'status' => 'open', 'created_at' => now(), 'updated_at' => now(),
         ]);
-        return back()->with('toast', ['type' => 'store', 'message' => 'Thanks. We will review this role.']);
+        return back()->with('toast', ['type' => 'store', 'message' => __('Thanks. We will review this role.')]);
     }
 
     public function claim(Request $request, Company $company)
     {
         abort_unless($request->user()?->isCompany(), 403);
-        abort_if($company->user || $company->claimed_by_company_id || $company->id === $request->user()->userable_id, 422, 'This company cannot be claimed.');
+        abort_if($company->user || $company->claimed_by_company_id || $company->id === $request->user()->userable_id, 422, __('This company cannot be claimed.'));
         $data = $request->validate(['evidence' => 'required|string|min:30|max:3000']);
         DB::table('company_claims')->updateOrInsert(['company_id' => $company->id, 'user_id' => $request->user()->id], [
             'evidence' => $data['evidence'], 'status' => 'pending', 'review_notes' => null, 'created_at' => now(), 'updated_at' => now(),
         ]);
-        return back()->with('toast', ['type' => 'store', 'message' => 'Company claim submitted for ownership review.']);
+        return back()->with('toast', ['type' => 'store', 'message' => __('Company claim submitted for ownership review.')]);
     }
 }

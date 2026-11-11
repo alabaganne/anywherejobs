@@ -209,6 +209,10 @@ are gone. Sign-in pages share their field and link classes from
 `Components/Auth/classes.js` and use `Breeze/Button.vue` (a full-width `.cta-primary`).
 ---
 
+### Languages
+
+Every page shows English or French from `page.props.locale`. Use `const { fr, text, dateLocale } = useText()` (`composables/useText.js`): `text('English', 'Français')` in templates and scripts, `dateLocale` for `Intl` and `toLocale*` calls. Lists of labels are computed values, so they follow the language. Public pages take the language from the link (`/fr`); signed-in pages take it from the account, changed with `Shared/LanguageMenu.vue` in the top bar (`saveLanguage` posts to `locale.update`). Text built on the server uses `__()` and `resources/lang/fr.json`.
+
 ## 4. Porting a page — checklist
 
 For each `tailwind/*.html`:

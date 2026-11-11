@@ -3,9 +3,9 @@
 @if (! empty($greeting))
 # {{ $greeting }}
 @elseif ($level === 'error')
-# Something went wrong
+# {{ __('Something went wrong') }}
 @else
-# Hello
+# {{ __('Hello') }}
 @endif
 
 {{-- Intro Lines --}}
@@ -37,13 +37,13 @@
 @if (! empty($salutation))
 {{ $salutation }}
 @else
-The {{ config('app.name') }} team
+{{ __('The :app team', ['app' => config('app.name')]) }}
 @endif
 
 {{-- Subcopy --}}
 @isset($actionText)
 <x-slot:subcopy>
-If the "{{ $actionText }}" button doesn't work, copy this link into your browser: <span class="break-all">[{{ $displayableActionUrl }}]({{ $actionUrl }})</span>
+{{ __('If the ":action" button doesn\'t work, copy this link into your browser:', ['action' => $actionText]) }} <span class="break-all">[{{ $displayableActionUrl }}]({{ $actionUrl }})</span>
 </x-slot:subcopy>
 @endisset
 </x-mail::message>

@@ -7,6 +7,10 @@ import AppShell from '@/Layouts/AppShell.vue';
 import CompanyLogo from '@/Components/Ui/CompanyLogo.vue';
 import PageHeader from '@/Components/Ui/PageHeader.vue';
 import StatusPill from '@/Components/Ui/StatusPill.vue';
+import { useText } from '@/composables/useText';
+
+const { fr, text } = useText();
+const count = (n, one, many) => (fr.value ? (n > 1 ? many : one) : n === 1 ? one : many);
 
 defineOptions({
 	layout: (_h, page) => h(AppShell, { active: 'dashboard' }, () => page),
@@ -35,9 +39,9 @@ const managedRolesHref = computed(() => `${route('companies.show', user.value?.u
 const partyName = (application) => (isCompany.value ? application.candidate?.name : application.company?.name) || '';
 
 const description = computed(() => {
-	if (isAdmin.value) return 'Keep roles, companies, and candidates up to date.';
-	if (isCompany.value) return 'Review your roles and keep applications moving.';
-	return 'Here is where your search stands today.';
+	if (isAdmin.value) return text('Keep roles, companies, and candidates up to date.', 'Gardez les offres, les entreprises et les candidats à jour.');
+	if (isCompany.value) return text('Review your roles and keep applications moving.', 'Passez en revue vos offres et faites avancer les candidatures.');
+	return text('Here is where your search stands today.', 'Voici où en est votre recherche aujourd’hui.');
 });
 
 const mascot = computed(() => {
@@ -46,53 +50,53 @@ const mascot = computed(() => {
 	return { src: '/site-assets/mascots/17-student-presenter.webp', width: 900, height: 900 };
 });
 
-const adminLinks = [
-	{ label: 'Review queue', route: 'imports.review', icon: Database },
-	{ label: 'Job leads', route: 'leads.index', icon: Target },
-	{ label: 'Companies', route: 'app.companies.index', icon: Building2 },
-	{ label: 'Candidates', route: 'candidates.index', icon: GraduationCap },
-	{ label: 'Fields', route: 'fields.index', icon: BookOpen },
-];
+const adminLinks = computed(() => [
+	{ label: text('Review queue', 'File de relecture'), route: 'imports.review', icon: Database },
+	{ label: text('Job leads', 'Pistes d’emploi'), route: 'leads.index', icon: Target },
+	{ label: text('Companies', 'Entreprises'), route: 'app.companies.index', icon: Building2 },
+	{ label: text('Candidates', 'Candidats'), route: 'candidates.index', icon: GraduationCap },
+	{ label: text('Fields', 'Domaines'), route: 'fields.index', icon: BookOpen },
+]);
 
 const cards = computed(() => {
 	if (isAdmin.value) {
 		return [
-			{ label: 'Open roles', value: props.opportunities_count, icon: Briefcase, href: route('app.opportunities.index') },
-			{ label: 'Companies', value: props.companies_count, icon: Building2, href: route('app.companies.index') },
-			{ label: 'Candidates', value: props.candidates_count, icon: GraduationCap, href: route('candidates.index') },
+			{ label: text('Open roles', 'Offres ouvertes'), value: props.opportunities_count, icon: Briefcase, href: route('app.opportunities.index') },
+			{ label: text('Companies', 'Entreprises'), value: props.companies_count, icon: Building2, href: route('app.companies.index') },
+			{ label: text('Candidates', 'Candidats'), value: props.candidates_count, icon: GraduationCap, href: route('candidates.index') },
 		];
 	}
 	if (isCompany.value) {
 		return [
-			{ label: props.roles_count === 1 ? 'Open role' : 'Open roles', value: props.roles_count, icon: Briefcase, href: managedRolesHref.value },
-			{ label: props.applications_count === 1 ? 'Active application' : 'Active applications', value: props.applications_count, icon: FileText, href: route('applications.index') },
-			{ label: props.interviews_count === 1 ? 'Interview' : 'Interviews', value: props.interviews_count, icon: CalendarCheck, href: route('applications.index', { status: 'interview' }) },
+			{ label: text(count(props.roles_count, 'Open role', 'Open roles'), count(props.roles_count, 'Offre ouverte', 'Offres ouvertes')), value: props.roles_count, icon: Briefcase, href: managedRolesHref.value },
+			{ label: text(count(props.applications_count, 'Active application', 'Active applications'), count(props.applications_count, 'Candidature active', 'Candidatures actives')), value: props.applications_count, icon: FileText, href: route('applications.index') },
+			{ label: text(count(props.interviews_count, 'Interview', 'Interviews'), count(props.interviews_count, 'Entretien', 'Entretiens')), value: props.interviews_count, icon: CalendarCheck, href: route('applications.index', { status: 'interview' }) },
 		];
 	}
 	return [
-		{ label: props.applications_count === 1 ? 'Active application' : 'Active applications', value: props.applications_count, icon: FileText, href: route('applications.index') },
-		{ label: props.interviews_count === 1 ? 'Interview' : 'Interviews', value: props.interviews_count, icon: CalendarCheck, href: route('applications.index', { status: 'interview' }) },
-		{ label: props.saved_count === 1 ? 'Saved role' : 'Saved roles', value: props.saved_count, icon: Bookmark, href: route('likes.index') },
+		{ label: text(count(props.applications_count, 'Active application', 'Active applications'), count(props.applications_count, 'Candidature active', 'Candidatures actives')), value: props.applications_count, icon: FileText, href: route('applications.index') },
+		{ label: text(count(props.interviews_count, 'Interview', 'Interviews'), count(props.interviews_count, 'Entretien', 'Entretiens')), value: props.interviews_count, icon: CalendarCheck, href: route('applications.index', { status: 'interview' }) },
+		{ label: text(count(props.saved_count, 'Saved role', 'Saved roles'), count(props.saved_count, 'Offre sauvegardée', 'Offres sauvegardées')), value: props.saved_count, icon: Bookmark, href: route('likes.index') },
 	];
 });
 </script>
 
 <template>
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
-		<PageHeader tone="navy" label="Dashboard" :title="`${is_new_user ? 'Welcome' : 'Welcome back'}, ${firstName}`" document-title="Dashboard" :description="description">
-			<template #title>{{ is_new_user ? 'Welcome' : 'Welcome back' }}, <span class="accent">{{ firstName }}</span></template>
+		<PageHeader tone="navy" :label="text('Dashboard', 'Tableau de bord')" :title="`${is_new_user ? text('Welcome', 'Bienvenue') : text('Welcome back', 'Bon retour')}, ${firstName}`" :document-title="text('Dashboard', 'Tableau de bord')" :description="description">
+			<template #title>{{ is_new_user ? text('Welcome', 'Bienvenue') : text('Welcome back', 'Bon retour') }}, <span class="accent">{{ firstName }}</span></template>
 			<template #actions>
 				<template v-if="isAdmin">
-					<Link class="cta cta-light" :href="route('imports.review')">Review queue</Link>
-					<Link class="cta cta-ghost" :href="route('leads.index')">Job leads</Link>
+					<Link class="cta cta-light" :href="route('imports.review')">{{ text('Review queue', 'File de relecture') }}</Link>
+					<Link class="cta cta-ghost" :href="route('leads.index')">{{ text('Job leads', 'Pistes d’emploi') }}</Link>
 				</template>
 				<template v-else-if="isCompany">
-					<Link class="cta cta-light" :href="route('opportunities.create')">Post a role</Link>
-					<Link class="cta cta-ghost" :href="managedRolesHref">Manage your roles</Link>
+					<Link class="cta cta-light" :href="route('opportunities.create')">{{ text('Post a role', 'Publier une offre') }}</Link>
+					<Link class="cta cta-ghost" :href="managedRolesHref">{{ text('Manage your roles', 'Gérer vos offres') }}</Link>
 				</template>
 				<template v-else>
-					<Link class="cta cta-light" :href="route('app.opportunities.index')">Browse roles<ArrowRight class="size-[18px]" aria-hidden="true" /></Link>
-					<Link class="cta cta-ghost" :href="route('settings', { tab: 'preferences' })">Job preferences</Link>
+					<Link class="cta cta-light" :href="route('app.opportunities.index')">{{ text('Browse roles', 'Parcourir les offres') }}<ArrowRight class="size-[18px]" aria-hidden="true" /></Link>
+					<Link class="cta cta-ghost" :href="route('settings', { tab: 'preferences' })">{{ text('Job preferences', 'Préférences d’emploi') }}</Link>
 				</template>
 			</template>
 			<template #art>
@@ -120,8 +124,8 @@ const cards = computed(() => {
 		<div class="grid gap-6 items-start max-[1080px]:grid-cols-1" :class="recommended.length ? 'grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]' : 'grid-cols-1'">
 			<section class="rounded-card bg-white overflow-hidden">
 				<div class="flex items-center justify-between gap-4 px-7 pt-6 pb-4 max-[560px]:px-5">
-					<h2 class="text-[20px] leading-[1.35] text-navy">{{ isAdmin ? 'Manage the catalog' : 'Recent applications' }}</h2>
-					<Link v-if="!isAdmin && applications.length" class="landing-link !py-0 text-[13px]! shrink-0 whitespace-nowrap" :href="route('applications.index')">View all<ArrowRight class="action-icon size-4" aria-hidden="true" /></Link>
+					<h2 class="text-[20px] leading-[1.35] text-navy">{{ isAdmin ? text('Manage the catalog', 'Gérer le catalogue') : text('Recent applications', 'Candidatures récentes') }}</h2>
+					<Link v-if="!isAdmin && applications.length" class="landing-link !py-0 text-[13px]! shrink-0 whitespace-nowrap" :href="route('applications.index')">{{ text('View all', 'Tout voir') }}<ArrowRight class="action-icon size-4" aria-hidden="true" /></Link>
 				</div>
 
 				<Link
@@ -146,15 +150,15 @@ const cards = computed(() => {
 							<component :is="item.icon" class="size-5 text-brand transition-colors group-hover:text-white" aria-hidden="true" />{{ item.label }}
 						</Link>
 					</div>
-					<p v-else-if="isCompany">No applications yet. Keep your <Link class="text-brand hover:underline" :href="managedRolesHref">role details</Link> up to date to attract candidates.</p>
-					<p v-else>You have not applied anywhere yet. <Link class="text-brand hover:underline" :href="route('app.opportunities.index')">Find a role</Link> to get started.</p>
+					<p v-else-if="isCompany">{{ text('No applications yet. Keep your', 'Aucune candidature pour le moment. Gardez les') }} <Link class="text-brand hover:underline" :href="managedRolesHref">{{ text('role details', 'détails de vos offres') }}</Link> {{ text('up to date to attract candidates.', 'à jour pour attirer des candidats.') }}</p>
+					<p v-else>{{ text('You have not applied anywhere yet.', 'Vous n’avez encore postulé nulle part.') }} <Link class="text-brand hover:underline" :href="route('app.opportunities.index')">{{ text('Find a role', 'Trouvez une offre') }}</Link> {{ text('to get started.', 'pour commencer.') }}</p>
 				</div>
 			</section>
 
 			<section v-if="recommended.length" class="rounded-card bg-white overflow-hidden">
 				<div class="flex items-center justify-between gap-4 px-7 pt-6 max-[560px]:px-5">
-					<h2 class="text-[20px] leading-[1.35] text-navy">Picked for you</h2>
-					<Link class="landing-link !py-0 text-[13px]!" :href="route('settings', { tab: 'preferences' })">Preferences</Link>
+					<h2 class="text-[20px] leading-[1.35] text-navy">{{ text('Picked for you', 'Choisies pour vous') }}</h2>
+					<Link class="landing-link !py-0 text-[13px]!" :href="route('settings', { tab: 'preferences' })">{{ text('Preferences', 'Préférences') }}</Link>
 				</div>
 				<p class="px-7 pt-2 pb-3 text-[14px] leading-[1.6] text-subtle max-[560px]:px-5">{{ recommendation_reasons.join('. ') }}</p>
 				<Link

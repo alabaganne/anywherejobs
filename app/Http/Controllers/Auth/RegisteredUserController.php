@@ -112,6 +112,7 @@ class RegisteredUserController extends Controller
             ]);
             $user->terms_accepted_at = now();
             $user->signup_ref = $request->session()->get('signup_ref');
+            $user->locale = $request->is('fr/*') ? 'fr' : 'en';
             $user->save();
 
             return $user;
@@ -125,7 +126,7 @@ class RegisteredUserController extends Controller
         return $user->isCompany()
             ? redirect()->route('companies.show', $user->userable)->with('toast', [
                 'type' => 'store',
-                'message' => 'Company profile completed. You can now post internships and jobs.'
+                'message' => __('Company profile completed. You can now post internships and jobs.')
             ])
             : redirect()->intended(route('dashboard', absolute: false));
     }

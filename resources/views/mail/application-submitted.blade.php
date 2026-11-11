@@ -1,9 +1,9 @@
 <x-mail::message>
-# New application for {!! $role !!}
+# {!! __('New application for :role', ['role' => $role]) !!}
 
-Hi {!! $company !!},
+{!! __('Hi :name,', ['name' => $company]) !!}
 
-**{!! $candidate !!}** applied to **{!! $role !!}** on {{ config('app.name') }}.
+{!! __('**:candidate** applied to **:role** on :app.', ['candidate' => $candidate, 'role' => $role, 'app' => config('app.name')]) !!}
 
 @if ($excerpt)
 <x-mail::panel>
@@ -12,18 +12,18 @@ Hi {!! $company !!},
 @endif
 
 @if ($attachments)
-{{ $attachments === 1 ? 'One file is attached' : $attachments.' files are attached' }} to the application.
+{{ $attachments === 1 ? __('One file is attached to the application.') : __(':count files are attached to the application.', ['count' => $attachments]) }}
 
 @endif
 <x-mail::button :url="$url">
-Review the application
+{{ __('Review the application') }}
 </x-mail::button>
 
-Reply from {{ config('app.name') }} so the candidate always knows where they stand.
+{{ __('Reply from :app so the candidate always knows where they stand.', ['app' => config('app.name')]) }}
 
-The {{ config('app.name') }} team
+{{ __('The :app team', ['app' => config('app.name')]) }}
 
 <x-slot:subcopy>
-You get this email because {!! $company !!} posts roles on {{ config('app.name') }}. If the button doesn't work, open this link: <span class="break-all">[{{ $url }}]({{ $url }})</span>
+{!! __("You get this email because :company posts roles on :app. If the button doesn't work, open this link:", ['company' => $company, 'app' => config('app.name')]) !!} <span class="break-all">[{{ $url }}]({{ $url }})</span>
 </x-slot:subcopy>
 </x-mail::message>

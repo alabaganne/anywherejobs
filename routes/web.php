@@ -126,6 +126,7 @@ Route::get('/students/{path}', fn (string $path) => redirect('/app/candidates/'.
 // Only /app pages get the workspace sidebar and header.
 Route::prefix('app')->middleware('auth')->group(function () {
     Route::redirect('/', '/app/dashboard');
+    Route::post('/locale', \App\Http\Controllers\LocaleController::class)->name('locale.update');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/opportunities', [OpportunityController::class, 'index'])->name('app.opportunities.index');
     Route::get('/opportunities/{category}', [OpportunityController::class, 'index'])->whereIn('category', ['internships', 'jobs'])->name('app.opportunities.category');

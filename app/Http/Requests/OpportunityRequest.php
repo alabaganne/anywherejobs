@@ -75,8 +75,8 @@ class OpportunityRequest extends FormRequest
     public function messages()
     {
         return [
-            'skills.max' => 'Pick up to 12 skills.',
-            'skills.*.exists' => 'One of the chosen skills no longer exists.',
+            'skills.max' => __('Pick up to 12 skills.'),
+            'skills.*.exists' => __('One of the chosen skills no longer exists.'),
         ];
     }
 
@@ -84,15 +84,15 @@ class OpportunityRequest extends FormRequest
     {
         return [function ($validator) {
             if ($this->filled('pay_min') && $this->filled('pay_max') && (float) $this->input('pay_max') < (float) $this->input('pay_min')) {
-                $validator->errors()->add('pay_max', 'Maximum compensation must be at least the minimum.');
+                $validator->errors()->add('pay_max', __('Maximum compensation must be at least the minimum.'));
             }
             if ($this->input('compensation_status') === 'unpaid' && ((float) $this->input('pay_min', 0) > 0 || (float) $this->input('pay_max', 0) > 0)) {
-                $validator->errors()->add('compensation_status', 'An unpaid role cannot advertise positive compensation.');
+                $validator->errors()->add('compensation_status', __('An unpaid role cannot advertise positive compensation.'));
             }
             $allowed = $this->input('eligible_countries', []);
             $excluded = $this->input('excluded_countries', []);
             if (is_array($allowed) && is_array($excluded) && array_intersect(array_filter($allowed, 'is_string'), array_filter($excluded, 'is_string'))) {
-                $validator->errors()->add('excluded_countries', 'A country cannot be both eligible and excluded.');
+                $validator->errors()->add('excluded_countries', __('A country cannot be both eligible and excluded.'));
             }
         }];
     }

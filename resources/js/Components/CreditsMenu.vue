@@ -2,11 +2,15 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { Coins, Gift } from '@lucide/vue';
+import { useText } from '@/composables/useText';
 
+const { fr, text, dateLocale } = useText();
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const billing = computed(() => page.props.billing || {});
 const credits = computed(() => user.value?.credits ?? 0);
+const plural = computed(() => (fr.value ? credits.value > 1 : credits.value !== 1));
+const creditWord = computed(() => text(`credit${plural.value ? 's' : ''}`, `crédit${plural.value ? 's' : ''}`));
 const canClaim = computed(() => billing.value.beta && user.value?.email_verified);
 const claiming = ref(false);
 const claim = () => {
@@ -15,7 +19,7 @@ const claim = () => {
 };
 const nextTopUp = computed(() => {
 	const now = new Date();
-	return new Date(now.getFullYear(), now.getMonth() + 1, 1).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+	return new Date(now.getFullYear(), now.getMonth() + 1, 1).toLocaleDateString(dateLocale.value, { day: 'numeric', month: 'long' });
 });
 
 // Opens on hover with a mouse, and on click or tap otherwise. A click while hovering keeps it open.
@@ -62,12 +66,12 @@ onBeforeUnmount(() => {
 			type="button"
 			aria-controls="credits-panel"
 			:aria-expanded="open"
-			:aria-label="`${credits} credit${credits === 1 ? '' : 's'} left`"
+			:aria-label="text(`${credits} ${creditWord} left`, `${credits} ${creditWord} restant${plural ? 's' : ''}`)"
 			@click="toggle"
 		>
 			<Coins class="size-4" aria-hidden="true" />
 			<span>{{ credits }}</span>
-			<span class="max-[680px]:hidden">credit{{ credits === 1 ? '' : 's' }}</span>
+			<span class="max-[680px]:hidden">{{ creditWord }}</span>
 		</button>
 
 		<Transition
@@ -80,22 +84,22 @@ onBeforeUnmount(() => {
 		>
 			<div v-if="open" id="credits-panel" class="absolute right-0 top-full pt-1.5 z-30 origin-top-right max-[680px]:fixed max-[680px]:inset-x-4 max-[680px]:top-[58px]">
 				<div class="w-80 max-[680px]:w-auto rounded-card border border-line bg-white p-5">
-					<p class="text-[12px] tracking-caps text-brand uppercase">Your credits</p>
-					<p class="text-2xl font-medium text-navy mt-1">{{ credits }} credit{{ credits === 1 ? '' : 's' }} left</p>
+					<p class="text-[12px] tracking-caps text-brand uppercase">{{ text('Your credits', 'Vos crédits') }}</p>
+					<p class="text-2xl font-medium text-navy mt-1">{{ text(`${credits} ${creditWord} left`, `${credits} ${creditWord} restant${plural ? 's' : ''}`) }}</p>
 					<p class="text-[13px] leading-relaxed text-ink-700 mt-3">
-						One credit writes a CV and cover letter for one role, translates a resume or makes an uploaded PDF editable (each with {{ billing.rewrites }} rewrites), or fills your profile from a resume. Browsing and applying stay free.
+						{{ text(`One credit writes a CV and cover letter for one role, translates a resume or makes an uploaded PDF editable (each with ${billing.rewrites} rewrites), or fills your profile from a resume. Browsing and applying stay free.`, `Un crédit rédige un CV et une lettre de motivation pour une offre, traduit un CV ou rend modifiable un PDF importé (chacun avec ${billing.rewrites} réécritures), ou remplit votre profil à partir d’un CV. Parcourir les offres et postuler restent gratuits.`) }}
 					</p>
-					<p v-if="user?.email_verified" class="rounded-card bg-pale text-navy text-[13px] px-3.5 py-2.5 mt-4">{{ billing.monthly }} free credits on {{ nextTopUp }}</p>
-					<p v-else class="rounded-card bg-amber-50 text-amber-900 text-[13px] leading-relaxed px-3.5 py-2.5 mt-4">Verify your email to use the AI tools and get {{ billing.monthly }} free credits each month<template v-if="billing.beta">, and free credits whenever you need them during the beta</template>.</p>
+					<p v-if="user?.email_verified" class="rounded-card bg-pale text-navy text-[13px] px-3.5 py-2.5 mt-4">{{ text(`${billing.monthly} free credits on ${nextTopUp}`, `${billing.monthly} crédits gratuits le ${nextTopUp}`) }}</p>
+					<p v-else class="rounded-card bg-amber-50 text-amber-900 text-[13px] leading-relaxed px-3.5 py-2.5 mt-4">{{ text(`Verify your email to use the AI tools and get ${billing.monthly} free credits each month`, `Vérifiez votre e-mail pour utiliser les outils d’IA et recevoir ${billing.monthly} crédits gratuits chaque mois`) }}<template v-if="billing.beta">{{ text(', and free credits whenever you need them during the beta', ', et des crédits gratuits dès que vous en avez besoin pendant la bêta') }}</template>.</p>
 					<div v-if="billing.beta" class="rounded-card bg-pale px-3.5 py-3 mt-2.5">
-						<p class="flex items-center gap-1.5 text-[13px] font-medium text-navy"><span class="rounded-md bg-navy text-white text-[10.5px] font-medium px-1.5 py-px">Beta</span>Credits are free for now</p>
-						<p class="text-[12.5px] leading-relaxed text-muted mt-1.5">{{ appName }} is in beta and payments are still being built. Get {{ billing.beta_credits }} free credits whenever you run low.</p>
+						<p class="flex items-center gap-1.5 text-[13px] font-medium text-navy"><span class="rounded-md bg-navy text-white text-[10.5px] font-medium px-1.5 py-px">{{ text('Beta', 'Bêta') }}</span>{{ text('Credits are free for now', 'Les crédits sont gratuits pour le moment') }}</p>
+						<p class="text-[12.5px] leading-relaxed text-muted mt-1.5">{{ text(`${appName} is in beta and payments are still being built. Get ${billing.beta_credits} free credits whenever you run low.`, `${appName} est en bêta et les paiements sont encore en construction. Recevez ${billing.beta_credits} crédits gratuits dès qu’il vous en manque.`) }}</p>
 					</div>
 					<button v-if="canClaim" class="cta cta-primary w-full !text-sm !py-2.5 mt-5 disabled:opacity-60" type="button" :disabled="claiming" @click="claim">
-						<Gift class="size-4" aria-hidden="true" />{{ claiming ? 'Adding…' : `Get ${billing.beta_credits} free credits` }}
+						<Gift class="size-4" aria-hidden="true" />{{ claiming ? text('Adding…', 'Ajout…') : text(`Get ${billing.beta_credits} free credits`, `Recevoir ${billing.beta_credits} crédits gratuits`) }}
 					</button>
 					<Link class="cta w-full !text-sm !py-2.5" :class="canClaim ? 'cta-secondary mt-2.5' : 'cta-primary mt-5'" :href="`${route('billing.index')}#packs`" @click="close">
-						Buy more credits
+						{{ text('Buy more credits', 'Acheter des crédits') }}
 					</Link>
 				</div>
 			</div>

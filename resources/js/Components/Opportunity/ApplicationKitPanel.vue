@@ -263,7 +263,7 @@ const waitNote = (part) => part === 'cv'
                 <div v-if="written(id) && !writing(id)" class="mt-5 border-t border-line pt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                     <p class="text-slate-600">{{ text('Read it through and fix anything that is not exactly right before you send it.', 'Relisez-le et corrigez ce qui n’est pas tout à fait juste avant de l’envoyer.') }}</p>
                     <button type="button" class="inline-flex items-center gap-1.5 font-semibold text-blue-700 disabled:opacity-50" :disabled="queued" @click="rewrite(id)"><RefreshCw :size="15" aria-hidden="true" />{{ text('Write it again', 'Le réécrire') }}</button>
-                    <span v-if="kit.rewrites_left !== null && kit.rewrites_left !== undefined" class="text-slate-500">{{ kit.rewrites_left === 1 ? text('1 rewrite left', '1 réécriture restante') : text(`${kit.rewrites_left} rewrites left`, `${kit.rewrites_left} réécritures restantes`) }}</span>
+                    <span v-if="kit.rewrites_left !== null && kit.rewrites_left !== undefined" class="text-slate-500">{{ kit.rewrites_left === 1 ? text('1 rewrite left', '1 réécriture restante') : text(`${kit.rewrites_left} rewrites left`, kit.rewrites_left === 0 ? '0 réécriture restante' : `${kit.rewrites_left} réécritures restantes`) }}</span>
                 </div>
             </div>
         </div>

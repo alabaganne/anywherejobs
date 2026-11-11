@@ -39,7 +39,20 @@ const IMPORT_PILLS = {
 	open: { label: 'Open', ...INFO },
 };
 
-export function statusPill(status, set = 'application') {
+const FR = {
+	submitted: 'Envoyée', viewed: 'Vue', review: 'En cours d’examen', interview: 'Entretien', offer: 'Offre', closed: 'Clôturée', accepted: 'Acceptée', rejected: 'Clôturée',
+};
+const IMPORT_FR = {
+	pending: 'Pas encore lue', review: 'En attente de relecture', published: 'Publiée', closed: 'Clôturée', rejected: 'Rejetée', approved: 'Approuvée', revoked: 'Révoquée', enabled: 'Activée', paused: 'En pause', running: 'En cours', completed: 'Terminée', partial: 'Partielle', failed: 'Échec', suppressed: 'Masquée', open: 'Ouverte',
+};
+
+export function statusPill(status, set = 'application', locale = 'en') {
+	const pill = statusPillEn(status, set);
+	const french = (set === 'import' ? IMPORT_FR : FR)[String(status === true ? 'accepted' : status === false ? 'closed' : status || (set === 'import' ? '' : 'submitted')).toLowerCase()];
+	return locale === 'fr' && french ? { ...pill, label: french } : pill;
+}
+
+function statusPillEn(status, set) {
 	if (set === 'import') {
 		const key = String(status || '').toLowerCase();
 		return IMPORT_PILLS[key] || { label: key.charAt(0).toUpperCase() + key.slice(1), ...NEUTRAL };

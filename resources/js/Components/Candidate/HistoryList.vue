@@ -1,5 +1,6 @@
 <script setup>
 import { Plus, Trash2 } from '@lucide/vue';
+import { useText } from '@/composables/useText';
 
 const props = defineProps({
 	modelValue: { type: Array, default: () => [] },
@@ -10,6 +11,7 @@ const props = defineProps({
 	errors: { type: Object, default: () => ({}) },
 });
 const emit = defineEmits(['update:modelValue']);
+const { text } = useText();
 
 const blank = () => Object.fromEntries(props.fields.map((field) => [field.key, field.type === 'checkbox' ? false : '']));
 const add = () => emit('update:modelValue', [...props.modelValue, blank()]);
@@ -24,7 +26,7 @@ const error = (index, key) => props.errors[`${props.name}.${index}.${key}`];
 			<h3 class="text-[20px] leading-[1.35] text-navy">{{ title }}</h3>
 			<button class="cta cta-secondary" type="button" @click="add"><Plus class="w-4 h-4" aria-hidden="true" /> {{ addLabel }}</button>
 		</div>
-		<p v-if="!modelValue.length" class="text-sm text-muted">Nothing added yet.</p>
+		<p v-if="!modelValue.length" class="text-sm text-muted">{{ text('Nothing added yet.', 'Rien d’ajouté pour l’instant.') }}</p>
 		<div v-for="(row, index) in modelValue" :key="index" class="rounded-card bg-paper-3 p-4 mb-3">
 			<div class="grid grid-cols-2 gap-3 max-[560px]:grid-cols-1">
 				<template v-for="field in fields" :key="field.key">
@@ -40,7 +42,7 @@ const error = (index, key) => props.errors[`${props.name}.${index}.${key}`];
 				</template>
 			</div>
 			<div class="flex justify-end mt-3">
-				<button class="inline-flex items-center gap-1.5 text-[13px] font-medium text-red-700 hover:underline" type="button" @click="remove(index)"><Trash2 class="w-3.5 h-3.5" aria-hidden="true" /> Remove</button>
+				<button class="inline-flex items-center gap-1.5 text-[13px] font-medium text-red-700 hover:underline" type="button" @click="remove(index)"><Trash2 class="w-3.5 h-3.5" aria-hidden="true" /> {{ text('Remove', 'Retirer') }}</button>
 			</div>
 		</div>
 	</div>

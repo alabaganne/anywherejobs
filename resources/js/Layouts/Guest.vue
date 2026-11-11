@@ -26,11 +26,11 @@
 				<header class="flex h-[88px] items-center justify-end gap-6 px-[clamp(24px,4.5vw,72px)] max-[1024px]:px-8 max-[900px]:justify-between max-[900px]:bg-navy max-[900px]:text-white max-[540px]:h-[72px] max-[540px]:gap-4 max-[540px]:px-6">
 					<Link :href="prefix || '/'" :class="brand" class="hidden self-center max-[900px]:inline-flex max-[900px]:focus-visible:outline-white"><brand-logo wordmark dark size="sm" /></Link>
 					<div class="flex items-center gap-4 sm:gap-6">
-						<a v-if="languageHref" :href="languageHref" :hreflang="fr ? 'en' : 'fr'" :lang="fr ? 'en' : 'fr'" :class="back">{{ fr ? 'English' : 'Français' }}</a>
-						<Link :href="prefix || '/'" :class="back"><icon name="arrow-left" class="size-4" /><span>{{ text('Back to home', 'Retour à l’accueil') }}</span></Link>
+						<Link :href="prefix || '/'" :class="back"><icon name="arrow-left" class="size-4 max-[540px]:size-5" /><span class="max-[540px]:sr-only">{{ text('Back to home', 'Retour à l’accueil') }}</span></Link>
+						<LanguageMenu class="text-navy max-[900px]:text-white" />
 					</div>
 				</header>
-				<main id="auth-main" tabindex="-1" class="flex min-w-0 flex-1 justify-center px-[clamp(28px,4.5vw,72px)] pb-16 outline-none max-[1024px]:px-8 max-[900px]:px-8 max-[900px]:pb-14 max-[540px]:px-6 max-[540px]:pb-12" :class="isRegister ? 'items-start pt-2' : 'items-center pt-4 max-[900px]:pt-12 max-[540px]:items-start max-[540px]:pt-10'">
+				<main id="auth-main" tabindex="-1" class="flex min-w-0 flex-1 justify-center px-[clamp(28px,4.5vw,72px)] pb-16 outline-none max-[1024px]:px-8 max-[900px]:px-8 max-[900px]:pb-14 max-[540px]:px-6 max-[540px]:pb-12" :class="isRegister ? 'items-start pt-2 max-[900px]:pt-10' : 'items-center pt-4 max-[900px]:pt-12 max-[540px]:items-start max-[540px]:pt-10'">
 					<div class="w-full" :class="isRegister ? 'max-w-[560px]' : 'max-w-[420px]'">
 						<div v-if="$page.props.toast?.message" class="mb-6 flex items-start gap-3 rounded-card px-5 py-4 text-[14px] leading-[1.7]" :class="$page.props.toast.type === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'" :role="$page.props.toast.type === 'error' ? 'alert' : 'status'"><icon :name="$page.props.toast.type === 'error' ? 'exclamation-circle' : 'check-circle'" class="mt-0.5 size-[19px] shrink-0" /><p>{{ $page.props.toast.message }}</p></div>
 						<slot />
@@ -50,6 +50,7 @@
 
 <script>
 import { Head } from '@inertiajs/vue3';
+import LanguageMenu from '@/Shared/LanguageMenu.vue';
 
 const pageTitles = {
 	'Auth/Login': ['Log in', 'Connexion'],
@@ -61,7 +62,7 @@ const pageTitles = {
 };
 
 export default {
-	components: { Head },
+	components: { Head, LanguageMenu },
 	data() {
 		return {
 			brand: 'focus-ring items-center rounded-lg',
@@ -75,10 +76,6 @@ export default {
 		},
 		prefix() {
 			return this.fr ? '/fr' : '';
-		},
-		languageHref() {
-			if (!['Auth/Login', 'Auth/Register', 'Auth/ForgotPassword'].includes(this.$page.component)) return null;
-			return this.fr ? this.$page.url.replace(/^\/fr/, '') : `/fr${this.$page.url}`;
 		},
 		isRegister() {
 			return this.$page.component === 'Auth/Register';

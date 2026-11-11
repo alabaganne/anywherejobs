@@ -6,12 +6,14 @@ import AppTopbar from './AppTopbar.vue';
 import NotificationsPanel from '@/Components/NotificationsPanel.vue';
 import VerifyEmailBanner from '@/Components/VerifyEmailBanner.vue';
 import WorkspaceNotice from '@/Components/WorkspaceNotice.vue';
+import { useText } from '@/composables/useText';
 
 defineProps({
 	active: { type: String, default: '' }, // 'dashboard' | 'applications' | …
 	fill: { type: Boolean, default: false }, // true for full-height, internally-scrolling pages (Messages)
 });
 
+const { text } = useText();
 const notificationsOpen = ref(false);
 const navigationOpen = ref(false);
 let stopListening;
@@ -21,9 +23,9 @@ onBeforeUnmount(() => stopListening?.());
 
 <template>
 	<div class="workspace-shell font-body text-ink grid grid-cols-[248px_minmax(0,1fr)] max-[900px]:grid-cols-1 bg-pale" :class="fill ? 'h-dvh' : 'min-h-screen'" @keydown.esc="navigationOpen = false">
-		<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] rounded-card bg-white px-4 py-2 text-sm font-medium border border-line">Skip to content</a>
+		<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] rounded-card bg-white px-4 py-2 text-sm font-medium border border-line">{{ text('Skip to content', 'Aller au contenu') }}</a>
 		<Transition enter-active-class="transition-opacity duration-200" enter-from-class="opacity-0" leave-active-class="transition-opacity duration-200" leave-to-class="opacity-0">
-			<button v-if="navigationOpen" class="hidden max-[900px]:block fixed inset-0 bg-navy/50 z-40" type="button" aria-label="Close navigation" @click="navigationOpen = false"></button>
+			<button v-if="navigationOpen" class="hidden max-[900px]:block fixed inset-0 bg-navy/50 z-40" type="button" :aria-label="text('Close navigation', 'Fermer la navigation')" @click="navigationOpen = false"></button>
 		</Transition>
 		<AppSidebar :active="active" :mobile-open="navigationOpen" @close="navigationOpen = false" />
 		<div class="flex flex-col min-w-0" :class="{ 'overflow-hidden': fill }">

@@ -1,8 +1,7 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { ChevronDown } from '@lucide/vue';
-import Flag from '@/Shared/Flag.vue';
+import LanguageMenu from '@/Shared/LanguageMenu.vue';
 const page = usePage();
 const fr = computed(() => page.props.locale === 'fr');
 const prefix = computed(() => fr.value ? '/fr' : '');
@@ -15,28 +14,12 @@ const links = computed(() => [
 ]);
 // Visitors get one sign-up button; the sign-up page links to log in.
 const account = computed(() => page.props.auth?.user ? (fr.value ? 'Mon espace' : 'Dashboard') : (fr.value ? 'Commencer' : 'Get started'));
-const languageMenu = ref(null);
 const mobileMenu = ref(null);
 const year = new Date().getFullYear();
 const currentPath = computed(() => page.url.split(/[?#]/)[0]);
 const isActive = (href) => currentPath.value === href || currentPath.value.startsWith(`${href}/`);
-const languageOptions = computed(() => {
-    const translation = page.props.translation;
-    if (translation) {
-        const [en, french] = fr.value ? [translation, currentPath.value] : [currentPath.value, translation];
-        return [{ code: 'en', label: 'English', href: en }, { code: 'fr', label: 'Français', href: french }];
-    }
-    const path = currentPath.value.replace(/^\/fr(?=\/|$)/, '') || '/';
-    const translatedPaths = ['/', '/about', '/contact', '/privacy', '/terms', '/blog', '/opportunities', '/companies', '/candidates', ...['internships', 'jobs'].map((category) => `/opportunities/${category}`)];
-    if (!translatedPaths.includes(path)) return [];
-    const suffix = page.url.slice(currentPath.value.length);
-    return [
-        { code: 'en', label: 'English', href: path + suffix },
-        { code: 'fr', label: 'Français', href: (path === '/' ? '/fr' : `/fr${path}`) + suffix },
-    ];
-});
 const closeMenus = (event) => {
-    [languageMenu.value, mobileMenu.value].forEach((menu) => { if (menu && !menu.contains(event.target)) menu.open = false; });
+    if (mobileMenu.value && !mobileMenu.value.contains(event.target)) mobileMenu.value.open = false;
 };
 const dismissMenu = (menu) => {
     if (!menu?.open) return;
@@ -74,20 +57,7 @@ onBeforeUnmount(() => {
                     <Link v-for="link in links" :key="link.href" :href="link.href" :class="navLink" :aria-current="isActive(link.href) ? 'page' : undefined">{{ link.label }}</Link>
                 </nav>
                 <div class="flex shrink-0 items-center gap-2 xl:gap-4 text-sm font-semibold">
-                    <details v-if="languageOptions.length" ref="languageMenu" name="public-header-menu" class="group relative" @keydown.esc.stop.prevent="dismissMenu(languageMenu)" @focusout="($event.relatedTarget && !languageMenu.contains($event.relatedTarget)) && (languageMenu.open = false)">
-                        <summary :aria-label="fr ? 'Langue : Français' : 'Language: English'" aria-controls="public-language-options" class="focus-ring flex h-10 cursor-pointer list-none items-center gap-2 rounded-card border border-white/30 pr-[11px] pl-1.5 text-[13px] tracking-[.06em] text-white transition-[border-color,background-color] duration-180 group-open:border-white group-open:bg-white/10 hover:border-white hover:bg-white/10 focus-visible:outline-white [&::-webkit-details-marker]:hidden">
-                            <Flag :code="fr ? 'fr' : 'en'" class="size-6 outline-white/25" />
-                            <span>{{ fr ? 'FR' : 'EN' }}</span>
-                            <ChevronDown class="h-3.5 w-3.5 opacity-70 transition-transform group-open:rotate-180" aria-hidden="true" />
-                        </summary>
-                        <nav id="public-language-options" :aria-label="fr ? 'Choisir la langue' : 'Choose language'" class="absolute top-[calc(100%+12px)] right-0 w-[196px] origin-top-right animate-menu-pop rounded-card border border-line bg-white p-1.5 text-navy before:absolute before:-top-[7px] before:right-[22px] before:size-3 before:rotate-45 before:border-t before:border-l before:border-line before:bg-white motion-reduce:animate-none">
-                            <a v-for="language in languageOptions" :key="language.code" :href="language.href" :lang="language.code" :hreflang="language.code" :aria-current="language.code === (fr ? 'fr' : 'en') ? 'true' : undefined" :class="['group/option focus-ring relative flex min-h-[46px] items-center gap-3 rounded-card px-2.5 py-2 text-[14px] font-semibold transition-colors duration-150', language.code === (fr ? 'fr' : 'en') ? 'bg-blue-50 text-brand-dark' : 'text-gray-700 hover:bg-pale hover:text-navy']">
-                                <Flag :code="language.code" class="size-[26px] outline-navy/12 transition-transform duration-200 ease-[cubic-bezier(.2,.7,.2,1)] group-hover/option:scale-108 group-hover/option:-rotate-8 motion-reduce:transition-none" />
-                                <span class="flex-1">{{ language.label }}</span>
-                                <span v-if="language.code === (fr ? 'fr' : 'en')" class="grid size-5 place-items-center rounded-full bg-brand text-white"><Icon name="check" class="h-3 w-3" /></span>
-                            </a>
-                        </nav>
-                    </details>
+                    <LanguageMenu name="public-header-menu" />
                     <div class="hidden xl:flex items-center gap-5">
                         <Link :href="currentUser ? route('dashboard') : `${prefix}/register`" class="cta cta-light focus-ring px-6 py-2.5 text-[14px] focus-visible:outline-white">{{ account }}</Link>
                     </div>

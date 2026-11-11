@@ -49,7 +49,7 @@ class FieldController extends Controller
 
         return Redirect::route('fields.index')->with('toast', [
             'type' => 'store',
-            'message' => 'Field created successfully.'
+            'message' => __('Field created successfully.')
         ]);
     }
 
@@ -90,7 +90,7 @@ class FieldController extends Controller
 
         return Redirect::route('fields.index')->with('toast', [
             'type' => 'update',
-            'message' => 'Field updated successfully.'
+            'message' => __('Field updated successfully.')
         ]);
     }
 
@@ -106,7 +106,7 @@ class FieldController extends Controller
 
         return Redirect::route('fields.index')->with('toast', [
             'type' => 'destroy',
-            'message' => 'Field deleted successfully.'
+            'message' => __('Field deleted successfully.')
         ]);
     }
 }

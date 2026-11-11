@@ -52,7 +52,8 @@ class TranslateResume implements ShouldQueue
     private function fail(Resume $draft, Credits $credits): void
     {
         if ($draft->status !== 'queued') { return; }
-        $error = $draft->source === 'copy' ? 'We could not read your resume right now. Please try again in a minute.' : 'We could not translate your resume right now. Please try again in a minute.';
+        $locale = $draft->candidate?->user?->preferredLocale();
+        $error = $draft->source === 'copy' ? __('We could not read your resume right now. Please try again in a minute.', [], $locale) : __('We could not translate your resume right now. Please try again in a minute.', [], $locale);
         $draft->update(['status' => $draft->content ? 'draft' : 'failed', 'error' => $error]);
         if ($draft->generations > 0) { $draft->decrement('generations'); }
         if ($user = $draft->candidate?->user) { $credits->refund($user, $draft->fresh()); }

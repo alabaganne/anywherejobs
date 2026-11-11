@@ -37,7 +37,7 @@ class ApplicationKitController extends Controller
             'part' => ['nullable', Rule::in(ApplicationKit::PARTS)],
         ]);
         $part = $data['part'] ?? 'both';
-        abort_unless($writer->enabled(), 503, 'Tailored CVs and letters are not available right now.');
+        abort_unless($writer->enabled(), 503, __('Tailored CVs and letters are not available right now.'));
 
         $kit = ApplicationKit::firstOrCreate(
             ['candidate_id' => $candidate->id, 'opportunity_id' => $opportunity->id, 'locale' => $data['locale']],
@@ -67,7 +67,7 @@ class ApplicationKitController extends Controller
     {
         $this->authorizeKit($request, $kit);
         $writing = $kit->status === 'queued' ? ($kit->writing ?? 'both') : null;
-        abort_if($writing && ($request->has('cv') && $writing !== 'letter' || $request->has('cover_letter') && $writing !== 'cv'), 409, 'This is still being written.');
+        abort_if($writing && ($request->has('cv') && $writing !== 'letter' || $request->has('cover_letter') && $writing !== 'cv'), 409, __('This is still being written.'));
         $data = $request->validate([
             'cover_letter' => 'nullable|string|max:20000',
             'cv' => 'sometimes|array',
@@ -86,14 +86,14 @@ class ApplicationKitController extends Controller
             return response()->json(['saved' => true]);
         }
 
-        return back()->with('toast', ['type' => 'update', 'message' => 'Your CV and letter are saved.']);
+        return back()->with('toast', ['type' => 'update', 'message' => __('Your CV and letter are saved.')]);
     }
 
     public function regenerate(Request $request, ApplicationKit $kit, ApplicationKits $writer, Credits $credits)
     {
         $this->authorizeKit($request, $kit);
-        abort_unless($kit->opportunity?->publication_status === 'published' && $kit->opportunity->isOpen(), 409, 'This listing is closed.');
-        abort_unless($writer->enabled(), 503, 'Tailored CVs and letters are not available right now.');
+        abort_unless($kit->opportunity?->publication_status === 'published' && $kit->opportunity->isOpen(), 409, __('This listing is closed.'));
+        abort_unless($writer->enabled(), 503, __('Tailored CVs and letters are not available right now.'));
         $part = $request->validate(['part' => ['nullable', Rule::in(ApplicationKit::PARTS)]])['part'] ?? 'both';
         if ($kit->status !== 'queued' && ($response = $this->start($request->user(), $kit, $credits, $part))) {
             return $response;
@@ -107,7 +107,7 @@ class ApplicationKitController extends Controller
         $this->authorizeKit($request, $kit);
         $kit->delete();
 
-        return redirect()->route('kits.index')->with('toast', ['type' => 'destroy', 'message' => 'The CV and letter were deleted.']);
+        return redirect()->route('kits.index')->with('toast', ['type' => 'destroy', 'message' => __('The CV and letter were deleted.')]);
     }
 
     public function cv(Request $request, ApplicationKit $kit, CvPdf $pdf)
@@ -130,7 +130,7 @@ class ApplicationKitController extends Controller
     private function start($user, ApplicationKit $kit, Credits $credits, string $part = 'both')
     {
         if (! $credits->chargeFor($user, $kit)) {
-            return response()->json(['message' => 'You have no credits left. Get more to tailor more CVs and letters.', 'billing_url' => route('billing.index')], 402);
+            return response()->json(['message' => __('You have no credits left. Get more to tailor more CVs and letters.'), 'billing_url' => route('billing.index')], 402);
         }
         $kit->update(['status' => 'queued', 'writing' => $part, 'error' => null, 'generations' => $kit->generations + 1]);
         GenerateApplicationKit::dispatch($kit->id);
@@ -171,7 +171,7 @@ class ApplicationKitController extends Controller
         return [
             'id' => $kit->id,
             'locale' => $kit->locale,
-            'language' => LanguageGuess::name($kit->locale) ?? strtoupper($kit->locale),
+            'language' => LanguageGuess::name($kit->locale, app()->getLocale()) ?? strtoupper($kit->locale),
             'status' => $kit->status,
             'writing' => $kit->status === 'queued' ? ($kit->writing ?? 'both') : null,
             'has_cv' => (bool) $kit->cv,

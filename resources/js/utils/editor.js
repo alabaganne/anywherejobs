@@ -1,9 +1,11 @@
 import { onBeforeUnmount, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useText } from '@/composables/useText';
 
 // Ctrl+S (Cmd+S on a Mac) saves, and leaving with unsaved changes asks first.
 // Call allowLeave() right before a visit the page has already confirmed.
 export function useEditorGuards({ dirty, save }) {
+	const { text } = useText();
 	let allowed = false;
 	const onKey = (event) => {
 		if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
@@ -23,7 +25,7 @@ export function useEditorGuards({ dirty, save }) {
 		stop = router.on('before', (event) => {
 			const visit = event.detail.visit;
 			if (allowed || !dirty.value || visit.method !== 'get' || visit.preserveState) return;
-			if (!window.confirm('You have unsaved changes. Leave without saving them?')) event.preventDefault();
+			if (!window.confirm(text('You have unsaved changes. Leave without saving them?', 'Vous avez des modifications non enregistrées. Quitter sans les enregistrer ?'))) event.preventDefault();
 		});
 	});
 	onBeforeUnmount(() => {

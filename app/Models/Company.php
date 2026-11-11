@@ -66,7 +66,7 @@ class Company extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        return $this->user?->name ?: $this->name ?: 'Employer not specified';
+        return $this->user?->name ?: $this->name ?: __('Employer not specified');
     }
 
     // Full public URL of a file on the public disk; outside URLs are never sent to the browser.

@@ -21,6 +21,6 @@ class VerifyEmailController extends Controller
         }
 
         return redirect()->intended(route('dashboard', absolute: false))
-            ->with('toast', ['type' => 'success', 'message' => 'Your email is confirmed. You can now apply, message employers and get alerts.']);
+            ->with('toast', ['type' => 'success', 'message' => __('Your email is confirmed. You can now apply, message employers and get alerts.')]);
     }
 }
