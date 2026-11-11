@@ -27,9 +27,9 @@ const shown = computed(() => props.items.filter((item) => item.label));
 	<div class="relative" :class="!flat && 'line-art overflow-hidden rounded-card bg-navy px-[34px] py-8 max-[680px]:px-6 max-[680px]:py-6'">
 		<div class="relative z-[1] flex items-center gap-5 flex-wrap">
 			<slot name="avatar">
-				<div class="grid size-[78px] shrink-0 place-items-center rounded-card bg-brand text-[28px] font-medium text-white" aria-hidden="true">{{ initials }}</div>
+				<div class="grid size-[78px] shrink-0 place-items-center rounded-card bg-brand text-[28px] font-medium text-white max-[560px]:size-14 max-[560px]:text-[20px]" aria-hidden="true">{{ initials }}</div>
 			</slot>
-			<div class="min-w-0 flex-1">
+			<div class="min-w-0 flex-1 max-[560px]:basis-full">
 				<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
 					<component :is="tag" class="font-medium leading-[1.15] text-white break-words" :class="flat ? 'text-[length:clamp(30px,3.6vw,46px)]' : 'text-[30px] max-[680px]:text-[25px]'">{{ name }}</component>
 					<slot name="badge" />
