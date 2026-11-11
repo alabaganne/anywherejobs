@@ -64,15 +64,15 @@ const cards = computed(() => {
 	}
 	if (isCompany.value) {
 		return [
-			{ label: 'Open roles', value: props.roles_count, icon: Briefcase, href: managedRolesHref.value },
-			{ label: 'Active applications', value: props.applications_count, icon: FileText, href: route('applications.index') },
-			{ label: 'Interviews', value: props.interviews_count, icon: CalendarCheck, href: route('applications.index', { status: 'interview' }) },
+			{ label: props.roles_count === 1 ? 'Open role' : 'Open roles', value: props.roles_count, icon: Briefcase, href: managedRolesHref.value },
+			{ label: props.applications_count === 1 ? 'Active application' : 'Active applications', value: props.applications_count, icon: FileText, href: route('applications.index') },
+			{ label: props.interviews_count === 1 ? 'Interview' : 'Interviews', value: props.interviews_count, icon: CalendarCheck, href: route('applications.index', { status: 'interview' }) },
 		];
 	}
 	return [
-		{ label: 'Active applications', value: props.applications_count, icon: FileText, href: route('applications.index') },
-		{ label: 'Interviews', value: props.interviews_count, icon: CalendarCheck, href: route('applications.index', { status: 'interview' }) },
-		{ label: 'Saved roles', value: props.saved_count, icon: Bookmark, href: route('likes.index') },
+		{ label: props.applications_count === 1 ? 'Active application' : 'Active applications', value: props.applications_count, icon: FileText, href: route('applications.index') },
+		{ label: props.interviews_count === 1 ? 'Interview' : 'Interviews', value: props.interviews_count, icon: CalendarCheck, href: route('applications.index', { status: 'interview' }) },
+		{ label: props.saved_count === 1 ? 'Saved role' : 'Saved roles', value: props.saved_count, icon: Bookmark, href: route('likes.index') },
 	];
 });
 </script>
@@ -100,19 +100,19 @@ const cards = computed(() => {
 			</template>
 		</PageHeader>
 
-		<div class="grid grid-cols-3 gap-5 mb-7 max-[760px]:grid-cols-1 max-[760px]:gap-3">
+		<div class="grid grid-cols-3 gap-5 mb-7 max-[760px]:gap-2">
 			<Link
 				v-for="card in cards"
 				:key="card.label"
 				:href="card.href"
-				class="group flex items-center gap-5 rounded-card border border-transparent bg-white p-6 transition-colors hover:border-brand/40 focus-visible:outline-2 focus-visible:outline-brand max-[760px]:p-5"
+				class="group flex items-center gap-5 rounded-card border border-transparent bg-white p-6 transition-colors hover:border-brand/40 focus-visible:outline-2 focus-visible:outline-brand max-[760px]:flex-col max-[760px]:items-start max-[760px]:gap-0 max-[760px]:p-3.5"
 			>
-				<span class="grid size-14 shrink-0 place-items-center rounded-card bg-pale text-brand transition-colors group-hover:bg-brand group-hover:text-white">
+				<span class="grid size-14 shrink-0 place-items-center rounded-card bg-pale text-brand transition-colors group-hover:bg-brand group-hover:text-white max-[760px]:hidden">
 					<component :is="card.icon" class="size-6" aria-hidden="true" />
 				</span>
 				<span class="min-w-0">
-					<span class="block text-[36px] font-medium leading-none text-navy">{{ card.value ?? 0 }}</span>
-					<span class="mt-2 block text-[13px] tracking-caps text-subtle uppercase">{{ card.label }}</span>
+					<span class="block text-[36px] font-medium leading-none text-navy max-[760px]:text-[26px]">{{ card.value ?? 0 }}</span>
+					<span class="mt-2 block text-[13px] tracking-caps text-subtle uppercase max-[760px]:text-[11px] max-[760px]:leading-4 max-[760px]:tracking-normal">{{ card.label }}</span>
 				</span>
 			</Link>
 		</div>
@@ -121,7 +121,7 @@ const cards = computed(() => {
 			<section class="rounded-card bg-white overflow-hidden">
 				<div class="flex items-center justify-between gap-4 px-7 pt-6 pb-4 max-[560px]:px-5">
 					<h2 class="text-[20px] leading-[1.35] text-navy">{{ isAdmin ? 'Manage the catalog' : 'Recent applications' }}</h2>
-					<Link v-if="!isAdmin && applications.length" class="landing-link !py-0 text-[13px]!" :href="route('applications.index')">View all<ArrowRight class="action-icon size-4" aria-hidden="true" /></Link>
+					<Link v-if="!isAdmin && applications.length" class="landing-link !py-0 text-[13px]! shrink-0 whitespace-nowrap" :href="route('applications.index')">View all<ArrowRight class="action-icon size-4" aria-hidden="true" /></Link>
 				</div>
 
 				<Link
@@ -132,7 +132,7 @@ const cards = computed(() => {
 				>
 					<CompanyLogo class="size-11 rounded-card text-[14px]" :name="partyName(application)" :src="isCompany ? null : application.company?.image" />
 					<div class="flex-1 min-w-0">
-						<b class="block truncate text-[16px] font-medium text-navy">{{ application.opportunity.title }}</b>
+						<b class="block truncate text-[16px] font-medium text-navy max-[560px]:whitespace-normal max-[560px]:line-clamp-2 max-[560px]:text-[15px]">{{ application.opportunity.title }}</b>
 						<span class="mt-0.5 block truncate text-[14px] text-subtle">{{ [partyName(application), application.opportunity.city?.name].filter(Boolean).join(', ') }}</span>
 					</div>
 					<StatusPill :status="application.status" />

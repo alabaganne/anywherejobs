@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { ArrowUpRight, Banknote, Bookmark, Globe, MapPin, MapPinOff } from '@lucide/vue';
+import { ArrowRight, Banknote, Bookmark, Globe, MapPin, MapPinOff } from '@lucide/vue';
 import CompanyLogo from '@/Components/Ui/CompanyLogo.vue';
 import VerifiedBadge from '@/Components/Company/VerifiedBadge.vue';
 import { openedAt, isSaved, toggleSaved } from '@/composables/useOpportunityActivity';
@@ -34,10 +34,11 @@ const seniorityLabel = computed(() => ({ entry: text('Entry level', 'Débutant')
 const workTypes = computed(() => fr.value ? { remote: 'À distance', hybrid: 'Hybride', onsite: 'Sur site', unknown: 'Mode de travail non précisé' } : { remote: 'Remote', hybrid: 'Hybrid', onsite: 'Onsite', unknown: 'Work mode not specified' });
 const location = computed(() => props.opportunity.location_label || props.opportunity.city?.name || '');
 const paid = computed(() => !!props.opportunity.pay);
+const payKnown = computed(() => paid.value || props.opportunity.compensation_status === 'unpaid');
 const toggleSave = () => toggleSaved(props.opportunity);
 </script>
 <template>
-    <article class="bg-white border border-line rounded-card p-6 flex flex-col min-w-0 transition-colors duration-180 hover:border-brand/40">
+    <article class="bg-white border border-line rounded-card p-6 max-[480px]:p-5 flex flex-col min-w-0 transition-colors duration-180 hover:border-brand/40">
         <div class="flex gap-3.5 items-center">
             <CompanyLogo class="w-12 h-12 rounded-card text-base shrink-0" :name="opportunity.company?.name || 'Company'" :src="opportunity.company?.image" />
             <div class="min-w-0 flex-1">
@@ -52,7 +53,7 @@ const toggleSave = () => toggleSaved(props.opportunity);
         <h3 class="mt-5 text-[19px] font-medium leading-[1.4] text-navy line-clamp-2 break-words" :title="opportunity.title"><Link :href="publicUrl" class="transition-colors duration-180 hover:text-brand">{{ opportunity.title }}</Link></h3>
         <div class="mt-3 flex flex-wrap gap-1.5 text-[12.5px]">
             <span class="rounded-md bg-blue-50 text-brand px-2.5 py-1">{{ opportunity.kind === 'job' ? text('Job', 'Emploi') : text('Internship', 'Stage') }}</span>
-            <span v-if="opportunity.work_type" class="rounded-md px-2.5 py-1" :class="opportunity.work_type === 'unknown' ? 'bg-slate-100 text-subtle-2' : 'bg-slate-100 text-navy'">{{ workTypes[opportunity.work_type] || opportunity.work_type }}</span>
+            <span v-if="opportunity.work_type" class="rounded-md px-2.5 py-1" :class="opportunity.work_type === 'unknown' ? 'bg-slate-100 text-slate-600' : 'bg-slate-100 text-navy'">{{ workTypes[opportunity.work_type] || opportunity.work_type }}</span>
             <span v-if="opportunity.applicant_scope === 'anywhere'" class="inline-flex items-center gap-1 rounded-md bg-green-50 text-green-700 px-2.5 py-1"><Globe :size="13" aria-hidden="true" />{{ text('Open worldwide', 'Ouvert au monde entier') }}</span>
             <span v-if="opportunity.closed_to_tunisia" class="inline-flex items-center gap-1 rounded-md bg-amber-50 text-amber-800 px-2.5 py-1"><MapPinOff :size="13" aria-hidden="true" />{{ text('Not open to Tunisia', 'Non ouvert à la Tunisie') }}</span>
             <span v-if="opportunity.seniority" class="rounded-md bg-slate-100 text-navy px-2.5 py-1">{{ seniorityLabel }}</span>
@@ -61,7 +62,7 @@ const toggleSave = () => toggleSaved(props.opportunity);
             <span v-if="opportunity.application" class="rounded-md bg-green-50 text-green-700 px-2.5 py-1">{{ text('Applied', 'Candidature enregistrée') }}</span>
             <span v-else-if="openedAt(opportunity.id)" class="rounded-md bg-blue-50 text-brand px-2.5 py-1">{{ text('Viewed', 'Consultée') }}</span>
         </div>
-        <p class="mt-4 flex items-start gap-2 text-[14.5px]" :class="paid ? 'text-navy' : 'text-subtle-2'"><Banknote :size="17" class="mt-0.5 shrink-0" :class="paid ? 'text-brand' : ''" aria-hidden="true" /><span class="min-w-0">{{ payLabel }}</span></p>
-        <div class="mt-auto pt-5"><div class="flex gap-3 justify-between items-end border-t border-line pt-4"><p class="min-w-0 text-[13px] text-subtle-2"><span v-if="postedDate" class="block truncate">{{ text('Posted', 'Publiée le') }} {{ postedDate }}</span><span v-if="addedDate" class="block truncate" :class="postedDate && 'mt-1'">{{ text(`Added to ${appName}`, `Ajoutée sur ${appName} le`) }} {{ addedDate }}</span><span class="block mt-1 truncate">{{ opportunity.origin === 'native' ? text(`Employer post on ${appName}`, `Offre employeur sur ${appName}`) : opportunity.source_name || text('Imported role', 'Offre importée') }}</span></p><Link :href="publicUrl" class="focus-ring shrink-0 inline-flex items-center gap-1 rounded-[2px] text-[13px] font-medium tracking-caps uppercase text-brand transition-colors duration-180 hover:text-navy">{{ text('View role', 'Voir l’offre') }}<span class="sr-only"> {{ opportunity.title }}</span><ArrowUpRight :size="16" aria-hidden="true" /></Link></div></div>
+        <p v-if="payKnown" class="mt-4 flex items-start gap-2 text-[14.5px]" :class="paid ? 'text-navy' : 'text-subtle-2'"><Banknote :size="17" class="mt-0.5 shrink-0" :class="paid ? 'text-brand' : ''" aria-hidden="true" /><span class="min-w-0">{{ payLabel }}</span></p>
+        <div class="mt-auto pt-5"><div class="flex flex-wrap gap-3 justify-between items-end border-t border-line pt-4"><p class="min-w-0 grow basis-[210px] text-[13px] text-subtle-2"><span v-if="postedDate" class="block truncate">{{ text('Posted', 'Publiée le') }} {{ postedDate }}</span><span v-if="addedDate" class="block truncate" :class="postedDate && 'mt-1'">{{ text(`Added to ${appName}`, `Ajoutée sur ${appName} le`) }} {{ addedDate }}</span><span class="block mt-1 truncate">{{ opportunity.origin === 'native' ? text(`Employer post on ${appName}`, `Offre employeur sur ${appName}`) : opportunity.source_name || text('Imported role', 'Offre importée') }}</span></p><Link :href="publicUrl" class="focus-ring ml-auto shrink-0 inline-flex items-center gap-1 rounded-[2px] text-[13px] font-medium tracking-caps uppercase text-brand transition-colors duration-180 hover:text-navy">{{ text('View role', 'Voir l’offre') }}<span class="sr-only"> {{ opportunity.title }}</span><ArrowRight :size="16" aria-hidden="true" /></Link></div></div>
     </article>
 </template>

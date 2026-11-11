@@ -18,6 +18,7 @@ import {
 	Sparkles,
 	Target,
 	UserPlus,
+	UserRound,
 	Users,
 	X,
 } from '@lucide/vue';
@@ -42,6 +43,7 @@ const main = computed(() => [
 	...(isCandidate.value || isCompany.value ? [{ id: 'applications', label: 'Applications', route: 'applications.index', icon: FileText, badge: badges.value.applications }] : []),
 	...(isCompany.value ? [{ id: 'roles', label: 'My roles', href: `${route('companies.show', user.value?.userable_id)}#opportunities`, icon: Briefcase }] : []),
 	...(isCandidate.value ? [
+		{ id: 'profile', label: 'Profile', route: 'profile.show', icon: UserRound },
 		{ id: 'saved', label: 'Saved roles', route: 'likes.index', icon: Bookmark, badge: user.value?.likes_count },
 		{ id: 'saved-searches', label: 'Saved searches', route: 'saved-searches.index', icon: SearchCheck },
 		{ id: 'kits', label: 'CV & letters', route: 'kits.index', icon: FileUser },

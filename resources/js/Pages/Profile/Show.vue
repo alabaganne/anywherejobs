@@ -96,7 +96,7 @@ const publicState = computed(() => ({
 		<!-- public profile -->
 		<section v-if="isCandidate" class="rounded-card mb-[18px]" :class="isPublic ? 'bg-green-600 text-white' : 'bg-white'" aria-labelledby="public-profile-title">
 			<div class="px-7 py-6 flex items-center justify-between gap-4 flex-wrap max-[560px]:px-5">
-				<div class="flex items-start gap-3.5 min-w-0 flex-1">
+				<div class="flex items-start gap-3.5 min-w-0 grow basis-[320px]">
 					<span class="w-10 h-10 rounded-card grid place-items-center shrink-0 [&_svg]:w-5 [&_svg]:h-5" :class="isPublic ? 'bg-white text-green-700' : 'bg-blue-600 text-white'"><Eye aria-hidden="true" /></span>
 					<div class="min-w-0">
 						<h2 id="public-profile-title" class="text-[20px] leading-[1.35]" :class="isPublic ? 'text-white' : 'text-navy'" role="status">{{ publicState.title }}</h2>
@@ -107,9 +107,9 @@ const publicState = computed(() => ({
 						</p>
 					</div>
 				</div>
-				<button v-if="profile.public_status === 'pending'" class="cta cta-secondary" type="button" :disabled="publicBusy" @click="updatePublic({ public: false })">Cancel request</button>
-				<button v-else-if="isPublic" class="cta cta-ghost" type="button" :disabled="publicBusy" @click="updatePublic({ public: false })">Make it private</button>
-				<button v-else class="cta cta-primary disabled:opacity-60" type="button" :disabled="publicBusy || !profile.email_verified" @click="updatePublic({ public: true })">{{ profile.public_status === 'declined' ? 'Ask again' : 'Ask to make it public' }}</button>
+				<button v-if="profile.public_status === 'pending'" class="cta cta-secondary max-[560px]:w-full" type="button" :disabled="publicBusy" @click="updatePublic({ public: false })">Cancel request</button>
+				<button v-else-if="isPublic" class="cta cta-ghost max-[560px]:w-full" type="button" :disabled="publicBusy" @click="updatePublic({ public: false })">Make it private</button>
+				<button v-else class="cta cta-primary disabled:opacity-60 max-[560px]:w-full" type="button" :disabled="publicBusy || !profile.email_verified" @click="updatePublic({ public: true })">{{ profile.public_status === 'declined' ? 'Ask again' : 'Ask to make it public' }}</button>
 			</div>
 			<label class="px-7 py-4 border-t flex items-start gap-3 cursor-pointer max-[560px]:px-5" :class="isPublic ? 'border-white/25' : 'border-line-2'">
 				<input type="checkbox" class="mt-1 w-4 h-4 shrink-0" :class="isPublic ? 'accent-white' : 'accent-blue-600'" :checked="profile.public_contact" :disabled="publicBusy" @change="updatePublic({ contact: $event.target.checked })">

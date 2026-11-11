@@ -18,16 +18,16 @@ const years = computed(() => {
 
 <template>
 	<Link :href="candidate.url" class="group flex flex-col min-w-0 bg-white border border-line rounded-card transition-colors duration-180 hover:border-brand/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-		<div class="flex items-start gap-4 p-6 pb-5">
+		<div class="flex items-start gap-4 p-6 pb-5 max-[480px]:p-5 max-[480px]:pb-4">
 			<span class="grid place-items-center shrink-0 size-14 rounded-card bg-brand text-white text-xl font-medium" aria-hidden="true">{{ initials }}</span>
 			<div class="min-w-0 flex-1">
 				<h2 class="text-[19px] font-medium leading-tight text-navy truncate transition-colors duration-180 group-hover:text-brand">{{ candidate.name }}</h2>
 				<p class="text-[15px] text-ink-700 mt-1.5 line-clamp-2">{{ candidate.headline || candidate.field || text('Candidate', 'Candidat') }}</p>
+				<span v-if="candidate.has_resume" class="mt-2 inline-flex items-center gap-1 rounded-md bg-green-50 text-green-700 text-[12.5px] font-medium px-2.5 py-1"><FileText :size="13" aria-hidden="true" />{{ text('Resume', 'CV') }}</span>
 			</div>
-			<span v-if="candidate.has_resume" class="inline-flex items-center gap-1 shrink-0 rounded-md bg-green-50 text-green-700 text-[12.5px] font-medium px-2.5 py-1"><FileText :size="13" aria-hidden="true" />{{ text('Resume', 'CV') }}</span>
 		</div>
 
-		<div class="px-6 flex-1">
+		<div class="px-6 flex-1 max-[480px]:px-5">
 			<ul v-if="(candidate.field && candidate.headline) || candidate.location || years" class="flex flex-wrap gap-x-4 gap-y-1.5 text-[14px] text-subtle [&_li]:inline-flex [&_li]:items-center [&_li]:gap-1.5 [&_li]:min-w-0 [&_svg]:shrink-0 [&_svg]:text-subtle-2">
 				<li v-if="candidate.field && candidate.headline"><GraduationCap :size="15" aria-hidden="true" />{{ candidate.field }}</li>
 				<li v-if="candidate.location"><MapPin :size="15" aria-hidden="true" />{{ candidate.location }}</li>
@@ -40,7 +40,7 @@ const years = computed(() => {
 			</ul>
 		</div>
 
-		<div class="mt-5 mx-6 py-4 border-t border-line flex items-center gap-2 text-[13px] font-medium tracking-caps uppercase text-brand">
+		<div class="mt-5 mx-6 max-[480px]:mx-5 py-4 border-t border-line flex items-center gap-2 text-[13px] font-medium tracking-caps uppercase text-brand">
 			{{ text('View profile', 'Voir le profil') }}<ArrowRight :size="16" class="transition-transform group-hover:translate-x-[3px]" aria-hidden="true" />
 		</div>
 	</Link>

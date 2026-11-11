@@ -75,19 +75,19 @@ const partyName = (application) => (isCandidate.value ? application.company?.nam
 				<Link
 					v-for="(application, index) in rows"
 					:key="application.id"
-					class="grid grid-cols-[1fr_150px_130px_40px] gap-4 items-center px-[22px] py-4 cursor-pointer transition-colors hover:bg-paper-2 focus-visible:-outline-offset-2 max-[760px]:grid-cols-[minmax(0,1fr)_auto]"
+					class="grid grid-cols-[1fr_150px_130px_40px] gap-4 items-center px-[22px] py-4 cursor-pointer transition-colors hover:bg-paper-2 focus-visible:-outline-offset-2 max-[760px]:grid-cols-1 max-[760px]:gap-2 max-[760px]:px-4"
 					:class="{ 'border-b border-line-2': index !== rows.length - 1 }"
 					:href="route('applications.show', application.id)"
 				>
 					<div class="flex items-center gap-3.5 min-w-0">
 						<CompanyLogo class="w-[46px] h-[46px] rounded-card text-[15px]" :name="partyName(application)" :src="isCandidate ? application.company?.image : null" />
-						<div>
+						<div class="min-w-0">
 							<b class="text-[15px] font-medium block">{{ application.opportunity.title }}</b>
 							<span class="text-[13px] text-muted">{{ partyName(application) }} · {{ application.opportunity.city?.name }}</span>
 						</div>
 					</div>
 					<div class="text-[13px] text-muted-2 max-[760px]:hidden">{{ application.created_at }}</div>
-					<div><StatusPill :status="application.status" /><span v-if="application.channel === 'external'" class="block text-xs text-muted mt-1">Your reported status</span></div>
+					<div class="max-[760px]:pl-[60px]"><StatusPill :status="application.status" /><span v-if="application.channel === 'external'" class="block text-xs text-muted mt-1">Your reported status</span></div>
 					<div class="w-[34px] h-[34px] rounded-[9px] border border-line grid place-items-center text-muted-2 justify-self-end max-[760px]:hidden [&_svg]:w-4 [&_svg]:h-4"><component :is="icons.chevron" aria-hidden="true" /></div>
 				</Link>
 

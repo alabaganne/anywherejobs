@@ -54,7 +54,7 @@ const button = 'cta focus-ring gap-2 px-5 py-2.5 text-[13.5px]';
 					<p v-if="!company.managed" class="mt-6 pt-5 border-t border-line text-[13px] text-subtle-2 leading-6">{{ text(`This employer does not have a managed account on ${appName}. Roles come from approved public sources and link to the original listing.`, `Cet employeur n’a pas de compte géré sur ${appName}. Les offres viennent de sources publiques approuvées et renvoient vers l’annonce d’origine.`) }}</p>
 				</section>
 
-				<section class="rounded-card border border-line bg-white p-6 sm:p-8" aria-labelledby="roles-title">
+				<section class="rounded-card border border-line bg-white p-6 sm:p-8 max-[640px]:border-0 max-[640px]:bg-transparent max-[640px]:p-0" aria-labelledby="roles-title">
 					<div class="flex flex-wrap items-center justify-between gap-3">
 						<h2 id="roles-title" class="text-[22px] leading-snug font-medium text-navy scroll-mt-28">{{ text('Open internships and jobs', 'Stages et emplois ouverts') }}</h2>
 						<span class="rounded-md bg-blue-50 px-3 py-1 text-[13px] text-brand">{{ open }} {{ open === 1 ? text('role', 'offre') : text('roles', 'offres') }}</span>

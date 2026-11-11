@@ -174,6 +174,8 @@ class ApplicationKitController extends Controller
             'language' => LanguageGuess::name($kit->locale) ?? strtoupper($kit->locale),
             'status' => $kit->status,
             'writing' => $kit->status === 'queued' ? ($kit->writing ?? 'both') : null,
+            'has_cv' => (bool) $kit->cv,
+            'has_letter' => filled($kit->cover_letter),
             'error' => $kit->error,
             'updated_at' => $kit->updated_at?->toIso8601String(),
             'updated_label' => $kit->updated_at?->diffForHumans(),

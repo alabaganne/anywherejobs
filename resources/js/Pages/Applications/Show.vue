@@ -123,11 +123,11 @@ const saveTracking = () => trackingForm.patch(route('applications.tracking.updat
 		<div class="grid grid-cols-[1fr_350px] gap-6 items-start max-[1080px]:grid-cols-1">
 			<!-- LEFT -->
 			<div class="flex flex-col gap-4">
-				<section class="bg-white border border-transparent rounded-card overflow-hidden px-8 py-[30px]">
-					<div class="flex items-start gap-[18px]">
-						<CompanyLogo class="w-[62px] h-[62px] rounded-card text-[22px]" :name="application.company.name" :src="application.company.image" />
-						<div>
-							<h1 class="text-[length:clamp(28px,2.6vw,36px)] font-medium leading-[1.15] text-navy">{{ application.opportunity.title }}</h1>
+				<section class="bg-white border border-transparent rounded-card overflow-hidden px-8 py-[30px] max-[560px]:px-5 max-[560px]:py-6">
+					<div class="flex items-start gap-[18px] max-[560px]:flex-col max-[560px]:gap-4">
+						<CompanyLogo class="w-[62px] h-[62px] rounded-card text-[22px] shrink-0 max-[560px]:size-12 max-[560px]:text-base" :name="application.company.name" :src="application.company.image" />
+						<div class="min-w-0">
+							<h1 class="text-[length:clamp(24px,2.6vw,36px)] font-medium leading-[1.15] text-navy break-words">{{ application.opportunity.title }}</h1>
 							<p class="text-[15px] text-muted mt-1.5"><b class="text-ink-700 font-medium">{{ application.company.name }}</b> · {{ application.opportunity.field.name }}</p>
 						</div>
 					</div>

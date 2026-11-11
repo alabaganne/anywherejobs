@@ -55,8 +55,8 @@ const checkMark = 'mt-0.5 grid size-6 shrink-0 place-items-center rounded-full b
 <template>
     <PublicLayout>
         <div class="landing">
-            <LandingHero title-id="hero-title" overlap :mascots="['17-student-presenter', '18-recruiter-mentor']" :label="text('Internships and jobs', 'Stages et emplois')" :lead="text('Internships and jobs around the world, from your first role to your next career move. Free to browse, with a CV and cover letter tailored to each role.', 'Des stages et des emplois partout dans le monde, de votre première expérience à votre prochaine étape. Gratuit, avec un CV et une lettre adaptés à chaque offre.')" :note="text('No account needed to explore or visit external application pages.', 'Aucun compte nécessaire pour consulter les offres ou candidater sur un site externe.')">
-                {{ text('Find your next', 'Trouvez votre prochaine') }} <span class="accent">{{ text('opportunity.', 'opportunité.') }}</span>
+            <LandingHero title-id="hero-title" overlap :mascots="['17-student-presenter', '18-recruiter-mentor']" :label="text('Internships and jobs', 'Stages et emplois')" :lead="text('Internships and jobs around the world, from your first role to your next career move. Free to browse, with a CV and cover letter tailored to each role.', 'Des stages et des emplois partout dans le monde, de votre première expérience à votre prochaine étape. Gratuit, avec un CV et une lettre adaptés à chaque offre.')" :note="text('No account needed to browse roles.', 'Aucun compte nécessaire pour parcourir les offres.')">
+                {{ text('Find your next', 'Trouvez votre prochaine') }} <span class="accent">{{ text('role.', 'offre.') }}</span>
                 <template #actions>
                     <Link :href="`${prefix}/opportunities`" class="cta cta-light focus-ring">{{ text('Browse roles', 'Voir les offres') }}<ArrowRight class="action-icon" aria-hidden="true" /></Link>
                     <Link :href="`${prefix}/register`" class="cta cta-ghost focus-ring">{{ text('Create a free account', 'Créer un compte gratuit') }}</Link>
