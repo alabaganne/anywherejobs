@@ -135,6 +135,41 @@ class BoardSourcesTest extends TestCase
         $this->assertSame(['Sigma', 'Backend Engineer', null], [$wwr->normalized_data['employer'], $wwr->normalized_data['title'], $wwr->normalized_data['location']]);
     }
 
+    public function test_board_listings_are_read_from_the_list_within_a_small_request_budget(): void
+    {
+        $item = fn ($id, $title) => '<item><title>'.$title.'</title><region>Anywhere in the World</region><type>Full-Time</type><description>&lt;p&gt;'.$this->body.'&lt;/p&gt;</description>'
+            .'<pubDate>'.now()->subDay()->toRfc2822String().'</pubDate><guid>https://weworkremotely.com/remote-jobs/'.$id.'</guid><link>https://weworkremotely.com/remote-jobs/'.$id.'</link></item>';
+        $story = ['objectID' => '6000', 'title' => 'Ask HN: Who is hiring? (November 2026)'];
+        $post = fn ($id, $text) => ['objectID' => $id, 'parent_id' => 6000, 'created_at' => now()->subDay()->toIso8601String(), 'comment_text' => $text];
+        Http::fake([
+            '*/robots.txt' => Http::response('', 404),
+            'weworkremotely.com/*' => Http::response('<?xml version="1.0"?><rss version="2.0"><channel>'.$item('sigma-backend', 'Sigma: Backend Engineer').$item('tau-frontend', 'Tau: Frontend Developer').'</channel></rss>'),
+            'hn.algolia.com/api/v1/search_by_date?tags=story*' => Http::response(['hits' => [$story]]),
+            'hn.algolia.com/api/v1/search_by_date?tags=comment*' => Http::response(['hits' => [
+                $post('6001', 'Flowstate (London, UK) — Founding Engineer — TypeScript / React / Postgres<p>'.$this->body.' Apply at https:&#x2F;&#x2F;flowstate.example&#x2F;jobs</p>'),
+                $post('6002', 'I am an iOS developer with 13 years of experience, mostly on streaming and e-commerce apps.<p>'.$this->body.'</p>'),
+            ]]),
+        ]);
+        $wwr = $this->source('wwr-back-end', 'wwr', 'https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss', ['weworkremotely.com'], 'leads');
+        $wwr->update(['max_requests' => 2, 'cadence_hours' => 12]);
+        // Seen on an earlier run, never read, and gone from the feed since.
+        $gone = $wwr->items()->create(['external_id' => 'https://weworkremotely.com/remote-jobs/old', 'source_url' => 'https://weworkremotely.com/remote-jobs/old',
+            'payload' => ['title' => 'Old: Backend Engineer'], 'state' => 'pending', 'first_seen_at' => now()->subDays(3), 'last_discovered_at' => now()->subDays(3)]);
+        $hn = $this->source('hn-who-is-hiring', 'hn', 'https://hn.algolia.com/api/v1/search_by_date?tags=story,author_whoishiring&hitsPerPage=5', ['hn.algolia.com', 'news.ycombinator.com'], 'leads');
+        $hn->update(['max_requests' => 4]);
+
+        app(OpportunityImporter::class)->run($wwr->fresh());
+        app(OpportunityImporter::class)->run($hn->fresh());
+
+        $this->assertSame(['lead', 'lead'], $wwr->items()->orderBy('id')->pluck('state')->all());
+        $this->assertFalse(OpportunitySource::whereKey($gone->id)->exists());
+        $flowstate = OpportunitySource::where('external_id', '6001')->sole();
+        $this->assertSame(['lead', 'Founding Engineer'], [$flowstate->state, $flowstate->normalized_data['title']]);
+        $this->assertStringStartsWith('Flowstate', $flowstate->normalized_data['employer']);
+        $seeker = OpportunitySource::where('external_id', '6002')->sole();
+        $this->assertSame(['rejected', 'A title, identified employer and substantive description are required.'], [$seeker->state, $seeker->error]);
+    }
+
     public function test_seeded_boards_only_feed_job_leads(): void
     {
         $this->seed(ImportSourceSeeder::class);

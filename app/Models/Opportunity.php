@@ -315,6 +315,18 @@ class Opportunity extends Model
         return $data;
     }
 
+    // Someone living in Tunisia cannot take it: Tunisia is left out, a remote role is limited to other places,
+    // or the role is on site abroad with no visa or relocation help. Such roles are listed with a badge.
+    public function closedToTunisia(): bool
+    {
+        if ($this->country_code === 'TN' || in_array('TN', $this->eligible_countries ?: [], true)) { return false; }
+        if (in_array('TN', $this->excluded_countries ?: [], true)) { return true; }
+        if ($this->relocation === 'yes' || $this->visa_sponsorship === 'yes') { return false; }
+        if ($this->work_type === 'remote') { return $this->remote_eligibility === 'restricted'; }
+        if ($this->applicant_scope === 'anywhere') { return false; }
+        return in_array($this->applicant_scope, ['listed', 'local'], true) || (bool) $this->country_code;
+    }
+
     public function isEligibleForCountry(?string $country, bool $includeUnknown = false): bool
     {
         $country = $country ? strtoupper($country) : null;

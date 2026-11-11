@@ -8,17 +8,18 @@ use RuntimeException;
 
 class OpportunityNormalizer
 {
+    // A listing missing what a role page needs is rejected rather than left waiting for review.
     public function normalize(array $input): array
     {
         $title = Str::limit($this->text($input['title'] ?? ''), 250, '');
         $description = Str::limit($this->text($input['description'] ?? ''), 80000, '');
         $employer = Str::limit($this->text($input['employer'] ?? ''), 250, '');
         if (! $title || mb_strlen($description) < 100 || ! $employer) {
-            throw new RuntimeException('A title, identified employer and substantive description are required.');
+            throw new ListingRejected('A title, identified employer and substantive description are required.');
         }
         $apply = $this->encodeUrl($input['application_url'] ?? '');
         if (! $this->publicUrl($apply)) {
-            throw new RuntimeException('A valid public application URL is required.');
+            throw new ListingRejected('A valid public application URL is required.');
         }
         $types = $this->employmentTypes($input['employment_types'] ?? []);
         // Some boards tick every contract type, so INTERN only counts when no regular contract type is listed with it.

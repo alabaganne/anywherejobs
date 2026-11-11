@@ -73,6 +73,7 @@ class OpportunityResource extends JsonResource
             'applicant_scope' => $this->applicant_scope,
             'relocation' => $this->relocation,
             'visa_sponsorship' => $this->visa_sponsorship,
+            'closed_to_tunisia' => $this->closedToTunisia(),
             'eligible_countries' => $this->eligible_countries ?: [],
             'excluded_countries' => $this->excluded_countries ?: [],
             'eligibility_evidence' => $detail ? ($this->eligibility_evidence ?: []) : [],

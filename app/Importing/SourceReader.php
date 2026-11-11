@@ -305,8 +305,8 @@ class SourceReader
             ];
         }
         if ($source->provider === 'hn') {
-            // "Acme | Senior Frontend Engineer | Remote (EU) | Full-time | https://acme.com/jobs"
-            $parts = array_values(array_filter(array_map('trim', explode('|', (string) ($data['title'] ?? '')))));
+            // "Acme | Senior Frontend Engineer | Remote (EU) | Full-time | https://acme.com/jobs", some with dashes instead of bars.
+            $parts = array_values(array_filter(array_map('trim', preg_split('/\s+[|—–]\s+|\|/u', (string) ($data['title'] ?? '')))));
             $role = collect($parts)->slice(1)->first(fn ($part) => preg_match('/engineer|developer|programmer|designer|scientist|architect|devops|sre|lead|cto|full.?stack|front.?end|back.?end/i', $part)) ?? ($parts[1] ?? '');
             $places = array_filter($parts, fn ($part) => preg_match('/remote|on.?site|hybrid|in.office/i', $part));
             $text = (string) ($data['comment_text'] ?? '');
@@ -326,10 +326,14 @@ class SourceReader
     // Reads a board listing from its saved list payload, or returns null when that would need a request.
     public function saved(ImportSource $source, OpportunitySource $item): ?array
     {
-        $saved = $item->payload && match ($source->provider) {
+        return $this->needsRequest($source, $item) ? null : $this->read($source, $item);
+    }
+
+    public function needsRequest(ImportSource $source, OpportunitySource $item): bool
+    {
+        return ! ($item->payload && match ($source->provider) {
             'greenhouse' => isset($item->payload['content']), 'jsonld' => false, default => in_array($source->provider, self::FROM_LIST, true),
-        };
-        return $saved ? $this->read($source, $item) : null;
+        });
     }
 
     public function fromJobPosting(ImportSource $source, OpportunitySource $item, array $data): array

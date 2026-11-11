@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { ArrowUpRight, Banknote, Bookmark, Globe, MapPin } from '@lucide/vue';
+import { ArrowUpRight, Banknote, Bookmark, Globe, MapPin, MapPinOff } from '@lucide/vue';
 import CompanyLogo from '@/Components/Ui/CompanyLogo.vue';
 import VerifiedBadge from '@/Components/Company/VerifiedBadge.vue';
 import { openedAt, isSaved, toggleSaved } from '@/composables/useOpportunityActivity';
@@ -54,6 +54,7 @@ const toggleSave = () => toggleSaved(props.opportunity);
             <span class="rounded-md bg-blue-50 text-brand px-2.5 py-1">{{ opportunity.kind === 'job' ? text('Job', 'Emploi') : text('Internship', 'Stage') }}</span>
             <span v-if="opportunity.work_type" class="rounded-md px-2.5 py-1" :class="opportunity.work_type === 'unknown' ? 'bg-slate-100 text-subtle-2' : 'bg-slate-100 text-navy'">{{ workTypes[opportunity.work_type] || opportunity.work_type }}</span>
             <span v-if="opportunity.applicant_scope === 'anywhere'" class="inline-flex items-center gap-1 rounded-md bg-green-50 text-green-700 px-2.5 py-1"><Globe :size="13" aria-hidden="true" />{{ text('Open worldwide', 'Ouvert au monde entier') }}</span>
+            <span v-if="opportunity.closed_to_tunisia" class="inline-flex items-center gap-1 rounded-md bg-amber-50 text-amber-800 px-2.5 py-1"><MapPinOff :size="13" aria-hidden="true" />{{ text('Not open to Tunisia', 'Non ouvert à la Tunisie') }}</span>
             <span v-if="opportunity.seniority" class="rounded-md bg-slate-100 text-navy px-2.5 py-1">{{ seniorityLabel }}</span>
             <span v-if="opportunity.duration_weeks && opportunity.kind !== 'job'" class="rounded-md bg-slate-100 text-navy px-2.5 py-1">{{ opportunity.duration_weeks }} {{ text('weeks', 'semaines') }}</span>
             <span v-if="!opportunity.is_open" class="rounded-md bg-slate-100 text-slate-600 px-2.5 py-1">{{ text('Closed', 'Clôturée') }}</span>

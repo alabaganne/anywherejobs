@@ -79,7 +79,7 @@ class OpportunityImporter
                     $item = new OpportunitySource([...$discovery, 'first_seen_at' => $started]);
                     try {
                         $data = $normalizer->normalize($reader->read($source, $item));
-                        $this->skipReason($source, $item, $data) ? $stats['rejected']++ : $stats['processed']++;
+                        $this->skipReason($item, $data) ? $stats['rejected']++ : $stats['processed']++;
                     } catch (SourceBudgetException) {
                         break;
                     } catch (Throwable) { $stats['rejected']++; }
@@ -102,6 +102,11 @@ class OpportunityImporter
                 OpportunitySource::upsert($rows, ['import_source_id', 'external_id'], in_array($source->provider, ['jsonld', 'pages'], true) ? array_diff($update, ['payload']) : $update);
             }
             if ($discover) { $source->update(['last_discovered_at' => $started]); }
+            // Board listings are read from the list, so one that left it before it was read never can be; it is found again if it comes back.
+            if ($discover && ! $suspicious && in_array($source->provider, SourceReader::FROM_LIST, true)) {
+                $source->items()->where('state', 'pending')->whereNull('last_verified_at')->whereNull('opportunity_id')
+                    ->where('last_discovered_at', '<', $started)->delete();
+            }
             $cycle = $source->last_discovered_at;
             // These providers are read from the saved list payload, so only items still on the board are current.
             $items = $source->items()->where('state', '!=', 'rejected')
@@ -146,7 +151,9 @@ class OpportunityImporter
                     $this->finish($waiting, $source, $scopeFields, $focusFields, $profiles, $stats, $newIds);
                     $waiting = [];
                 }
-                if (microtime(true) > $deadline || $http->requests >= $source->max_requests - 2 || ($maxNew && count($newIds) >= $maxNew)) { break; }
+                if (microtime(true) > $deadline || ($maxNew && count($newIds) >= $maxNew)) { break; }
+                // A listing read from the saved list costs no request; only page reads keep two requests in reserve.
+                if ($http->requests >= $source->max_requests - 2 && $reader->needsRequest($source, $item)) { break; }
                 try {
                     $input = $reader->read($source, $item);
                     $data = $normalizer->normalize($input);
@@ -161,7 +168,7 @@ class OpportunityImporter
                     } elseif ($this->expired($data)) {
                         $this->closeSource($item);
                         $stats['closed']++;
-                    } elseif (! $item->opportunity_id && ($reason = $this->skipReason($source, $item, $data))) {
+                    } elseif (! $item->opportunity_id && ($reason = $this->skipReason($item, $data))) {
                         $item->update(['state' => 'rejected', 'error' => $reason]);
                         $stats['rejected']++;
                     } elseif ($this->olderThan($data, $item, config('importer.retention_days'))) {
@@ -608,16 +615,11 @@ class OpportunityImporter
     }
 
     // Returns why a newly found listing is not imported, or null when it should be.
-    private function skipReason(ImportSource $source, OpportunitySource $item, array $data): ?string
+    private function skipReason(OpportunitySource $item, array $data): ?string
     {
+        // Roles someone in Tunisia cannot take are kept too; their cards and pages say so.
         if ($this->olderThan($data, $item, config('importer.max_age_days'))) {
             return 'Posted more than '.config('importer.max_age_days').' days ago.';
-        }
-        // Worldwide boards keep internships, plus jobs someone in Tunisia can actually take.
-        if (($source->settings['scope'] ?? 'all') === 'reachable' && $data['kind'] === 'job'
-            && $data['country_code'] !== 'TN' && $data['relocation'] !== 'yes' && $data['visa_sponsorship'] !== 'yes'
-            && ! ($data['work_type'] === 'remote' && $data['remote_eligibility'] !== 'restricted')) {
-            return 'Job is not open to candidates in Tunisia.';
         }
         return null;
     }

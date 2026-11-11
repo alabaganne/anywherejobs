@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Ai\OpportunityClassifier;
 use App\Importing\CandidateProfiles;
+use App\Http\Resources\OpportunityResource;
 use App\Importing\OpportunityImporter;
 use App\Importing\OpportunityNormalizer;
 use App\Importing\SourceHttp;
@@ -164,7 +165,7 @@ class OpportunityImportTest extends TestCase
         $this->assertSame(2, Opportunity::count());
     }
 
-    public function test_board_import_keeps_recent_reachable_roles_and_reads_the_list_payload(): void
+    public function test_board_import_keeps_recent_roles_marks_the_ones_closed_to_tunisia_and_reads_the_list_payload(): void
     {
         Http::fake([
             '*/robots.txt' => Http::response('', 404),
@@ -182,9 +183,10 @@ class OpportunityImportTest extends TestCase
 
         app(OpportunityImporter::class)->run($source, 100);
 
-        $this->assertEqualsCanonicalizing(['Software Engineering Intern', 'Platform Engineer'], Opportunity::pluck('title')->all());
+        $this->assertEqualsCanonicalizing(['Software Engineering Intern', 'Backend Engineer', 'Platform Engineer'], Opportunity::pluck('title')->all());
         $this->assertSame('remote', Opportunity::where('title', 'Platform Engineer')->value('work_type'));
-        $this->assertSame('Job is not open to candidates in Tunisia.', OpportunitySource::where('external_id', '2')->value('error'));
+        $this->assertTrue((new OpportunityResource(Opportunity::where('title', 'Backend Engineer')->sole()))->resolve(request())['closed_to_tunisia']);
+        $this->assertFalse(Opportunity::where('title', 'Platform Engineer')->sole()->closedToTunisia());
         $this->assertSame('Posted more than 30 days ago.', OpportunitySource::where('external_id', '4')->value('error'));
         Http::assertNotSent(fn ($request) => str_contains($request->url(), 'boards-api.greenhouse.io/v1/boards/acme/jobs/'));
     }
