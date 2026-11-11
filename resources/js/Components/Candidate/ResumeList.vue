@@ -1,10 +1,13 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Link, router, useForm, usePage } from '@inertiajs/vue3';
-import { Download, FilePenLine, FileText, Languages, Pencil, Plus, Star, Trash2, Upload } from '@lucide/vue';
+import { ChevronDown, FileText, Plus, Upload } from '@lucide/vue';
 import axios from 'axios';
+import Menu from '@/Components/Ui/Menu.vue';
+import ResumeRow from '@/Components/Candidate/ResumeRow.vue';
+import { menuItem } from '@/utils/menu';
 
-// The candidate's resumes on their profile page: upload, make one from the profile, translate, pick the main one.
+// The candidate's resumes on their profile page: the main one first, translations and copies under the resume they came from.
 const props = defineProps({
 	resumes: { type: Array, default: () => [] },
 	limit: { type: Number, default: 10 },
@@ -12,14 +15,31 @@ const props = defineProps({
 });
 const page = usePage();
 const billing = computed(() => page.props.billing || {});
-const credits = computed(() => page.props.auth?.user?.credits ?? 0);
-const free = computed(() => !billing.value.enabled || billing.value.free);
+const paid = computed(() => !!billing.value.enabled && !billing.value.free);
 const full = computed(() => props.resumes.length >= props.limit);
+const aiOff = computed(() => !props.emailVerified ? 'Verify your email to use the AI tools.' : full.value ? `You have ${props.limit} resumes. Delete one to add another.` : '');
 const upload = useForm({ resume: null });
 const fileInput = ref(null);
 const busy = ref(null);
 const error = ref('');
 const billingUrl = ref('');
+
+// A translation or copy sits under the resume it came from, unless it is the main one.
+const byId = computed(() => Object.fromEntries(props.resumes.map((resume) => [resume.id, resume])));
+const rootOf = (resume) => {
+	let current = resume;
+	const seen = new Set();
+	while (!current.is_main && current.translated_from && byId.value[current.translated_from.id] && !seen.has(current.id)) {
+		seen.add(current.id);
+		current = byId.value[current.translated_from.id];
+	}
+	return current;
+};
+const groups = computed(() => props.resumes
+	.filter((resume) => rootOf(resume) === resume)
+	.map((resume) => ({ resume, children: props.resumes.filter((child) => child !== resume && rootOf(child) === resume) })));
+const main = computed(() => groups.value.find((group) => group.resume.is_main));
+const others = computed(() => groups.value.filter((group) => !group.resume.is_main));
 
 const pick = (event) => {
 	upload.resume = event.target.files?.[0] || null;
@@ -49,64 +69,46 @@ const startAi = async (resume, target = null) => {
 		busy.value = null;
 	}
 };
-const source = { uploaded: 'Uploaded PDF', profile: 'From your profile', translation: 'AI translation', copy: 'Editable copy' };
-const status = (resume) => ({
-	queued: resume.source === 'copy' ? 'Being read…' : 'Being translated…',
-	draft: 'Draft: check and save it',
-	failed: resume.source === 'copy' ? 'Reading failed' : 'Translation failed',
-})[resume.status];
+const rowProps = computed(() => ({ busy: busy.value, aiOff: aiOff.value, paid: paid.value }));
 </script>
 
 <template>
-	<section id="resumes" class="bg-white border border-transparent rounded-card mb-[18px] scroll-mt-24" aria-labelledby="resumes-title">
-		<div class="flex flex-wrap items-center justify-between gap-3 px-7 pt-6 pb-1 max-[560px]:px-5">
-			<div>
+	<section id="resumes" class="bg-white border border-transparent rounded-card mb-[18px] pb-2 scroll-mt-24" aria-labelledby="resumes-title">
+		<div class="flex flex-wrap items-start justify-between gap-3 px-7 pt-6 max-[560px]:px-5">
+			<div class="min-w-0 grow basis-[260px]">
 				<h3 id="resumes-title" class="text-[20px] leading-[1.35] text-navy">Resumes</h3>
-				<p class="text-[13px] text-muted mt-0.5">Your main resume is the one you share, apply with by default, and the one the AI reads.</p>
+				<p class="text-[13px] text-muted mt-0.5">Your main resume is shared on your public profile, sent when you apply and read by the AI.</p>
 			</div>
-			<div class="flex flex-wrap gap-2">
-				<Link v-if="!full" :href="route('resumes.create')" class="cta cta-primary"><Plus class="w-4 h-4" aria-hidden="true" /> Make one from my profile</Link>
-				<label v-if="!full" class="cta cta-secondary cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand">
-					<Upload class="w-4 h-4" aria-hidden="true" /> {{ upload.processing ? 'Uploading…' : 'Upload PDF' }}
-					<input ref="fileInput" type="file" accept="application/pdf" class="sr-only" :disabled="upload.processing" @change="pick">
-				</label>
-			</div>
+			<input ref="fileInput" type="file" accept="application/pdf" class="sr-only" tabindex="-1" aria-hidden="true" @change="pick">
+			<Menu width="w-72">
+				<template #button="{ open, toggle }">
+					<button type="button" class="cta cta-primary disabled:opacity-60" :disabled="full || upload.processing" aria-haspopup="menu" :aria-expanded="open" @click="toggle"><Plus class="size-4" aria-hidden="true" />{{ upload.processing ? 'Uploading…' : 'Add resume' }}<ChevronDown class="size-4" aria-hidden="true" /></button>
+				</template>
+				<button :class="menuItem" role="menuitem" type="button" @click="fileInput?.click()"><Upload class="size-4 text-muted-2" />Upload a PDF</button>
+				<Link :class="menuItem" role="menuitem" :href="route('resumes.create')"><FileText class="size-4 text-muted-2" />Make one from my profile</Link>
+			</Menu>
 		</div>
 
-		<p v-if="upload.errors.resume" class="mx-[22px] mt-4 text-sm text-red-700" role="alert">{{ upload.errors.resume }}</p>
-		<p v-if="error" class="mx-[22px] mt-4 text-sm text-red-700" role="alert">{{ error }} <a v-if="billingUrl" :href="billingUrl" class="underline font-medium">Get credits</a></p>
+		<p v-if="full" class="mx-7 mt-3 text-[13px] text-muted max-[560px]:mx-5">You have {{ limit }} resumes. Delete one to add another.</p>
+		<p v-if="upload.errors.resume" class="mx-7 mt-3 text-sm text-red-700 max-[560px]:mx-5" role="alert">{{ upload.errors.resume }}</p>
+		<p v-if="error" class="mx-7 mt-3 text-sm text-red-700 max-[560px]:mx-5" role="alert">{{ error }} <a v-if="billingUrl" :href="billingUrl" class="underline font-medium">Get credits</a></p>
 
-		<ul v-if="resumes.length" class="divide-y divide-line-2">
-			<li v-for="resume in resumes" :key="resume.id" class="px-[22px] py-4 flex flex-wrap items-start justify-between gap-3">
-				<div class="flex items-start gap-3 min-w-0">
-					<span class="w-10 h-10 rounded-card grid place-items-center shrink-0 bg-blue-50 text-blue-700"><FileText class="w-5 h-5" aria-hidden="true" /></span>
-					<div class="min-w-0">
-						<p class="font-medium text-[14.5px] truncate">{{ resume.name }}</p>
-						<p class="flex flex-wrap items-center gap-1.5 mt-1 text-xs">
-							<span v-if="resume.is_main" class="rounded-full bg-blue-600 text-white px-2 py-0.5 font-medium">Main</span>
-							<span class="rounded-full bg-paper-2 px-2 py-0.5 text-ink-700">{{ source[resume.source] }}</span>
-							<span v-if="resume.language" class="rounded-full bg-paper-2 px-2 py-0.5 text-ink-700">{{ resume.language.label }}</span>
-							<span v-if="status(resume)" class="rounded-full px-2 py-0.5 font-medium" :class="resume.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'">{{ status(resume) }}</span>
-							<span class="text-muted">Updated {{ resume.updated_label }}</span>
-						</p>
-					</div>
-				</div>
-				<div class="flex flex-wrap items-center gap-2 text-[13px]">
-					<a v-if="resume.has_file && resume.status === 'ready'" :href="route('resumes.download', resume.id)" class="cta cta-secondary !py-1.5"><Download class="w-4 h-4" aria-hidden="true" /> PDF</a>
-					<Link v-if="resume.editable" :href="route('resumes.show', resume.id)" class="cta cta-secondary !py-1.5"><Pencil class="w-4 h-4" aria-hidden="true" /> {{ resume.status === 'draft' ? 'Check draft' : 'Open' }}</Link>
-					<button v-if="!resume.is_main && resume.status === 'ready'" type="button" class="cta cta-secondary !py-1.5" @click="makeMain(resume)"><Star class="w-4 h-4" aria-hidden="true" /> Make main</button>
-					<button v-if="resume.source === 'uploaded' && resume.status === 'ready'" type="button" class="cta cta-secondary !py-1.5" :disabled="full || busy !== null || !emailVerified" :title="!emailVerified ? 'Verify your email to use the AI tools' : null" @click="startAi(resume)"><FilePenLine class="w-4 h-4" aria-hidden="true" /> {{ busy === `${resume.id}-copy` ? 'Starting…' : 'Make editable' }}</button>
-					<button v-for="target in resume.targets" :key="target.code" type="button" class="cta cta-secondary !py-1.5" :disabled="full || busy !== null || !emailVerified" :title="!emailVerified ? 'Verify your email to use the AI tools' : null" @click="startAi(resume, target)"><Languages class="w-4 h-4" aria-hidden="true" /> {{ busy === `${resume.id}-${target.code}` ? 'Starting…' : `${target.label} version` }}</button>
-					<button type="button" class="cta cta-secondary !py-1.5 text-red-700" :aria-label="`Delete ${resume.name}`" @click="remove(resume)"><Trash2 class="w-4 h-4" aria-hidden="true" /></button>
-				</div>
-			</li>
-		</ul>
-		<div v-else class="px-[22px] py-6 text-[14.5px] text-muted leading-[1.7]">
-			No resume yet. Upload the PDF you already have, or make one from your profile with one of our themes. It’s free.
+		<div v-if="main" class="mx-[22px] mt-5 rounded-card bg-pale p-5 space-y-4 max-[560px]:mx-3 max-[560px]:p-4">
+			<p class="text-[12px] font-medium tracking-caps uppercase text-brand">Main resume</p>
+			<ResumeRow :resume="main.resume" v-bind="rowProps" @ai="startAi(main.resume, $event)" @main="makeMain(main.resume)" @remove="remove(main.resume)" />
+			<ResumeRow v-for="child in main.children" :key="child.id" :resume="child" nested v-bind="rowProps" @ai="startAi(child, $event)" @main="makeMain(child)" @remove="remove(child)" />
 		</div>
-		<p class="px-[22px] py-3 border-t border-line-2 text-xs text-muted">
-			{{ resumes.length }} of {{ limit }} resumes. Making a resume from your profile, changing its theme and downloading are free.
-			<template v-if="!free">An AI translation, or an editable copy of an uploaded PDF, uses 1 credit (3 rewrites included). You have {{ credits }}.</template>
-		</p>
+
+		<template v-if="others.length">
+			<p class="px-7 mt-6 text-[12px] font-medium tracking-caps uppercase text-subtle max-[560px]:px-5">{{ main ? 'Other resumes' : 'Your resumes' }}</p>
+			<ul class="mt-1 divide-y divide-line-2">
+				<li v-for="group in others" :key="group.resume.id" class="px-[22px] py-4 space-y-3 max-[560px]:px-3">
+					<ResumeRow :resume="group.resume" v-bind="rowProps" @ai="startAi(group.resume, $event)" @main="makeMain(group.resume)" @remove="remove(group.resume)" />
+					<ResumeRow v-for="child in group.children" :key="child.id" :resume="child" nested v-bind="rowProps" @ai="startAi(child, $event)" @main="makeMain(child)" @remove="remove(child)" />
+				</li>
+			</ul>
+		</template>
+
+		<p v-if="!resumes.length" class="px-7 py-6 text-[14.5px] text-muted leading-[1.7] max-[560px]:px-5">No resume yet. Upload the PDF you already have, or make one from your profile. Both are free.</p>
 	</section>
 </template>

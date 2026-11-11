@@ -67,6 +67,7 @@ const strength = computed(() =>
 	Math.round((checklist.value.filter((item) => item.done).length / checklist.value.length) * 100)
 );
 
+const isPublic = computed(() => props.profile.public_status === 'approved');
 const publicBusy = ref(false);
 const updatePublic = (data) =>
 	router.put(route('profile.public.update'), data, {
@@ -84,7 +85,7 @@ const publicState = computed(() => ({
 <template>
 	<div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-[1120px] mx-auto">
 		<ProfileBanner class="mb-6" :name="profile.name" :headline="headline" :items="bannerItems">
-			<span v-if="profile.public_status === 'approved'" class="self-center text-xs font-medium px-3 py-1.5 rounded-full bg-green-100 text-emerald-700">Public</span>
+			<span v-if="profile.public_status === 'approved'" class="self-center text-xs font-medium px-3 py-1.5 rounded-full bg-green-600 text-white">Public</span>
 			<span v-else-if="profile.public_status === 'pending'" class="self-center text-xs font-medium px-3 py-1.5 rounded-full bg-amber-100 text-amber-700">Under review</span>
 			<Link class="cta cta-primary cta-sm [&_svg]:w-4 [&_svg]:h-4" :href="route('settings')">
 				<component :is="icons.pencil" aria-hidden="true" />
@@ -93,28 +94,28 @@ const publicState = computed(() => ({
 		</ProfileBanner>
 
 		<!-- public profile -->
-		<section v-if="isCandidate" class="rounded-card mb-[18px]" :class="profile.public_status === 'approved' ? 'bg-emerald-50' : 'bg-white'" aria-labelledby="public-profile-title">
+		<section v-if="isCandidate" class="rounded-card mb-[18px]" :class="isPublic ? 'bg-green-600 text-white' : 'bg-white'" aria-labelledby="public-profile-title">
 			<div class="px-7 py-6 flex items-center justify-between gap-4 flex-wrap max-[560px]:px-5">
 				<div class="flex items-start gap-3.5 min-w-0 flex-1">
-					<span class="w-10 h-10 rounded-card grid place-items-center shrink-0 text-white [&_svg]:w-5 [&_svg]:h-5" :class="profile.public_status === 'approved' ? 'bg-emerald-600' : 'bg-blue-600'"><Eye aria-hidden="true" /></span>
+					<span class="w-10 h-10 rounded-card grid place-items-center shrink-0 [&_svg]:w-5 [&_svg]:h-5" :class="isPublic ? 'bg-white text-green-700' : 'bg-blue-600 text-white'"><Eye aria-hidden="true" /></span>
 					<div class="min-w-0">
-						<h2 id="public-profile-title" class="text-[20px] leading-[1.35] text-navy" role="status">{{ publicState.title }}</h2>
-						<p class="text-[15px] leading-[1.6] text-subtle mt-1 max-w-[640px]">{{ publicState.text }}</p>
-						<a v-if="profile.public_status" :href="profile.public_url" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[13.5px] font-medium text-blue-700 hover:underline mt-1.5">{{ profile.public_status === 'approved' ? 'Open your public page' : 'Preview your public page' }}<ArrowUpRight class="w-3.5 h-3.5" aria-hidden="true" /></a>
+						<h2 id="public-profile-title" class="text-[20px] leading-[1.35]" :class="isPublic ? 'text-white' : 'text-navy'" role="status">{{ publicState.title }}</h2>
+						<p class="text-[15px] leading-[1.6] mt-1 max-w-[640px]" :class="isPublic ? 'text-white' : 'text-subtle'">{{ publicState.text }}</p>
+						<a v-if="profile.public_status" :href="profile.public_url" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[13.5px] font-medium hover:underline mt-1.5" :class="isPublic ? 'text-white underline' : 'text-blue-700'">{{ profile.public_status === 'approved' ? 'Open your public page' : 'Preview your public page' }}<ArrowUpRight class="w-3.5 h-3.5" aria-hidden="true" /></a>
 						<p v-if="!profile.public_status && !profile.email_verified" class="text-[13px] text-muted mt-1.5">
 							<Link class="font-medium text-blue-700 hover:underline" :href="route('settings', { tab: 'security' })">Verify your email</Link> first.
 						</p>
 					</div>
 				</div>
 				<button v-if="profile.public_status === 'pending'" class="cta cta-secondary" type="button" :disabled="publicBusy" @click="updatePublic({ public: false })">Cancel request</button>
-				<button v-else-if="profile.public_status === 'approved'" class="cta cta-secondary" type="button" :disabled="publicBusy" @click="updatePublic({ public: false })">Make it private</button>
+				<button v-else-if="isPublic" class="cta cta-ghost" type="button" :disabled="publicBusy" @click="updatePublic({ public: false })">Make it private</button>
 				<button v-else class="cta cta-primary disabled:opacity-60" type="button" :disabled="publicBusy || !profile.email_verified" @click="updatePublic({ public: true })">{{ profile.public_status === 'declined' ? 'Ask again' : 'Ask to make it public' }}</button>
 			</div>
-			<label class="px-7 py-4 border-t flex items-start gap-3 cursor-pointer max-[560px]:px-5" :class="profile.public_status === 'approved' ? 'border-emerald-100' : 'border-line-2'">
-				<input type="checkbox" class="mt-1 w-4 h-4 accent-blue-600 shrink-0" :checked="profile.public_contact" :disabled="publicBusy" @change="updatePublic({ contact: $event.target.checked })">
+			<label class="px-7 py-4 border-t flex items-start gap-3 cursor-pointer max-[560px]:px-5" :class="isPublic ? 'border-white/25' : 'border-line-2'">
+				<input type="checkbox" class="mt-1 w-4 h-4 shrink-0" :class="isPublic ? 'accent-white' : 'accent-blue-600'" :checked="profile.public_contact" :disabled="publicBusy" @change="updatePublic({ contact: $event.target.checked })">
 				<span>
-					<b class="text-[14px] font-medium block">Share my main resume, email and phone number</b>
-					<span class="text-[13px] text-muted block mt-0.5">Anyone who opens your public profile can download your resume and contact you. Turn this off at any time.</span>
+					<b class="text-[14px] font-medium block" :class="isPublic ? 'text-white' : 'text-navy'">Share my main resume, email and phone number</b>
+					<span class="text-[13px] block mt-0.5" :class="isPublic ? 'text-white' : 'text-muted'">Anyone who opens your public profile can download your resume and contact you. Turn this off at any time.</span>
 				</span>
 			</label>
 		</section>

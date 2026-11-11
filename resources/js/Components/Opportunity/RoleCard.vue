@@ -27,10 +27,9 @@ const payLabel = computed(() => {
     const periods = fr.value ? { hour: 'heure', day: 'jour', week: 'semaine', month: 'mois', year: 'an' } : { hour: 'hour', day: 'day', week: 'week', month: 'month', year: 'year' };
     return `${amount ?? ''} ${pay.currency || text('(currency not specified)', '(devise non précisée)')}${pay.unit ? ` / ${periods[pay.unit] || pay.unit}` : ''}`;
 });
-const displayDate = computed(() => {
-    const date = props.opportunity.posted_at || props.opportunity.added_at;
-    return date ? new Intl.DateTimeFormat(fr.value ? 'fr-FR' : 'en-GB', { dateStyle: 'medium', timeZone: 'Africa/Tunis' }).format(new Date(date)) : '';
-});
+const day = (date) => date ? new Intl.DateTimeFormat(fr.value ? 'fr-FR' : 'en-GB', { dateStyle: 'medium', timeZone: 'Africa/Tunis' }).format(new Date(date)) : '';
+const postedDate = computed(() => day(props.opportunity.posted_at));
+const addedDate = computed(() => day(props.opportunity.added_at));
 const seniorityLabel = computed(() => ({ entry: text('Entry level', 'Débutant'), graduate: text('Graduate', 'Jeune diplômé'), mid: text('Mid level', 'Confirmé'), senior: 'Senior', lead: text('Lead', 'Responsable'), executive: text('Executive', 'Direction') }[props.opportunity.seniority] || props.opportunity.seniority));
 const workTypes = computed(() => fr.value ? { remote: 'À distance', hybrid: 'Hybride', onsite: 'Sur site', unknown: 'Mode de travail non précisé' } : { remote: 'Remote', hybrid: 'Hybrid', onsite: 'Onsite', unknown: 'Work mode not specified' });
 const location = computed(() => props.opportunity.location_label || props.opportunity.city?.name || '');
@@ -62,6 +61,6 @@ const toggleSave = () => toggleSaved(props.opportunity);
             <span v-else-if="openedAt(opportunity.id)" class="rounded-md bg-blue-50 text-brand px-2.5 py-1">{{ text('Viewed', 'Consultée') }}</span>
         </div>
         <p class="mt-4 flex items-start gap-2 text-[14.5px]" :class="paid ? 'text-navy' : 'text-subtle-2'"><Banknote :size="17" class="mt-0.5 shrink-0" :class="paid ? 'text-brand' : ''" aria-hidden="true" /><span class="min-w-0">{{ payLabel }}</span></p>
-        <div class="mt-auto pt-5"><div class="flex gap-3 justify-between items-end border-t border-line pt-4"><p class="min-w-0 text-[13px] text-subtle-2"><span class="block truncate">{{ opportunity.posted_at ? text('Posted', 'Publié') : text(`Added to ${appName}`, `Ajouté sur ${appName}`) }} {{ displayDate }}</span><span class="block mt-1 truncate">{{ opportunity.origin === 'native' ? text(`Employer post on ${appName}`, `Offre employeur sur ${appName}`) : opportunity.source_name || text('Imported role', 'Offre importée') }}</span></p><Link :href="publicUrl" class="focus-ring shrink-0 inline-flex items-center gap-1 rounded-[2px] text-[13px] font-medium tracking-caps uppercase text-brand transition-colors duration-180 hover:text-navy">{{ text('View role', 'Voir l’offre') }}<span class="sr-only"> {{ opportunity.title }}</span><ArrowUpRight :size="16" aria-hidden="true" /></Link></div></div>
+        <div class="mt-auto pt-5"><div class="flex gap-3 justify-between items-end border-t border-line pt-4"><p class="min-w-0 text-[13px] text-subtle-2"><span v-if="postedDate" class="block truncate">{{ text('Posted', 'Publiée le') }} {{ postedDate }}</span><span v-if="addedDate" class="block truncate" :class="postedDate && 'mt-1'">{{ text(`Added to ${appName}`, `Ajoutée sur ${appName} le`) }} {{ addedDate }}</span><span class="block mt-1 truncate">{{ opportunity.origin === 'native' ? text(`Employer post on ${appName}`, `Offre employeur sur ${appName}`) : opportunity.source_name || text('Imported role', 'Offre importée') }}</span></p><Link :href="publicUrl" class="focus-ring shrink-0 inline-flex items-center gap-1 rounded-[2px] text-[13px] font-medium tracking-caps uppercase text-brand transition-colors duration-180 hover:text-navy">{{ text('View role', 'Voir l’offre') }}<span class="sr-only"> {{ opportunity.title }}</span><ArrowUpRight :size="16" aria-hidden="true" /></Link></div></div>
     </article>
 </template>
