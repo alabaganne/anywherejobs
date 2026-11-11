@@ -11,8 +11,14 @@ class ImportSourceSeeder extends Seeder
 
     public function run(): void
     {
+        $this->ensure();
+    }
+
+    // Adds the sources that are missing ($keys limits it to those); changes an admin made to existing ones stay.
+    public function ensure(?array $keys = null): void
+    {
         foreach ($this->sources() as $source) {
-            // Keep any changes an admin made to a source that already exists.
+            if ($keys && ! in_array($source['key'], $keys, true)) { continue; }
             ImportSource::firstOrCreate(['key' => $source['key']], $source + [
                 'permission_status' => 'approved', 'publication_mode' => 'automatic', 'enabled' => true, 'cadence_hours' => 24,
             ]);
@@ -92,7 +98,7 @@ class ImportSourceSeeder extends Seeder
                 'allowed_domains' => $domains, 'permission_notes' => $note, 'publication_mode' => 'leads', 'cadence_hours' => $cadence,
                 'settings' => $settings + ['scope' => 'all'], 'request_delay_ms' => 1500, 'max_requests' => $requests];
         }
-        // The links in Hacker News "Who is hiring" posts: the AI opens each one and real jobs wait for review.
+        // The links in Hacker News "Who is hiring" posts: the AI opens each one; real jobs it rates good go live, the rest wait for review.
         $sources[] = ['key' => 'linked-job-pages', 'name' => 'Job pages linked from Hacker News', 'provider' => 'pages',
             'url' => 'https://news.ycombinator.com/', 'allowed_domains' => [], 'publication_mode' => 'review',
             'permission_notes' => 'Employer job pages linked from Hacker News "Who is hiring" posts. Only the employer page is shown, with a link to apply there; the post itself is never published. Each site\'s robots rules apply. Checked on 2026-10-27.',

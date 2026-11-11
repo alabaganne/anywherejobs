@@ -42,11 +42,11 @@ return [
             'twitter.com', 'x.com', 'facebook.com', 'instagram.com', 'youtube.com', 'youtu.be', 't.me', 'discord.gg', 'discord.com',
             'calendly.com', 'drive.google.com', 'docs.google.com', 'forms.gle'],
     ],
-    // Imports only add listings a candidate profile or a resume profile (`opportunities:profile`) wants.
-    // `from` picks whose candidate profiles count: admins (the owner, the default) or everyone.
+    // Off by default: every IT listing is kept. When on, imports only add listings a candidate profile or a resume profile
+    // (`opportunities:profile`) wants. `from` picks whose candidate profiles count: admins or everyone.
     // Accounts on these email domains (seeded demo accounts) are left out.
     'profiles' => [
-        'enabled' => (bool) env('OPPORTUNITY_MATCH_PROFILES', true),
+        'enabled' => (bool) env('OPPORTUNITY_MATCH_PROFILES', false),
         'from' => env('OPPORTUNITY_PROFILES_FROM', 'admins'),
         'ignore_domains' => ['example.com'],
     ],

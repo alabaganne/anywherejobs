@@ -52,6 +52,15 @@ You get several listings, each starting with "Listing <id>". Answer once for eve
   - "unknown": the listing does not say.
 - relocation and visa_sponsorship: "yes" or "no" only when the listing says so, otherwise "unknown".
 - evidence: a short quote from the listing behind your applicant_scope, relocation or visa answer, or an empty string.
+
+Some listings end with a "Hiring post": the employer's own post on the Hacker News "Who is hiring" thread that linked to this job. It is part of the listing and often the only place that says where the role is based and who can apply. Its first line usually reads "Company | Role | Place | REMOTE, ONSITE or HYBRID | Contract | Pay". Read it like this:
+  - "REMOTE (worldwide)", "Remote (Global)", "REMOTE anywhere", "any timezone": remote, applicant_scope "anywhere".
+  - "REMOTE (US)", "US Remote", "Remote (US only)", "REMOTE (EU)", "REMOTE (UK)", "Remote (US, Canada)", "Remote (North America & Europe)", "REMOTE (CET)" or a range of time zones: remote, applicant_scope "listed", with the countries it names (a region without country names leaves the list empty). Tunisia is "yes" only when the region includes it.
+  - "US citizens only", "US work authorization required", "no visa sponsorship", "security clearance": applicant_scope "local".
+  - "REMOTE" with no place or limit: remote, applicant_scope "unknown". Never assume worldwide.
+  - "ONSITE", "In office", "In person" or "HYBRID" with a city: onsite or hybrid. "VISA", "visa sponsorship" or "relocation" there means applicant_scope "anywhere" and visa_sponsorship or relocation "yes".
+  - Several options, such as "ONSITE in Berlin or REMOTE (EU)": remote, with the remote limits.
+  - When the post names several roles, the job page says which one this listing is; facts the post gives for the company as a whole apply to it.
 PROMPT);
     }
 

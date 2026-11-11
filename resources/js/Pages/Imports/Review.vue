@@ -33,7 +33,7 @@ const date = (value) => value ? new Date(value).toLocaleString('en-GB', { day: '
 
 <template>
     <div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-wrap mx-auto">
-        <PageHeader title="Review queue" description="Listings found on the sources. Approve the ones that should go live, reject the rest." />
+        <PageHeader title="Review queue" description="Listings found on the sources. Open one to see its page, then approve it, reject it or trust its source." />
 
         <div v-if="Object.keys(page.props.errors || {}).length" class="bg-red-50 border border-red-200 text-red-600 rounded-card p-4 mb-5 text-[14px]" role="alert"><p v-for="(error, key) in page.props.errors" :key="key">{{ error }}</p></div>
 
@@ -63,7 +63,7 @@ const date = (value) => value ? new Date(value).toLocaleString('en-GB', { day: '
                 <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2.5">
-                            <h2 class="font-medium text-[15.5px]">{{ item.normalized_data?.title || item.opportunity?.title || 'Not read yet' }}</h2>
+                            <h2 class="font-medium text-[15.5px]"><Link v-if="item.normalized_data" :href="route('imports.items.show', { item: item.id, ...filters })" class="hover:text-blue-700">{{ item.normalized_data.title }}</Link><template v-else>{{ item.opportunity?.title || 'Not read yet' }}</template></h2>
                             <StatusPill set="import" :status="item.state" />
                         </div>
                         <p class="text-[13px] text-muted mt-1">
@@ -74,6 +74,7 @@ const date = (value) => value ? new Date(value).toLocaleString('en-GB', { day: '
                         <p v-if="item.error" class="text-[13px] text-red-600 mt-1.5">{{ item.error }}</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
+                        <Link v-if="item.normalized_data" class="cta cta-secondary cta-sm" :href="route('imports.items.show', { item: item.id, ...filters })">View page</Link>
                         <button v-if="item.normalized_data && !['closed', 'published'].includes(item.state)" type="button" class="cta cta-primary cta-sm" @click="publish(item)">Approve</button>
                         <button v-if="item.state !== 'rejected'" type="button" class="cta cta-danger cta-sm" :aria-expanded="rejectingId === item.id" @click="rejectingId = rejectingId === item.id ? null : item.id">Reject</button>
                         <Link v-if="item.opportunity" class="cta cta-secondary cta-sm" :href="route('imports.opportunities.show', item.opportunity.id)">Moderate</Link>

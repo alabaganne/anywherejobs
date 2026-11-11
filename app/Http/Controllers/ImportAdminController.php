@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OpportunityResource;
+use App\Importing\CompanyRegistry;
 use App\Importing\OpportunityImporter;
 use App\Importing\SourceHttp;
 use App\Importing\SourceReader;
@@ -91,7 +93,7 @@ class ImportAdminController extends Controller
         $bySource = fn ($query) => $query->when($filters['source_id'] ?? null, fn ($query, $source) => $query->where('import_source_id', $source));
         $items = OpportunitySource::with(['importSource', 'opportunity.company.user'])->tap($bySource)
             ->when($filters['state'] !== 'all', fn ($query) => $query->where('state', $filters['state']))
-            ->latest()->paginate(20)->withQueryString();
+            ->latest('id')->paginate(20)->withQueryString();
         return Inertia::render('Imports/Review', [
             'items' => $items->through(fn ($item) => [
                 'id' => $item->id, 'source_name' => $item->importSource->name,
@@ -233,6 +235,70 @@ class ImportAdminController extends Controller
             throw ValidationException::withMessages(['url' => $exception->getMessage()]);
         }
         return $data;
+    }
+
+    // One listing from the queue shown as its page would look once published, with the review actions.
+    public function item(Request $request, OpportunitySource $item, OpportunityImporter $importer)
+    {
+        abort_unless($item->normalized_data, 404);
+        $filters = $request->validate([
+            'source_id' => 'nullable|integer',
+            'state' => 'nullable|in:all,pending,review,waiting,unmatched,lead,published,closed,rejected',
+        ]);
+        $filters['state'] ??= 'review';
+        $item->load('importSource', 'opportunity');
+        $role = $importer->preview($item);
+        $opportunity = (new OpportunityResource($role))->resolve($request);
+        if (! $role->company?->exists) { $opportunity['company']['public_url'] = null; }
+        // The next listing down the queue, so the admin can go through it one page at a time.
+        $next = OpportunitySource::whereNotNull('normalized_data')->where('id', '<', $item->id)
+            ->when($filters['state'] !== 'all', fn ($query) => $query->where('state', $filters['state']))
+            ->when($filters['source_id'] ?? null, fn ($query, $source) => $query->where('import_source_id', $source))
+            ->orderByDesc('id')->value('id');
+        $data = $item->normalized_data;
+        return Inertia::render('Opportunities/Show', [
+            'opportunity' => $opportunity,
+            'review' => [
+                'id' => $item->id, 'state' => $item->state, 'error' => $item->error,
+                'source' => ['id' => $item->import_source_id, 'name' => $item->importSource->name, 'trusted' => CompanyRegistry::trusted($item->importSource),
+                    'can_trust' => ! in_array($item->importSource->publication_mode, ['leads'], true) && $item->importSource->provider !== 'pages'],
+                'quality' => $data['quality'] ?? null, 'quality_reason' => $data['quality_reason'] ?? null,
+                'ai_reason' => $data['page_check']['reason'] ?? null, 'post_url' => $data['page_check']['post_url'] ?? $item->payload['post']['url'] ?? null,
+                'original_url' => $data['page_check']['page_url'] ?? $item->source_url,
+                'checked_at' => $item->last_verified_at?->toIso8601String(),
+                'public_url' => $item->opportunity?->publication_status === 'published' ? $item->opportunity->public_url : null,
+                'next_id' => $next, 'filters' => array_filter($filters),
+            ],
+        ]);
+    }
+
+    // Approves this listing and trusts its source: its new listings go live from now on without review.
+    public function trust(Request $request, OpportunitySource $item, OpportunityImporter $importer)
+    {
+        $source = $item->importSource;
+        abort_if($source->publication_mode === 'leads' || $source->provider === 'pages', 422, 'This source cannot be trusted as a whole.');
+        if ($item->state !== 'published') {
+            try {
+                $importer->publish($item);
+            } catch (\RuntimeException $exception) {
+                throw ValidationException::withMessages(['publication' => $exception->getMessage()]);
+            }
+        }
+        $source->update(['settings' => [...($source->settings ?? []), 'trusted' => true], 'publication_mode' => 'automatic']);
+        $published = 0;
+        // The other listings of this source waiting for review go live too; ones too old to publish are read again on the next run.
+        $source->items()->where('state', 'review')->whereNull('opportunity_id')->whereNotNull('normalized_data')->orderBy('id')->limit(200)->get()
+            ->each(function (OpportunitySource $other) use ($importer, &$published) {
+                if (($other->normalized_data['quality'] ?? null) === 'reject') { return; }
+                try {
+                    $importer->publish($other);
+                    $published++;
+                } catch (\RuntimeException) {
+                    $other->update(['state' => 'pending']);
+                }
+            });
+        $this->audit($request, 'source.trusted', null, $source->id, ['item_id' => $item->id, 'published' => $published]);
+        return back()->with('toast', ['type' => 'update', 'message' => "Approved. {$source->name} is trusted now, and {$published} more waiting ".str('listing')->plural($published).' went live.']);
     }
 
     public function runSource(Request $request, ImportSource $source)

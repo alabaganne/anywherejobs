@@ -295,6 +295,25 @@ class PublicOpportunityListingTest extends TestCase
             ->where('opportunities.data.0.description', fn ($excerpt) => mb_strlen($excerpt) <= 323));
     }
 
+    public function test_visitors_sign_up_before_they_apply_and_come_back_to_the_role()
+    {
+        $opportunity = $this->opportunity($this->company('Atlas Cloud'), 'Backend engineer', now()->addMonth());
+        $opportunity->update(['application_mode' => 'external', 'application_url' => 'https://atlas.example/jobs/1']);
+        $path = parse_url($opportunity->public_url, PHP_URL_PATH);
+
+        $this->get($path)->assertOk()->assertInertia(fn (Assert $page) => $page->where('opportunity.application_url', null)->where('opportunity.source_url', null));
+        $this->get('/register?next='.urlencode($path))->assertOk();
+        $this->post('/register', ['name' => 'New Person', 'email' => 'new@example.com', 'password' => 'password', 'password_confirmation' => 'password', 'terms' => '1'])
+            ->assertRedirect($path);
+        $this->get($path)->assertInertia(fn (Assert $page) => $page->where('opportunity.application_url', 'https://atlas.example/jobs/1'));
+
+        // Only pages on this site are remembered.
+        auth()->logout();
+        $this->get('/register?next='.urlencode('//evil.example/x'))->assertOk();
+        $this->post('/register', ['name' => 'Other Person', 'email' => 'other@example.com', 'password' => 'password', 'password_confirmation' => 'password', 'terms' => '1'])
+            ->assertRedirect(route('dashboard', absolute: false));
+    }
+
     private function company(string $name): Company
     {
         $company = Company::create(['website' => 'https://example.com', 'about' => 'A company used in tests.', 'city_id' => $this->city->id]);

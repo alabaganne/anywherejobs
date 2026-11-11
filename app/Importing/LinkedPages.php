@@ -91,7 +91,9 @@ class LinkedPages
             'employment_types' => $answer['employment_types'],
             'language' => is_string($posting['inLanguage'] ?? null) ? $posting['inLanguage'] : null,
             'application_url' => $page['url'],
-            'page_check' => ['reason' => $reason, 'post_url' => $item->payload['post']['url'] ?? null, 'page_url' => $page['url'], 'model' => $answer['model'] ?? null],
+            // The post often is the only place that says where the role is based and who can apply, so the AI review reads it too.
+            'page_check' => ['reason' => $reason, 'post_url' => $item->payload['post']['url'] ?? null, 'page_url' => $page['url'], 'model' => $answer['model'] ?? null,
+                'post' => Str::limit($post, 2000)],
         ];
         if ($data['title'] === '' || $data['employer'] === '') { throw new ListingRejected('The AI could not tell the role or the employer: '.$reason); }
         if (mb_strlen((new OpportunityNormalizer())->text($data['description'])) < 200) { throw new ListingRejected('The job page has too little text to show: '.$reason); }

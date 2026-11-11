@@ -7,5 +7,5 @@ import { isAppPath } from '@/utils/url';
 // /app pages get the workspace; the same page anywhere else is the public site, signed in or not.
 export default (_h, page) =>
 	isAppPath(usePage().url)
-		? h(AppShell, { active: 'opportunities' }, () => page)
+		? h(AppShell, { active: usePage().props.review ? 'imports.review' : 'opportunities' }, () => page)
 		: h(PublicLayout, () => page);

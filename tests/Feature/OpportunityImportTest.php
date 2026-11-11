@@ -78,6 +78,7 @@ class OpportunityImportTest extends TestCase
 
     public function test_imports_only_add_listings_a_profile_wants_and_add_the_rest_once_one_does(): void
     {
+        config(['importer.profiles.enabled' => true]);
         Http::fake([
             '*/robots.txt' => Http::response('', 404),
             'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [
@@ -106,6 +107,26 @@ class OpportunityImportTest extends TestCase
 
         $this->assertTrue(CandidateProfiles::forget('Data'));
         $this->assertSame(['Resume'], array_keys(CandidateProfiles::saved()));
+    }
+
+    public function test_profile_matching_is_off_by_default_so_every_it_listing_is_kept(): void
+    {
+        Http::fake([
+            '*/robots.txt' => Http::response('', 404),
+            'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [
+                $this->greenhouseJob(1, 'Mobile Developer Intern', 'Paris, France', 1),
+                $this->greenhouseJob(2, 'Data Engineer Intern', 'Berlin, Germany', 2),
+            ]]),
+        ]);
+        $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse',
+            'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
+            'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io'], 'settings' => ['scope' => 'reachable']]);
+        Field::create(['name' => 'Mobile Development']);
+        CandidateProfiles::save('Resume', ['fields' => ['Mobile Development'], 'kinds' => ['internship']]);
+
+        $this->artisan('opportunities:fetch --count=5 --no-csv')->expectsOutputToContain('Adding IT listings for everyone.')
+            ->expectsOutputToContain('2 new opportunities added.')->assertSuccessful();
+        $this->assertSame(0, OpportunitySource::where('state', 'unmatched')->count());
     }
 
     public function test_a_candidate_profile_matches_by_shared_skills_and_respects_kind_and_level(): void

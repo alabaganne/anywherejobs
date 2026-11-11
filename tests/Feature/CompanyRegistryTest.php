@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Ai\OpportunityClassifier;
 use App\Importing\CompanyRegistry;
 use App\Importing\JobKey;
 use App\Importing\OpportunityImporter;
@@ -151,6 +152,53 @@ class CompanyRegistryTest extends TestCase
         $this->assertSame(0, Opportunity::count());
     }
 
+    public function test_a_listing_the_ai_rates_good_goes_live_from_any_source_and_a_weak_one_waits(): void
+    {
+        config(['importer.trusted_sources' => true]);
+        $this->rate(['Frontend Engineer' => 'good', 'Backend Engineer' => 'weak']);
+        Http::fake(['*/robots.txt' => Http::response('', 404), 'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [
+            $this->job(1, 'Frontend Engineer'), $this->job(2, 'Backend Engineer'),
+        ]])]);
+        $source = $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse', 'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
+            'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io']]);
+
+        app(OpportunityImporter::class)->run($source);
+
+        $this->assertSame(['Frontend Engineer'], Opportunity::pluck('title')->all());
+        $weak = OpportunitySource::where('external_id', '2')->sole();
+        $this->assertSame(['review', 'Not linked from a checked company website.'], [$weak->state, $weak->error]);
+    }
+
+    public function test_an_admin_reviews_a_listing_on_its_page_and_can_trust_its_source(): void
+    {
+        config(['importer.trusted_sources' => true]);
+        Http::fake(['*/robots.txt' => Http::response('', 404), 'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [
+            $this->job(1, 'Frontend Engineer'), $this->job(2, 'Backend Engineer'), $this->job(3, 'Mobile Engineer'),
+        ]])]);
+        $source = $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse', 'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
+            'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io']]);
+        app(OpportunityImporter::class)->run($source);
+        [$first, $second] = OpportunitySource::orderByDesc('id')->take(2)->get();
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+
+        $this->actingAs($admin)->get(route('imports.items.show', $first))->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->component('Opportunities/Show')
+            ->where('opportunity.title', $first->normalized_data['title'])
+            ->where('opportunity.description', fn ($text) => str_contains($text, 'React product features'))
+            ->where('review.state', 'review')->where('review.next_id', $second->id)
+            ->where('review.source.can_trust', true)->where('review.source.trusted', false));
+        $this->actingAs(User::factory()->create())->get(route('imports.items.show', $first))->assertForbidden();
+        $this->assertSame(0, Opportunity::count());
+
+        $this->actingAs($admin)->post(route('imports.items.trust', $first))->assertSessionHasNoErrors();
+
+        $this->assertSame(3, Opportunity::count());
+        $this->assertTrue(CompanyRegistry::trusted($source->fresh()));
+        $this->assertSame('automatic', $source->fresh()->publication_mode);
+        $this->assertSame(['published'], OpportunitySource::distinct()->pluck('state')->all());
+    }
+
     public function test_linking_keeps_a_board_its_company_site_links_to_and_pauses_one_it_does_not(): void
     {
         Http::fake([
@@ -241,6 +289,26 @@ class CompanyRegistryTest extends TestCase
             'output' => $output ?? [['type' => 'message', 'id' => 'msg_1', 'role' => 'assistant', 'status' => 'completed',
                 'content' => [['type' => 'output_text', 'text' => json_encode($data), 'annotations' => []]]]],
             'usage' => ['input_tokens' => 100, 'output_tokens' => 20, 'total_tokens' => 120]];
+    }
+
+    // The AI review rates each listing by its title.
+    private function rate(array $quality): void
+    {
+        $classifier = new class extends OpportunityClassifier {
+            public array $quality = [];
+
+            public function enabled(): bool { return true; }
+
+            public function classifyMany(array $listings, array $fields, array $skills = []): array
+            {
+                return array_map(fn ($data) => ['in_scope' => true, 'quality' => $this->quality[$data['title']] ?? 'weak', 'quality_reason' => '', 'field' => 'Web Development',
+                    'kind' => 'job', 'seniority' => 'mid', 'work_type' => 'remote', 'employment_types' => [], 'program_type' => 'none', 'skills' => [],
+                    'applicant_scope' => 'unknown', 'eligible_countries' => [], 'excluded_countries' => [], 'tunisia' => 'unknown', 'relocation' => 'unknown',
+                    'visa_sponsorship' => 'unknown', 'evidence' => '', 'model' => 'test'], $listings);
+            }
+        };
+        $classifier->quality = $quality;
+        $this->app->instance(OpportunityClassifier::class, $classifier);
     }
 
     private function source(array $attributes): ImportSource

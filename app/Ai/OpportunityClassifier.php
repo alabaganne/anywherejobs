@@ -97,6 +97,7 @@ class OpportunityClassifier
             'Description:',
             // The start of a listing is enough to sort it.
             Str::limit($data['description'], 12000),
+            ...(empty($data['page_check']['post']) ? [] : ['', 'Hiring post:', Str::limit($data['page_check']['post'], 2000)]),
         ]);
     }
 }

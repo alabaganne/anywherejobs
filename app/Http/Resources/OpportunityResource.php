@@ -11,7 +11,7 @@ class OpportunityResource extends JsonResource
     public function toArray($request)
     {
         $user = $request->user();
-        $detail = $request->routeIs('opportunities.show', 'app.opportunities.show', 'fr.opportunity');
+        $detail = $request->routeIs('opportunities.show', 'app.opportunities.show', 'fr.opportunity', 'imports.items.show');
         $locale = $request->is('fr', 'fr/*') ? 'fr' : 'en';
         $candidate = $user && $user->isCandidate() ? $user->userable : null;
         $application = $candidate && $this->relationLoaded('candidateApplications')
@@ -48,7 +48,8 @@ class OpportunityResource extends JsonResource
             'kind' => $this->kind,
             'origin' => $this->origin,
             'application_mode' => $this->application_mode,
-            'application_url' => $this->application_url,
+            // Visitors sign up before they go to the employer's page.
+            'application_url' => $user ? $this->application_url : null,
             'publication_status' => $this->publication_status,
             'status' => $this->status,
             'closing_at' => $this->closing_at?->format('F d, Y'),
@@ -94,7 +95,7 @@ class OpportunityResource extends JsonResource
             'last_verified_at' => $this->last_verified_at?->toIso8601String(),
             'last_verified_label' => $this->last_verified_at?->diffForHumans(),
             'source_name' => $source?->importSource?->name ?? ($this->origin === 'native' ? __('Posted on :app', ['app' => config('app.name')]) : null),
-            'source_url' => $source?->source_url,
+            'source_url' => $user ? $source?->source_url : null,
             'company' => [
                 'id' => $company?->id,
                 'user_id' => $companyUser?->id,

@@ -31,9 +31,9 @@ class FetchOpportunities extends Command
         [$focus, $focusFields] = $focus;
         $days = filter_var($this->option('days') ?? config('importer.fetch_max_age_days'), FILTER_VALIDATE_INT);
         if (! $days || $days < 1) { $this->error('Days must be a whole number above 0.'); return self::FAILURE; }
-        $profiles = $this->option('everyone') ? new CandidateProfiles() : CandidateProfiles::load();
+        $profiles = $this->option('everyone') ? new CandidateProfiles() : CandidateProfiles::forImports();
         if ($profiles->isEmpty()) {
-            $this->line($this->option('everyone') ? 'Adding IT listings for everyone.' : 'No candidate profile has fields or skills yet, so any IT listing can be added. Read a resume with php artisan opportunities:profile.');
+            $this->line($this->option('everyone') || ! config('importer.profiles.enabled') ? 'Adding IT listings for everyone.' : 'No candidate profile has fields or skills yet, so any IT listing can be added. Read a resume with php artisan opportunities:profile.');
         } else {
             $summary = $profiles->summary();
             $this->line(sprintf('Matching listings posted in the last %d days against %d candidate %s.', $days, count($profiles->profiles), str('profile')->plural(count($profiles->profiles))));

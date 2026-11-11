@@ -18,7 +18,9 @@ Route::middleware(['auth', 'admin'])->prefix('app/admin/imports')->group(functio
     Route::put('/sources/{source}', [ImportAdminController::class, 'updateSource'])->name('imports.sources.update');
     Route::post('/fetch', [ImportAdminController::class, 'fetch'])->middleware('throttle:6,1,import-fetch')->name('imports.fetch');
     Route::post('/sources/{source}/run', [ImportAdminController::class, 'runSource'])->middleware('throttle:10,1,import-run')->name('imports.sources.run');
+    Route::get('/items/{item}', [ImportAdminController::class, 'item'])->name('imports.items.show');
     Route::post('/items/{item}/publish', [ImportAdminController::class, 'publish'])->name('imports.items.publish');
+    Route::post('/items/{item}/trust', [ImportAdminController::class, 'trust'])->name('imports.items.trust');
     Route::post('/items/{item}/reject', [ImportAdminController::class, 'reject'])->name('imports.items.reject');
     Route::put('/opportunities/{opportunity}', [ImportAdminController::class, 'moderate'])->name('imports.opportunities.moderate');
     Route::post('/opportunities/{opportunity}/merge', [ImportAdminController::class, 'merge'])->name('imports.opportunities.merge');

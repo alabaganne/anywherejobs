@@ -24,8 +24,8 @@ class OpportunityImporter
     // $focus is a full title regex: only matching listings are checked, the rest wait for the daily import.
     // $focusFields then keeps only listings sorted into those fields; the others also wait for the daily import.
     // Every run also keeps to importer.scope: new listings outside it are rejected for good.
-    // New listings no candidate profile wants wait as "unmatched" and are checked again on each refresh; $profiles
-    // defaults to the profiles in the system. $maxAgeDays skips listings older than that without rejecting them.
+    // With profile matching on, new listings no candidate profile wants wait as "unmatched" and are checked again on each
+    // refresh; $profiles defaults to the profiles in the system. $maxAgeDays skips listings older than that without rejecting them.
     public function run(ImportSource $source, int $limit = 40, bool $dryRun = false, bool $recheck = false, bool $onlyNew = false, ?int $maxNew = null, ?string $focus = null, ?array $focusFields = null, ?CandidateProfiles $profiles = null, ?int $maxAgeDays = null): array
     {
         if (! $source->isApproved()) { throw new RuntimeException('Source must be enabled with approved reuse permission.'); }
@@ -275,14 +275,14 @@ class OpportunityImporter
                     $stats['rejected']++;
                 } elseif ($source->publication_mode === 'leads') {
                     $item->update(['state' => 'lead', 'error' => null]);
-                } elseif (! $trusted && ! $item->opportunity_id) {
+                } elseif (! $trusted && ! self::good($data) && ! $item->opportunity_id) {
                     $item->update(['state' => 'review', 'error' => 'Not linked from a checked company website.']);
                 } elseif (! $item->opportunity_id && ($check = $this->companyCheck($source, $item, $data))) {
                     if ($check === 'rejected') {
                         $item->update(['state' => 'rejected', 'error' => 'Company website not found.']);
                         $stats['rejected']++;
                     }
-                } elseif ($source->publication_mode === 'automatic' || $item->opportunity_id) {
+                } elseif ($source->publication_mode === 'automatic' || $item->opportunity_id || self::good($data)) {
                     $role = $this->publish($item);
                     if ($role->wasRecentlyCreated) { $newIds[] = $role->id; }
                     $stats['published']++;
@@ -296,6 +296,12 @@ class OpportunityImporter
                 $stats['rejected']++;
             }
         }
+    }
+
+    // The AI rated it a good listing: it goes live from any approved source once its company is checked; weak ones wait for review.
+    public static function good(array $data): bool
+    {
+        return ($data['quality'] ?? null) === 'good';
     }
 
     // A new imported listing waits until its company's own website is found and checked; after two failed tries it is rejected.
@@ -319,7 +325,7 @@ class OpportunityImporter
         OpportunitySource::where('state', 'waiting')->where('company_id', $company->id)->with('importSource')->get()->each(function (OpportunitySource $item) use ($company, $verified) {
             if ($verified) {
                 try {
-                    $item->importSource->publication_mode === 'automatic' ? $this->publish($item) : $item->update(['state' => 'review', 'error' => null]);
+                    $item->importSource->publication_mode === 'automatic' || self::good($item->normalized_data ?? []) ? $this->publish($item) : $item->update(['state' => 'review', 'error' => null]);
                 } catch (Throwable $e) {
                     $item->update(['state' => 'review', 'error' => Str::limit($e->getMessage(), 1000)]);
                 }
@@ -398,6 +404,23 @@ class OpportunityImporter
             $item->update(['opportunity_id' => $opportunity->id, 'state' => 'published', 'content_hash' => $hash, 'error' => null]);
             return $opportunity;
         });
+    }
+
+    // The listing as its page would show it once published, for the review queue. Nothing is saved.
+    public function preview(OpportunitySource $item): Opportunity
+    {
+        if ($item->opportunity) { return $item->opportunity->load(['company.user', 'company.city', 'field', 'city', 'skills', 'sources.importSource', 'translations']); }
+        $data = $item->normalized_data;
+        $source = $item->importSource;
+        $company = $source->company ?? Company::find($item->company_id) ?? Company::where('name', $data['employer'])->first()
+            ?? (new Company())->forceFill(['name' => $data['employer'], 'website' => $data['website'] ?? null]);
+        $role = (new Opportunity())->fill(collect($data)->except(['employer', 'website', 'requisition_id', 'page_check'])->all());
+        $role->forceFill(['company_id' => $company->id, 'field_id' => $this->classify($data), 'origin' => 'imported', 'application_mode' => 'external',
+            'status' => 'open', 'publication_status' => 'draft', 'first_seen_at' => $item->first_seen_at, 'last_verified_at' => $item->last_verified_at]);
+        $skills = $data['skills'] ?? (new OpportunityNormalizer())->skills($data['title'], $data['description']);
+        return $role->setRelation('company', $company)->setRelation('field', Field::find($role->field_id))->setRelation('city', null)
+            ->setRelation('skills', collect(array_slice($skills, 0, 15))->map(fn ($name) => (new Skill())->forceFill(['name' => $name])))
+            ->setRelation('sources', collect([$item]))->setRelation('translations', collect());
     }
 
     // Applies a new AI answer to a published listing; facts a moderator corrected stay as they are.

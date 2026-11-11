@@ -35,8 +35,8 @@ You check job links for :site, an IT job board. Someone posted on a job board (o
 - title: the role's title as the page writes it, or the post when the page has several roles; empty unless the verdict is "job".
 - employer: the hiring company's name, without "Inc" or "Ltd"; empty when unknown.
 - employer_site: true when the page is on the employer's own website, false when it is on a job board, ATS or hosting site.
-- location: where the role is based, as written, for example "Berlin, Germany" or "Remote (EU)"; empty when not given.
-- work_type: "remote", "hybrid" or "onsite" when the page or post says so, otherwise "unknown".
+- location: where the role is based, as written on the page or else in the post, keeping any limit on who can apply, for example "Berlin, Germany", "Remote (EU)", "Remote (US only)", "Remote (worldwide)" or "Berlin or Remote (Europe)"; empty when not given.
+- work_type: "remote", "hybrid" or "onsite" when the page or post says so, otherwise "unknown". Posts write it in capitals: "REMOTE", "ONSITE", "HYBRID". When the role can be remote or on site, answer "remote".
 - employment_types: the contract types stated; empty when not given.
 PROMPT);
     }

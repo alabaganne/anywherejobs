@@ -160,6 +160,39 @@ class LinkedPagesTest extends TestCase
         $this->assertSame('The AI check failed, so the page is read later.', $item->error);
     }
 
+    public function test_a_real_job_the_ai_rates_good_goes_live_and_its_review_reads_the_post(): void
+    {
+        $classifier = new class extends OpportunityClassifier {
+            public array $seen = [];
+
+            public function enabled(): bool { return true; }
+
+            public function classifyMany(array $listings, array $fields, array $skills = []): array
+            {
+                $this->seen = [...$this->seen, ...array_values($listings)];
+                return array_map(fn () => ['in_scope' => true, 'quality' => 'good', 'quality_reason' => '', 'field' => 'Web Development', 'kind' => 'job',
+                    'seniority' => 'senior', 'work_type' => 'remote', 'employment_types' => ['FULL_TIME'], 'program_type' => 'none', 'skills' => [],
+                    'applicant_scope' => 'listed', 'eligible_countries' => ['US'], 'excluded_countries' => [], 'tunisia' => 'no', 'relocation' => 'unknown',
+                    'visa_sponsorship' => 'unknown', 'evidence' => 'REMOTE (US only)', 'model' => 'test'], $listings);
+            }
+        };
+        $this->app->instance(OpportunityClassifier::class, $classifier);
+        $this->fakeThread([
+            $this->hnPost('6010', 'Acme | Senior Backend Engineer | REMOTE (US only) | Full-time <a href="https:&#x2F;&#x2F;acme.dev&#x2F;jobs&#x2F;backend">apply</a>'),
+        ], ['https://acme.dev/jobs/backend' => '<html><title>Backend Engineer</title><body><main><h1>Senior Backend Engineer</h1><p>'.$this->body.'</p></main></body></html>']);
+        $this->ai->answers = ['https://acme.dev/jobs/backend' => ['verdict' => 'job', 'reason' => 'Job posting for a Senior Backend Engineer at Acme.',
+            'title' => 'Senior Backend Engineer', 'employer' => 'Acme', 'employer_site' => true, 'location' => 'Remote (US only)', 'work_type' => 'remote']];
+
+        $item = $this->runPages()->items()->sole();
+
+        $this->assertSame('published', $item->state);
+        $this->assertSame(['listed', ['US']], [$item->opportunity->applicant_scope, $item->opportunity->eligible_countries]);
+        $listing = collect($classifier->seen)->first(fn ($data) => isset($data['page_check']));
+        $this->assertStringContainsString('REMOTE (US only)', $listing['page_check']['post']);
+        $prompt = (new \ReflectionMethod(OpportunityClassifier::class, 'listing'))->invoke($classifier, $listing);
+        $this->assertStringContainsString("Hiring post:\nAcme | Senior Backend Engineer | REMOTE (US only)", $prompt);
+    }
+
     public function test_the_seeded_source_reads_hacker_news_links_for_review(): void
     {
         $this->seed(ImportSourceSeeder::class);

@@ -22,6 +22,7 @@ class RegisteredUserController extends Controller
      */
     public function create(Request $request)
     {
+        $this->rememberNext($request);
         return Inertia::render('Auth/Register', [
             'fields' => Field::select('id', 'name')->orderBy('name')->get(),
             'accountType' => $request->query('account') === 'company' ? 'company' : 'candidate',
@@ -126,6 +127,6 @@ class RegisteredUserController extends Controller
                 'type' => 'store',
                 'message' => 'Company profile completed. You can now post internships and jobs.'
             ])
-            : redirect(route('dashboard', absolute: false));
+            : redirect()->intended(route('dashboard', absolute: false));
     }
 }

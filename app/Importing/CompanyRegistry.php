@@ -122,6 +122,8 @@ class CompanyRegistry
     // Whether imports may publish this source's new listings: a followed, checked company whose own site links to it.
     public static function trusted(ImportSource $source): bool
     {
+        // An admin trusted it from the review queue.
+        if (! empty($source->settings['trusted'])) { return true; }
         $company = $source->company;
         if ($company?->claimed_by_company_id) { $company = Company::find($company->claimed_by_company_id) ?? $company; }
         if (! $company) { return false; }
