@@ -283,6 +283,14 @@ class ApplicationKitTest extends TestCase
         $this->assertNull($kit->fresh()->cv);
     }
 
+    public function test_visitors_see_the_cv_and_letter_tools_locked_and_get_no_kit_data(): void
+    {
+        $role = $this->role();
+        $this->get($role->public_url)->assertOk()->assertInertia(fn ($page) => $page
+            ->where('kits', [])->where('kitThemes', [])->where('billing.signup', config('billing.signup_credits')));
+        $this->postJson("/app/opportunities/{$role->id}/kit", ['locale' => 'en', 'part' => 'cv'])->assertUnauthorized();
+    }
+
     private function candidate(): User
     {
         return User::where('email', 'student@example.com')->firstOrFail();

@@ -101,6 +101,7 @@ class HandleInertiaRequests extends Middleware
             'billing' => [
                 'enabled' => (bool) config('billing.enabled'),
                 'free' => $user ? app(\App\Billing\Credits::class)->isFree($user) : false,
+                'signup' => (int) config('billing.signup_credits'),
                 'monthly' => (int) config('billing.monthly_credits'),
                 'rewrites' => (int) config('billing.rewrites_per_kit'),
                 'beta' => app(\App\Billing\Credits::class)->beta(),
