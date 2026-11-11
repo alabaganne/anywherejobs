@@ -53,13 +53,13 @@ textarea {
 	@apply outline-2 outline-offset-2 outline-brand;
 }
 .cta-primary {
-	@apply border-brand bg-brand text-white hover:bg-transparent hover:text-navy;
+	@apply border-brand bg-brand text-white hover:border-brand-dark hover:bg-brand-dark;
 }
 .cta-secondary {
 	@apply border-brand bg-white text-navy hover:bg-brand hover:text-white;
 }
 .cta-light {
-	@apply border-white bg-white text-brand hover:bg-transparent hover:text-white;
+	@apply border-white bg-white text-brand hover:border-pale hover:bg-pale hover:text-brand-dark;
 }
 .cta-ghost {
 	@apply border-white/70 bg-transparent text-white hover:border-white hover:bg-white hover:text-brand;
