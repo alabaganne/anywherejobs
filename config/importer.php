@@ -19,9 +19,9 @@ return [
     'same_title' => 0.9,
     // New imported listings wait until their company's website is found and checked.
     'verify_companies' => (bool) env('OPPORTUNITY_VERIFY_COMPANIES', true),
-    // New listings are only published from sources of followed companies whose own website links to them
-    // (`companies:discover`, `companies:link-sources`); the rest go to the review queue.
-    'trusted_sources' => (bool) env('OPPORTUNITY_TRUSTED_SOURCES', true),
+    // New listings go live at most this many a day (Tunis time), the best first (`opportunities:publish-queued`); the rest
+    // wait as "queued" for a later day, and a day can pass with none. 0 publishes new listings as soon as they are found.
+    'daily_limit' => (int) env('OPPORTUNITY_DAILY_LIMIT', 25),
     // The companies the site follows: how many new ones the AI looks for each day, and what to look for.
     'registry' => [
         'per_day' => (int) env('COMPANY_REGISTRY_PER_DAY', 2),

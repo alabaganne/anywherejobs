@@ -12,6 +12,7 @@ use App\Models\Opportunity;
 use App\Models\OpportunitySource;
 use App\Models\Skill;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -148,7 +149,7 @@ class OpportunityImporter
             $batch = max(1, (int) config('importer.ai.batch_size', 10));
             foreach ($items as $item) {
                 if ($waiting && ($maxNew && count($newIds) + count($waiting) >= $maxNew)) {
-                    $this->finish($waiting, $source, $scopeFields, $focusFields, $profiles, $stats, $newIds);
+                    $this->finish($waiting, $source, $scopeFields, $focusFields, $profiles, $stats, $newIds, (bool) $maxNew);
                     $waiting = [];
                 }
                 if (microtime(true) > $deadline || ($maxNew && count($newIds) >= $maxNew)) { break; }
@@ -184,7 +185,7 @@ class OpportunityImporter
                     } else {
                         $waiting[] = [$item, $data];
                         if (count($waiting) >= $batch) {
-                            $this->finish($waiting, $source, $scopeFields, $focusFields, $profiles, $stats, $newIds);
+                            $this->finish($waiting, $source, $scopeFields, $focusFields, $profiles, $stats, $newIds, (bool) $maxNew);
                             $waiting = [];
                         }
                     }
@@ -208,7 +209,7 @@ class OpportunityImporter
                     $stats['rejected']++;
                 }
             }
-            $this->finish($waiting, $source, $scopeFields, $focusFields, $profiles, $stats, $newIds);
+            $this->finish($waiting, $source, $scopeFields, $focusFields, $profiles, $stats, $newIds, (bool) $maxNew);
             if ($discover && $stats['complete'] && $snapshot['authoritative']) {
                 $missing = $source->items()->where('last_discovered_at', '<', $started)->whereNotIn('state', ['closed', 'rejected'])->get();
                 foreach ($missing as $item) {
@@ -250,9 +251,10 @@ class OpportunityImporter
         }
     }
 
-    // The AI reads every listing in $waiting that it has not read before in one batch, then each one is checked and published.
-    // The answer is kept with the listing, so later refreshes do not ask again.
-    private function finish(array $waiting, ImportSource $source, ?array $scopeFields, ?array $focusFields, ?CandidateProfiles $profiles, array &$stats, array &$newIds): void
+    // The AI reads every listing in $waiting that it has not read before in one batch, then each one is checked.
+    // The answer is kept with the listing, so later refreshes do not ask again. Listings already online are updated; new ones
+    // are queued for the daily publish (importer.daily_limit), unless $now (a fetch the owner started) adds them right away.
+    private function finish(array $waiting, ImportSource $source, ?array $scopeFields, ?array $focusFields, ?CandidateProfiles $profiles, array &$stats, array &$newIds, bool $now = false): void
     {
         if (! $waiting) { return; }
         $classifier = app(OpportunityClassifier::class);
@@ -260,8 +262,6 @@ class OpportunityImporter
         $reviews = $ask && $classifier->enabled()
             ? $classifier->classifyMany(array_map(fn ($pair) => $pair[1], $ask), $this->fieldNames(), $this->skillNames())
             : [];
-        // New listings are only published from a followed company whose own website links to the source.
-        $trusted = $source->publication_mode === 'leads' || ! config('importer.trusted_sources') || CompanyRegistry::trusted($source);
         foreach ($waiting as $key => [$item, $data]) {
             try {
                 if (isset($reviews[$key])) { $item->ai_review = $reviews[$key]; }
@@ -282,19 +282,17 @@ class OpportunityImporter
                     $stats['rejected']++;
                 } elseif ($source->publication_mode === 'leads') {
                     $item->update(['state' => 'lead', 'error' => null]);
-                } elseif (! $trusted && ! self::good($data) && ! $item->opportunity_id) {
-                    $item->update(['state' => 'review', 'error' => 'Not linked from a checked company website.']);
                 } elseif (! $item->opportunity_id && ($check = $this->companyCheck($source, $item, $data))) {
                     if ($check === 'rejected') {
                         $item->update(['state' => 'rejected', 'error' => 'Company website not found.']);
                         $stats['rejected']++;
                     }
-                } elseif ($source->publication_mode === 'automatic' || $item->opportunity_id || self::good($data)) {
+                } elseif ($item->opportunity_id || $now || ! config('importer.daily_limit')) {
                     $role = $this->publish($item);
                     if ($role->wasRecentlyCreated) { $newIds[] = $role->id; }
                     $stats['published']++;
                 } else {
-                    $item->update(['state' => 'review']);
+                    $item->update(['state' => 'queued', 'error' => null]);
                 }
             } catch (\Illuminate\Database\QueryException $e) {
                 throw $e;
@@ -305,7 +303,7 @@ class OpportunityImporter
         }
     }
 
-    // The AI rated it a good listing: it goes live from any approved source once its company is checked; weak ones wait for review.
+    // The AI rated it a good listing: it is published before weak ones.
     public static function good(array $data): bool
     {
         return ($data['quality'] ?? null) === 'good';
@@ -324,7 +322,7 @@ class OpportunityImporter
         return 'waiting';
     }
 
-    // Listings that waited for this company's check: published (or sent to review) when it passed, rejected after two failed tries.
+    // Listings that waited for this company's check: queued for the daily publish when it passed, rejected after two failed tries.
     public function release(Company $company): void
     {
         $company->refresh();
@@ -332,7 +330,7 @@ class OpportunityImporter
         OpportunitySource::where('state', 'waiting')->where('company_id', $company->id)->with('importSource')->get()->each(function (OpportunitySource $item) use ($company, $verified) {
             if ($verified) {
                 try {
-                    $item->importSource->publication_mode === 'automatic' || self::good($item->normalized_data ?? []) ? $this->publish($item) : $item->update(['state' => 'review', 'error' => null]);
+                    config('importer.daily_limit') ? $item->update(['state' => 'queued', 'error' => null]) : $this->publish($item);
                 } catch (Throwable $e) {
                     $item->update(['state' => 'review', 'error' => Str::limit($e->getMessage(), 1000)]);
                 }
@@ -340,6 +338,43 @@ class OpportunityImporter
                 $item->update(['state' => 'rejected', 'error' => 'Company website not found.']);
             }
         });
+    }
+
+    // Publishes queued listings until today's new roles (Tunis time) reach the limit: first the ones the AI rated good or
+    // from a trusted source, then roles open to people in Tunisia, newest first. A day with nothing queued adds nothing.
+    public function publishQueued(?int $limit = null): array
+    {
+        $left = ($limit ?? (int) config('importer.daily_limit'))
+            - Opportunity::where('origin', 'imported')->where('created_at', '>=', now(config('importer.timezone'))->startOfDay())->count();
+        if ($left <= 0) { return []; }
+        $ranks = []; $trusted = [];
+        OpportunitySource::where('state', 'queued')->with('importSource')->lazyById(200)->each(function (OpportunitySource $item) use (&$ranks, &$trusted) {
+            $source = $item->importSource;
+            // Listings no longer verified recently wait for their next refresh.
+            if (! $item->last_verified_at || $item->last_verified_at->lt(now()->subHours($source->freshnessHours()))) { return; }
+            $data = $item->normalized_data ?? [];
+            $trusted[$source->id] ??= CompanyRegistry::trusted($source);
+            $role = (new Opportunity())->forceFill(Arr::only($data, ['country_code', 'eligible_countries', 'excluded_countries', 'relocation',
+                'visa_sponsorship', 'work_type', 'remote_eligibility', 'applicant_scope']));
+            $ranks[$item->id] = [self::good($data) || $trusted[$source->id] ? 0 : 1, $role->closedToTunisia() ? 1 : 0,
+                -(strtotime((string) ($data['posted_at'] ?? '')) ?: $item->first_seen_at?->timestamp ?? 0)];
+        });
+        asort($ranks);
+        $added = [];
+        foreach (array_keys($ranks) as $id) {
+            if (count($added) >= $left) { break; }
+            $item = OpportunitySource::find($id);
+            if ($item?->state !== 'queued') { continue; }
+            try {
+                $role = $this->publish($item);
+                if ($role->wasRecentlyCreated) { $added[] = $role->id; }
+            } catch (\Illuminate\Database\QueryException $e) {
+                throw $e;
+            } catch (Throwable $e) {
+                $item->update(['state' => 'review', 'error' => Str::limit($e->getMessage(), 1000)]);
+            }
+        }
+        return $added;
     }
 
     public function publish(OpportunitySource $item): Opportunity

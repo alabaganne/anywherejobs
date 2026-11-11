@@ -4,7 +4,7 @@ Unfinished work, small fixes and chores that are not on the roadmap (`FUTURE_PLA
 
 ## Move the server to the company registry
 
-New listings are published from sources of followed companies (`importer.trusted_sources`), from sources an admin trusted, or when the AI rates them good. Until older sources are linked, their weak listings wait in the review queue.
+New listings wait for the daily publish (at most 25 a day, `importer.daily_limit`); listings from sources of followed companies or sources an admin trusted, and the ones the AI rates good, go first.
 
 To do:
 - After deploying, run `php artisan migrate --force`, then `php artisan companies:link-sources --limit=100`. It checks each source's company website (AI and web requests) and links or pauses the source; `--dry-run` only covers companies already checked. A paused source can be turned back on under Sources.

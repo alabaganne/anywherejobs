@@ -86,7 +86,7 @@ class ImportAdminController extends Controller
     {
         $filters = $request->validate([
             'source_id' => 'nullable|integer|exists:import_sources,id',
-            'state' => 'nullable|in:all,pending,review,waiting,unmatched,lead,published,closed,rejected',
+            'state' => 'nullable|in:all,pending,review,queued,waiting,unmatched,lead,published,closed,rejected',
             'page' => 'nullable|integer|min:1|max:10000',
         ]);
         $filters['state'] ??= 'review';
@@ -243,7 +243,7 @@ class ImportAdminController extends Controller
         abort_unless($item->normalized_data, 404);
         $filters = $request->validate([
             'source_id' => 'nullable|integer',
-            'state' => 'nullable|in:all,pending,review,waiting,unmatched,lead,published,closed,rejected',
+            'state' => 'nullable|in:all,pending,review,queued,waiting,unmatched,lead,published,closed,rejected',
         ]);
         $filters['state'] ??= 'review';
         $item->load('importSource', 'opportunity');

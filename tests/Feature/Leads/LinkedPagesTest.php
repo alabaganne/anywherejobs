@@ -70,8 +70,9 @@ class LinkedPagesTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_the_ai_follows_a_post_link_to_the_job_page_and_sends_it_to_review(): void
+    public function test_the_ai_follows_a_post_link_to_the_job_page_and_queues_it(): void
     {
+        config(['importer.daily_limit' => 25]);
         $this->fakeThread([
             $this->hnPost('6001', 'Acme | Backend Engineer | Berlin | VISA <a href="https:&#x2F;&#x2F;acme.dev&#x2F;">acme.dev</a> <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;founder">me</a>'),
         ], [
@@ -90,7 +91,7 @@ class LinkedPagesTest extends TestCase
 
         $item = $pages->items()->sole();
         $this->assertSame('https://acme.dev/', $item->source_url);
-        $this->assertSame('review', $item->state);
+        $this->assertSame('queued', $item->state);
         $this->assertSame(['Backend Engineer', 'Acme', 'DE', 'onsite'], [$item->normalized_data['title'], $item->normalized_data['employer'], $item->normalized_data['country_code'], $item->normalized_data['work_type']]);
         $this->assertSame('https://acme.dev/careers/backend-engineer', $item->normalized_data['application_url']);
         $this->assertSame('https://news.ycombinator.com/item?id=6001', $item->normalized_data['page_check']['post_url']);
@@ -103,7 +104,7 @@ class LinkedPagesTest extends TestCase
 
         $admin = User::factory()->create();
         $admin->forceFill(['is_admin' => true])->save();
-        $this->actingAs($admin)->get(route('imports.review'))->assertOk()
+        $this->actingAs($admin)->get(route('imports.review', ['state' => 'queued']))->assertOk()
             ->assertInertia(fn ($page) => $page->where('items.data.0.post_url', 'https://news.ycombinator.com/item?id=6001'));
         $this->actingAs($admin)->post(route('imports.items.publish', $item))->assertSessionHasNoErrors();
         $role = $item->fresh()->opportunity;
@@ -193,11 +194,45 @@ class LinkedPagesTest extends TestCase
         $this->assertStringContainsString("Hiring post:\nAcme | Senior Backend Engineer | REMOTE (US only)", $prompt);
     }
 
-    public function test_the_seeded_source_reads_hacker_news_links_for_review(): void
+    public function test_workable_and_welcome_to_the_jungle_jobs_are_read_from_their_job_data(): void
+    {
+        $this->fakeThread([
+            $this->hnPost('6002', 'Acme | Backend Engineer | Remote <a href="https:&#x2F;&#x2F;apply.workable.com&#x2F;acme&#x2F;j&#x2F;ABC123&#x2F;">Workable</a>'),
+            $this->hnPost('6003', 'Acme | Developpeur Laravel | Paris <a href="https:&#x2F;&#x2F;www.welcometothejungle.com&#x2F;fr&#x2F;companies&#x2F;acme&#x2F;jobs&#x2F;developpeur-laravel_paris">WTTJ</a>'),
+        ], [
+            'https://apply.workable.com/api/v2/accounts/acme/jobs/ABC123' => ['title' => 'Backend Engineer', 'workplace' => 'remote', 'type' => 'full',
+                'published' => '2026-10-20T00:00:00.000Z', 'language' => 'en', 'locations' => [['city' => '', 'region' => null, 'country' => 'Germany']],
+                'description' => '<p>'.$this->body.'</p>', 'requirements' => '<ul><li>Five years of PHP</li></ul>', 'benefits' => ''],
+            'https://apply.workable.com/api/v1/accounts/acme' => ['name' => 'Acme GmbH', 'url' => 'https://acme.dev'],
+            'https://api.welcometothejungle.com/api/v1/organizations/acme/jobs/developpeur-laravel_paris' => ['job' => ['name' => 'Développeur Laravel',
+                'organization' => ['name' => 'Acme'], 'published_at' => '2026-10-21T08:00:00Z', 'language' => 'fr', 'contract_type' => 'full_time', 'remote' => 'partial',
+                'offices' => [['city' => 'Paris', 'country_code' => 'FR']], 'description' => '<p>'.$this->body.'</p>', 'profile' => '<p>Trois ans de Laravel.</p>']],
+        ]);
+        $workable = 'https://apply.workable.com/acme/j/ABC123/';
+        $wttj = 'https://www.welcometothejungle.com/fr/companies/acme/jobs/developpeur-laravel_paris';
+        $this->ai->answers = [
+            $workable => ['verdict' => 'job', 'reason' => 'Backend role.', 'title' => 'Backend Engineer', 'employer' => 'Acme GmbH', 'location' => 'Germany', 'work_type' => 'remote'],
+            $wttj => ['verdict' => 'job', 'reason' => 'Laravel role.', 'title' => 'Développeur Laravel', 'employer' => 'Acme', 'location' => 'Paris, France', 'work_type' => 'hybrid'],
+        ];
+
+        $pages = $this->runPages();
+
+        $pages = $pages->items()->get()->keyBy('source_url');
+        $this->assertSame(['published', 'published'], [$pages[$workable]->state, $pages[$wttj]->state]);
+        $this->assertStringContainsString('Acme GmbH · Germany · Remote · Full time', $this->ai->calls[0]['page']['text']);
+        $this->assertStringContainsString('Five years of PHP', $pages[$workable]->normalized_data['description']);
+        $this->assertSame([$workable, '2026-10-20'], [$pages[$workable]->normalized_data['application_url'], substr($pages[$workable]->normalized_data['posted_at'], 0, 10)]);
+        $this->assertStringContainsString('Profil recherché', $pages[$wttj]->normalized_data['description']);
+        $this->assertStringContainsString('Trois ans de Laravel', $pages[$wttj]->normalized_data['description']);
+        // The site turns bots away, so its pages are never opened.
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), 'www.welcometothejungle.com'));
+    }
+
+    public function test_the_seeded_source_reads_hacker_news_links(): void
     {
         $this->seed(ImportSourceSeeder::class);
         $source = ImportSource::where('key', 'linked-job-pages')->sole();
-        $this->assertSame(['pages', 'review', [], true], [$source->provider, $source->publication_mode, $source->allowed_domains, $source->isApproved()]);
+        $this->assertSame(['pages', 'automatic', [], true], [$source->provider, $source->publication_mode, $source->allowed_domains, $source->isApproved()]);
     }
 
     private function hnPost(string $id, string $text): array
@@ -218,7 +253,7 @@ class LinkedPagesTest extends TestCase
     private function runPages(): ImportSource
     {
         $pages = ImportSource::firstOrCreate(['key' => 'linked-job-pages'], ['name' => 'Linked pages', 'provider' => 'pages', 'url' => 'https://news.ycombinator.com/',
-            'allowed_domains' => [], 'permission_status' => 'approved', 'permission_notes' => 'Test source.', 'publication_mode' => 'review', 'enabled' => true,
+            'allowed_domains' => [], 'permission_status' => 'approved', 'permission_notes' => 'Test source.', 'publication_mode' => 'automatic', 'enabled' => true,
             'cadence_hours' => 24, 'request_delay_ms' => 0, 'max_requests' => 100, 'settings' => ['scope' => 'all']]);
         app(OpportunityImporter::class)->run($pages->fresh(), recheck: true);
         return $pages;

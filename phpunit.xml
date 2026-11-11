@@ -33,7 +33,7 @@
         <env name="OPENAI_API_KEY" value=""/>
         <env name="OPPORTUNITY_AI_ENABLED" value="false"/>
         <env name="OPPORTUNITY_VERIFY_COMPANIES" value="false"/>
-        <env name="OPPORTUNITY_TRUSTED_SOURCES" value="false"/>
+        <env name="OPPORTUNITY_DAILY_LIMIT" value="0"/>
         <env name="CV_PDF_FAKE" value="true"/>
         <env name="BILLING_ENABLED" value="false"/>
         <env name="BILLING_BETA" value="false"/>

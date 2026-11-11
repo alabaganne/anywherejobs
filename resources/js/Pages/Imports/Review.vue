@@ -15,6 +15,7 @@ const { text, dateLocale } = useText();
 
 const states = computed(() => [
     { key: 'review', label: text('Waiting for review', 'En attente de validation') },
+    { key: 'queued', label: text('Next to publish', 'Prochaines à publier') },
     { key: 'pending', label: text('Not read yet', 'Pas encore lue') },
     { key: 'published', label: text('Published', 'Publiée') },
     { key: 'waiting', label: text('Waiting for company check', 'En attente de la vérification de l’entreprise') },

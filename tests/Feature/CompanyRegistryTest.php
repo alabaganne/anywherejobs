@@ -59,7 +59,6 @@ class CompanyRegistryTest extends TestCase
         $this->assertSame(['greenhouse-acme', 'approved', true, $company->id], [$source->key, $source->permission_status, $source->enabled, $source->company_id]);
         $this->assertSame('https://acme.dev/careers', $source->settings['linked_from']);
 
-        config(['importer.trusted_sources' => true]);
         app(OpportunityImporter::class)->run($source);
         $role = Opportunity::sole();
         $this->assertSame([$company->id, 'Frontend Engineer'], [$role->company_id, $role->title]);
@@ -139,45 +138,51 @@ class CompanyRegistryTest extends TestCase
         $this->assertStringNotContainsString('Imprint', $data['description']);
     }
 
-    public function test_new_listings_from_a_source_no_followed_company_links_to_go_to_review(): void
+    public function test_new_listings_wait_in_a_queue_and_the_best_go_live_up_to_the_daily_limit(): void
     {
-        config(['importer.trusted_sources' => true]);
-        Http::fake(['*/robots.txt' => Http::response('', 404), 'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [$this->job(1, 'Frontend Engineer')]])]);
-        $source = $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse', 'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
-            'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io']]);
-
-        app(OpportunityImporter::class)->run($source);
-
-        $this->assertSame(['review', 'Not linked from a checked company website.'], [OpportunitySource::sole()->state, OpportunitySource::sole()->error]);
-        $this->assertSame(0, Opportunity::count());
-    }
-
-    public function test_a_listing_the_ai_rates_good_goes_live_from_any_source_and_a_weak_one_waits(): void
-    {
-        config(['importer.trusted_sources' => true]);
-        $this->rate(['Frontend Engineer' => 'good', 'Backend Engineer' => 'weak']);
+        config(['importer.daily_limit' => 2]);
+        $this->rate(['Backend Engineer' => 'good', 'Data Engineer' => ['applicant_scope' => 'listed', 'excluded_countries' => ['TN']]]);
         Http::fake(['*/robots.txt' => Http::response('', 404), 'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [
             $this->job(1, 'Frontend Engineer'), $this->job(2, 'Backend Engineer'),
+            ['first_published' => now()->subHours(2)->toIso8601String()] + $this->job(3, 'Mobile Engineer'),
+            ['first_published' => now()->subHour()->toIso8601String()] + $this->job(4, 'Data Engineer'),
         ]])]);
         $source = $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse', 'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
             'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io']]);
 
         app(OpportunityImporter::class)->run($source);
 
-        $this->assertSame(['Frontend Engineer'], Opportunity::pluck('title')->all());
-        $weak = OpportunitySource::where('external_id', '2')->sole();
-        $this->assertSame(['review', 'Not linked from a checked company website.'], [$weak->state, $weak->error]);
+        // Nothing waits for review: weak listings and sources no followed company links to are queued too.
+        $this->assertSame(0, Opportunity::count());
+        $this->assertSame(['queued'], OpportunitySource::distinct()->pluck('state')->all());
+
+        // The good one first, then the newest role open to people in Tunisia.
+        $this->artisan('opportunities:publish-queued')->expectsOutputToContain('2 new opportunities published.')->assertSuccessful();
+        $this->assertEqualsCanonicalizing(['Backend Engineer', 'Mobile Engineer'], Opportunity::pluck('title')->all());
+        $this->artisan('opportunities:publish-queued')->expectsOutputToContain('0 new opportunities published.')->assertSuccessful();
+
+        // The next day the rest go live, the role closed to Tunisia last; a day with nothing queued adds nothing.
+        $this->travel(1)->day();
+        $this->assertSame(1, count(app(OpportunityImporter::class)->publishQueued(1)));
+        $this->assertTrue(Opportunity::where('title', 'Frontend Engineer')->exists());
+        $this->artisan('opportunities:publish-queued')->expectsOutputToContain('1 new opportunities published.')->assertSuccessful();
+        $this->assertTrue(Opportunity::where('title', 'Data Engineer')->sole()->closedToTunisia());
+        $this->travel(1)->day();
+        $this->artisan('opportunities:publish-queued')->expectsOutputToContain('0 new opportunities published.')->assertSuccessful();
+        $this->assertSame(['published'], OpportunitySource::distinct()->pluck('state')->all());
     }
 
     public function test_an_admin_reviews_a_listing_on_its_page_and_can_trust_its_source(): void
     {
-        config(['importer.trusted_sources' => true]);
         Http::fake(['*/robots.txt' => Http::response('', 404), 'boards-api.greenhouse.io/v1/boards/acme/jobs*' => Http::response(['jobs' => [
             $this->job(1, 'Frontend Engineer'), $this->job(2, 'Backend Engineer'), $this->job(3, 'Mobile Engineer'),
         ]])]);
         $source = $this->source(['key' => 'greenhouse-acme', 'provider' => 'greenhouse', 'url' => 'https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true',
             'allowed_domains' => ['boards-api.greenhouse.io', 'job-boards.greenhouse.io']]);
+        config(['importer.daily_limit' => 25]);
         app(OpportunityImporter::class)->run($source);
+        // Listings whose publishing failed wait for review.
+        OpportunitySource::query()->update(['state' => 'review']);
         [$first, $second] = OpportunitySource::orderByDesc('id')->take(2)->get();
         $admin = User::factory()->create();
         $admin->forceFill(['is_admin' => true])->save();
@@ -291,7 +296,7 @@ class CompanyRegistryTest extends TestCase
             'usage' => ['input_tokens' => 100, 'output_tokens' => 20, 'total_tokens' => 120]];
     }
 
-    // The AI review rates each listing by its title.
+    // The AI review rates each listing by its title: a quality, or the answers that differ from a weak remote role.
     private function rate(array $quality): void
     {
         $classifier = new class extends OpportunityClassifier {
@@ -301,10 +306,10 @@ class CompanyRegistryTest extends TestCase
 
             public function classifyMany(array $listings, array $fields, array $skills = []): array
             {
-                return array_map(fn ($data) => ['in_scope' => true, 'quality' => $this->quality[$data['title']] ?? 'weak', 'quality_reason' => '', 'field' => 'Web Development',
+                return array_map(fn ($data) => [...['in_scope' => true, 'quality' => 'weak', 'quality_reason' => '', 'field' => 'Web Development',
                     'kind' => 'job', 'seniority' => 'mid', 'work_type' => 'remote', 'employment_types' => [], 'program_type' => 'none', 'skills' => [],
                     'applicant_scope' => 'unknown', 'eligible_countries' => [], 'excluded_countries' => [], 'tunisia' => 'unknown', 'relocation' => 'unknown',
-                    'visa_sponsorship' => 'unknown', 'evidence' => '', 'model' => 'test'], $listings);
+                    'visa_sponsorship' => 'unknown', 'evidence' => '', 'model' => 'test'], ...(is_array($answer = $this->quality[$data['title']] ?? []) ? $answer : ['quality' => $answer])], $listings);
             }
         };
         $classifier->quality = $quality;

@@ -45,7 +45,7 @@ class LinkedPages
         // A page checked before is only opened again to see that it is still online.
         if ($saved = $item->payload['page'] ?? null) {
             try {
-                $this->http->get($saved['page_check']['page_url']);
+                $this->fetch($saved['page_check']['page_url']);
             } catch (SourceRequestException $e) {
                 if ($e instanceof SourceBudgetException || in_array($e->status, [404, 410], true)) { throw $e; }
             }
@@ -57,7 +57,7 @@ class LinkedPages
         $url = $item->source_url; $seen = [];
         for ($hop = 0; ; $hop++) {
             try {
-                $page = $this->page($this->http->get($url), $this->http->url ?? $url);
+                $page = $this->page(...$this->fetch($url));
             } catch (SourceBudgetException $e) {
                 throw $e;
             } catch (SourceRequestException $e) {
@@ -117,6 +117,52 @@ class LinkedPages
         }
         $jobs = array_filter($links, fn ($url) => JobKey::ats($url) || preg_match(self::JOB_PATH, (string) parse_url($url, PHP_URL_PATH)));
         return array_slice(array_values($jobs ?: array_slice($links, 0, 1)), 0, (int) config('importer.linked_pages.links_per_post'));
+    }
+
+    // The page's HTML and its address after redirects. Workable and Welcome to the Jungle show their jobs only with scripts
+    // (and Welcome to the Jungle turns bots away), so their public job data is read instead and made into a plain page
+    // with JobPosting data (owner, 11 November 2026).
+    private function fetch(string $url): array
+    {
+        if (! ($job = $this->jobData($url))) {
+            $html = $this->http->get($url);
+            $url = $this->http->url ?? $url;
+            // A short Workable link leads to the job page, whose address names the account.
+            if (! ($job = $this->jobData($url))) { return [$html, $url]; }
+        }
+        $sections = implode('', array_map(fn ($heading, $html) => trim(strip_tags((string) $html)) === '' ? '' : ($heading ? '<h2>'.e($heading).'</h2>' : '').$html,
+            array_keys($job['sections']), $job['sections']));
+        $posting = ['@context' => 'https://schema.org', '@type' => 'JobPosting', 'title' => $job['title'], 'description' => $sections,
+            'datePosted' => $job['posted_at'], 'inLanguage' => $job['language'], 'hiringOrganization' => ['@type' => 'Organization', 'name' => $job['employer']]];
+        $facts = implode(' · ', array_filter([$job['employer'], implode('; ', array_filter($job['places'])), $job['workplace'], $job['type']]));
+        return ['<html><head><title>'.e($job['title'].' - '.$job['employer']).'</title><script type="application/ld+json">'
+            .json_encode($posting, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG).'</script></head><body><main><h1>'.e($job['title']).'</h1><p>'
+            .e($facts).'</p>'.$sections.'</main></body></html>', $url];
+    }
+
+    // The job's facts and text from Workable's or Welcome to the Jungle's public job data, or null for other pages.
+    private function jobData(string $url): ?array
+    {
+        $json = fn (string $address) => json_decode($this->http->get($address), true, 64, JSON_THROW_ON_ERROR);
+        if (preg_match('~^https://apply\.workable\.com/([\w-]+)/j/(\w+)~i', $url, $match)) {
+            $job = $json('https://apply.workable.com/api/v2/accounts/'.$match[1].'/jobs/'.$match[2]);
+            $account = $json('https://apply.workable.com/api/v1/accounts/'.$match[1]);
+            return ['title' => (string) ($job['title'] ?? ''), 'employer' => (string) ($account['name'] ?? ''), 'posted_at' => $job['published'] ?? null,
+                'language' => $job['language'] ?? null, 'type' => ['full' => 'Full time', 'part' => 'Part time'][$job['type'] ?? ''] ?? ucfirst((string) ($job['type'] ?? '')), 'workplace' => ucfirst(str_replace('_', ' ', (string) ($job['workplace'] ?? ''))),
+                'places' => array_map(fn ($place) => implode(', ', array_filter([$place['city'] ?? null, $place['region'] ?? null, $place['country'] ?? null])), $job['locations'] ?? []),
+                'sections' => ['' => $job['description'] ?? '', 'Requirements' => $job['requirements'] ?? '', 'Benefits' => $job['benefits'] ?? '']];
+        }
+        if (preg_match('~^https://(?:www\.)?welcometothejungle\.com/(?:[a-z]{2}(?:-[a-z]{2})?/)?companies/([\w-]+)/jobs/([\w-]+)~i', $url, $match)) {
+            $job = $json('https://api.welcometothejungle.com/api/v1/organizations/'.$match[1].'/jobs/'.$match[2])['job'] ?? [];
+            $french = ($job['language'] ?? null) === 'fr';
+            return ['title' => (string) ($job['name'] ?? ''), 'employer' => (string) ($job['organization']['name'] ?? ''), 'posted_at' => $job['published_at'] ?? null,
+                'language' => $job['language'] ?? null, 'type' => ucfirst(str_replace('_', ' ', (string) ($job['contract_type'] ?? ''))),
+                'workplace' => ['fulltime' => 'Remote', 'partial' => 'Hybrid', 'punctual' => 'Occasional remote', 'no' => 'On site'][$job['remote'] ?? ''] ?? '',
+                'places' => array_map(fn ($office) => implode(', ', array_filter([$office['city'] ?? null, $office['country_code'] ?? null])), $job['offices'] ?? []),
+                'sections' => ['' => $job['description'] ?? '', ($french ? 'Profil recherché' : 'Preferred experience') => $job['profile'] ?? '',
+                    ($french ? 'Déroulement des entretiens' : 'Recruitment process') => $job['recruitment_process'] ?? '']];
+        }
+        return null;
     }
 
     // The page's address, title, main text (and its HTML), JobPosting data and links, job-looking links first.

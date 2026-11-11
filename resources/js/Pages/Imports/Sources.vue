@@ -114,7 +114,7 @@ const date = (value) => value ? new Date(value).toLocaleString(dateLocale.value,
                         <td><StatusPill set="import" :status="source.permission_status" /></td>
                         <td>
                             <StatusPill set="import" :status="source.enabled ? 'enabled' : 'paused'" />
-                            <p class="text-[12.5px] text-muted mt-1.5">{{ source.publication_mode === 'automatic' ? text('Publishes on its own', 'Publie seule') : text('Every listing reviewed', 'Chaque offre est validée') }}</p>
+                            <p class="text-[12.5px] text-muted mt-1.5">{{ source.publication_mode === 'leads' ? text('Job leads only', 'Pistes d’emploi seulement') : text('Publishes on its own', 'Publie seule') }}</p>
                         </td>
                         <td class="text-[13.5px] tabular-nums whitespace-nowrap">
                             {{ source.items_count }} {{ text('found', source.items_count > 1 ? 'trouvées' : 'trouvée') }}
