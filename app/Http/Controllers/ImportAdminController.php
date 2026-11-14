@@ -129,9 +129,26 @@ class ImportAdminController extends Controller
         ]);
     }
 
+    public function scheduleToggle(\Illuminate\Http\Request $request, string $task)
+    {
+        abort_unless(isset(\App\Support\ScheduledTasks::COMMANDS[$task]), 404);
+        $data = $request->validate(['enabled' => ['required', 'boolean']]);
+        \Illuminate\Support\Facades\Cache::forever('schedule.enabled.'.$task, $data['enabled']);
+        return back();
+    }
+
+    public function scheduleRun(string $task)
+    {
+        $command = \App\Support\ScheduledTasks::COMMANDS[$task] ?? null;
+        abort_unless($command, 404);
+        \Illuminate\Support\Facades\Artisan::queue($command);
+        return back()->with('success', __('Task queued.'));
+    }
+
     public function runs()
     {
         return Inertia::render('Imports/Runs', [
+            'scheduledTasks' => \App\Support\ScheduledTasks::listing(),
             'runs' => ImportRun::with('importSource:id,name')->latest()->paginate(25),
             'deliveryHealth' => DB::table('opportunity_deliveries')->selectRaw('status, count(*) as total')->groupBy('status')->get(),
             'uncertainDeliveries' => DB::table('opportunity_deliveries')->where('status', 'uncertain')->select('batch_id', 'saved_search_id', 'last_error', 'attempted_at')->distinct()->limit(20)->get(),

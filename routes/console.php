@@ -25,3 +25,14 @@ Schedule::command('opportunities:translate --limit=200')->everyTenMinutes()->wit
 Schedule::command('credits:monthly')->monthlyOn(1, '06:00')->timezone('Africa/Tunis')->withoutOverlapping();
 Schedule::call(fn () => \Illuminate\Support\Facades\Cache::put('opportunities:scheduler:last_seen_at', now()->toIso8601String(), now()->addDay()))
     ->everyMinute()->name('opportunities.scheduler-heartbeat');
+
+// Every scheduled command is off by default; admins control each from Runs & health.
+foreach (Schedule::events() as $event) {
+    if (! $event->command) continue;
+    foreach (\App\Support\ScheduledTasks::COMMANDS as $name => $command) {
+        if (str_contains($event->command, $name)) {
+            $event->when(fn () => \App\Support\ScheduledTasks::enabled($name));
+            break;
+        }
+    }
+}

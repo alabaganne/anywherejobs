@@ -101,3 +101,5 @@ When the owner makes a decision of any kind (product, logic, naming, data, desig
 | `NAMING.md` | Names considered, why Anywhere Jobs, its domains, how to change the name |
 | `database/seeders/data/SOURCES.md` | Seeded listings and import sources |
 | `LANDING_PAGE_IMPLEMENTATION_PROMPT.md`, `OPPORTUNITY_FINDER_IMPLEMENTATION_PLAN.md`, `PUBLIC_PAGES_REDESIGN_PROMPT.md` | Task briefs (history) |
+
+- 2026-11-14: All scheduled commands default to off. Admins use Imports → Runs & health to enable each schedule or queue a manual run.

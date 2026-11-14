@@ -1,5 +1,6 @@
 <script setup>
 import { h } from 'vue';
+import { router } from '@inertiajs/vue3';
 import AppShell from '@/Layouts/AppShell.vue';
 import PageHeader from '@/Components/Ui/PageHeader.vue';
 import Pagination from '@/Components/Ui/Pagination.vue';
@@ -7,7 +8,7 @@ import StatusPill from '@/Components/Ui/StatusPill.vue';
 import { useText } from '@/composables/useText';
 
 defineOptions({ layout: (_h, page) => h(AppShell, { active: 'imports.runs' }, () => page) });
-defineProps({ runs: Object, deliveryHealth: Array, uncertainDeliveries: Array });
+defineProps({ runs: Object, deliveryHealth: Array, uncertainDeliveries: Array, scheduledTasks: Array });
 const { text, dateLocale } = useText();
 const date = (value) => value ? new Date(value).toLocaleString(dateLocale.value, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
 </script>
@@ -15,6 +16,17 @@ const date = (value) => value ? new Date(value).toLocaleString(dateLocale.value,
 <template>
     <div class="px-8 max-[680px]:px-5 pt-8 pb-14 w-full max-w-[1080px] mx-auto">
         <PageHeader :title="text('Runs & health', 'Exécutions et état')" :description="text('Recent imports and how alert emails are going out.', 'Les imports récents et l’envoi des e-mails d’alerte.')" />
+
+        <section class="my-6 rounded-card bg-white p-5">
+            <h2 class="text-xl mb-4">{{ text('Scheduled tasks', 'Tâches planifiées') }}</h2>
+            <div v-for="task in scheduledTasks" :key="task.name" class="flex items-center justify-between gap-4 py-3 border-b border-line-2">
+                <span>{{ task.name }}</span>
+                <div class="flex gap-4">
+                    <button type="button" :aria-pressed="task.enabled" @click="router.post('/app/admin/imports/schedule/' + task.name, { enabled: !task.enabled }, { preserveScroll: true })">{{ task.enabled ? text('Automatic: on', 'Automatique : activé') : text('Automatic: off', 'Automatique : désactivé') }}</button>
+                    <button type="button" @click="router.post('/app/admin/imports/schedule/' + task.name + '/run', {}, { preserveScroll: true })">{{ text('Run now', 'Exécuter') }}</button>
+                </div>
+            </div>
+        </section>
 
         <h2 class="mb-3 text-[20px] leading-[1.35] text-navy">{{ text('Recent runs', 'Exécutions récentes') }}</h2>
         <div class="bg-white border border-transparent rounded-card overflow-x-auto">

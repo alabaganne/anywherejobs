@@ -10,6 +10,8 @@ Route::middleware(['auth', 'admin'])->prefix('app/admin/imports')->group(functio
     Route::get('/review', [ImportAdminController::class, 'review'])->name('imports.review');
     Route::get('/reports', [ImportAdminController::class, 'reports'])->name('imports.reports');
     Route::get('/claims', [ImportAdminController::class, 'claims'])->name('imports.claims');
+    Route::post('/schedule/{task}', [ImportAdminController::class, 'scheduleToggle'])->name('imports.schedule.toggle');
+    Route::post('/schedule/{task}/run', [ImportAdminController::class, 'scheduleRun'])->middleware('throttle:6,1')->name('imports.schedule.run');
     Route::get('/runs', [ImportAdminController::class, 'runs'])->name('imports.runs');
     Route::get('/opportunities/{opportunity}', [ImportAdminController::class, 'opportunity'])->name('imports.opportunities.show');
     Route::get('/sources/create', [ImportAdminController::class, 'createSource'])->name('imports.sources.create');

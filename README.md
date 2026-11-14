@@ -394,3 +394,5 @@ Before release, verify both compiled bundles, the real SSR initial HTML, native 
 - `design/DESIGN.md` and `design/INTEGRATION.md`: workspace design reference; current shared tokens are in `resources/css/app.css`
 
 Licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+- 2026-11-14: All scheduled commands default to off. Admins use Imports → Runs & health to enable each schedule or queue a manual run.
